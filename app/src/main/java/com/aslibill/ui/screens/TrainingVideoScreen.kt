@@ -1,0 +1,103 @@
+package com.aslibill.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import com.aslibill.ui.components.DarkCard
+import com.aslibill.ui.components.ScreenSurface
+import com.aslibill.ui.components.SectionHeader
+import com.aslibill.ui.theme.AsliColors
+
+@Composable
+fun TrainingVideoScreen(
+    contentPadding: PaddingValues,
+    vm: TrainingVideoViewModel
+) {
+    val videos by vm.videos.collectAsState()
+
+    ScreenSurface {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            SectionHeader("Training Videos")
+
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(videos) { video ->
+                    VideoListItem(video = video, onClick = { vm.playVideo(video) })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun VideoListItem(video: TrainingVideo, onClick: () -> Unit) {
+    DarkCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Placeholder for Thumbnail
+            Box(
+                modifier = Modifier
+                    .size(80.dp, 60.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(AsliColors.Card2),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Outlined.PlayCircle,
+                    contentDescription = null,
+                    tint = AsliColors.Orange,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    video.title,
+                    color = AsliColors.TextPrimary,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    "Duration: ${video.duration}",
+                    color = AsliColors.TextSecondary,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+    }
+}

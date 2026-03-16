@@ -1,0 +1,315 @@
+package com.aslibill.ui
+
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.platform.LocalContext
+import com.aslibill.ui.screens.BluetoothPrinterScreen
+import com.aslibill.ui.screens.HomeScreen
+import com.aslibill.ui.screens.InventoryScreen
+import com.aslibill.ui.screens.ItemWiseBillScreen
+import com.aslibill.ui.screens.PrintSettingsScreen
+import com.aslibill.ui.screens.UpgradePremiumScreen
+import com.aslibill.ui.screens.UpgradePremiumViewModel
+import com.aslibill.ui.screens.PrintSettingsViewModel
+import com.aslibill.ui.screens.PrintSettingsViewModelFactory
+import com.aslibill.ui.screens.QuickBillScreen
+import com.aslibill.ui.screens.ReportsScreen
+import com.aslibill.AsliBillApplication
+import com.aslibill.ui.screens.InventoryViewModelFactory
+import com.aslibill.ui.screens.ItemWiseBillViewModelFactory
+import com.aslibill.ui.screens.ReportsViewModelFactory
+import com.aslibill.ui.screens.QuickBillViewModelFactory
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.aslibill.ui.screens.BluetoothPrinterViewModel
+import com.aslibill.ui.screens.BluetoothPrinterViewModelFactory
+import com.aslibill.ui.screens.StaffManagementScreen
+import com.aslibill.ui.screens.StaffManagementViewModel
+import com.aslibill.ui.screens.StaffManagementViewModelFactory
+import com.aslibill.ui.screens.CustomerManagementScreen
+import com.aslibill.ui.screens.CustomerManagementViewModel
+import com.aslibill.ui.screens.CustomerManagementViewModelFactory
+import com.aslibill.ui.screens.CreditDetailsScreen
+import com.aslibill.ui.screens.CreditDetailsViewModel
+import com.aslibill.ui.screens.CreditDetailsViewModelFactory
+import com.aslibill.ui.screens.CashManagementScreen
+import com.aslibill.ui.screens.CashManagementViewModel
+import com.aslibill.ui.screens.CashManagementViewModelFactory
+import com.aslibill.ui.screens.ItemWiseSalesReportScreen
+import com.aslibill.ui.screens.ItemWiseSalesReportViewModel
+import com.aslibill.ui.screens.ItemWiseSalesReportViewModelFactory
+import com.aslibill.ui.screens.DayReportScreen
+import com.aslibill.ui.screens.DayReportViewModel
+import com.aslibill.ui.screens.DayReportViewModelFactory
+import com.aslibill.ui.screens.SalesSummaryScreen
+import com.aslibill.ui.screens.SalesSummaryViewModel
+import com.aslibill.ui.screens.SalesSummaryViewModelFactory
+import com.aslibill.ui.screens.FeedbackScreen
+import com.aslibill.ui.screens.FeedbackViewModel
+import com.aslibill.ui.screens.TrainingVideoScreen
+import com.aslibill.ui.screens.TrainingVideoViewModel
+import com.aslibill.ui.screens.ContactUsScreen
+import com.aslibill.ui.screens.ContactUsViewModel
+import com.aslibill.ui.screens.SubscriptionScreen
+import com.aslibill.ui.screens.SubscriptionViewModel
+import com.aslibill.ui.screens.DeleteAccountScreen
+import com.aslibill.ui.screens.DeleteAccountViewModel
+import com.aslibill.ui.screens.BuyPrintersScreen
+import com.aslibill.ui.screens.BuyPrintersViewModel
+import com.aslibill.ui.screens.LoginScreen
+import com.aslibill.ui.screens.LoginViewModel
+import com.aslibill.ui.screens.LoginViewModelFactory
+import com.aslibill.ui.screens.SignupScreen
+import com.aslibill.ui.screens.SignupViewModel
+import com.aslibill.ui.screens.SignupViewModelFactory
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+
+@Composable
+fun AsliBillApp() {
+  val navController = rememberNavController()
+  val context = LocalContext.current
+  val app = context.applicationContext as AsliBillApplication
+  val userSession = app.container.authRepository.userSession.collectAsState(initial = null).value
+  val scope = rememberCoroutineScope()
+
+  Scaffold { padding ->
+    NavHost(
+      navController = navController,
+      startDestination = if (userSession != null) Routes.Home else Routes.Login,
+      modifier = Modifier
+    ) {
+      composable(Routes.Home) {
+        HomeScreen(
+          onQuickBill = { navController.navigate(Routes.QuickBill) },
+          onItemWiseBill = { navController.navigate(Routes.ItemWiseBill) },
+          onInventory = { navController.navigate(Routes.Inventory) },
+          onReports = { navController.navigate(Routes.Reports) },
+          onBluetoothPrinter = { navController.navigate(Routes.BluetoothPrinter) },
+          onPrintSettings = { navController.navigate(Routes.PrintSettings) },
+          onStaffManagement = { navController.navigate(Routes.StaffManagement) },
+          onCustomerManagement = { navController.navigate(Routes.CustomerManagement) },
+          onCreditDetails = { navController.navigate(Routes.CreditDetails) },
+          onCashManagement = { navController.navigate(Routes.CashManagement) },
+          onItemWiseSalesReport = { navController.navigate(Routes.ItemWiseSalesReport) },
+          onDayReport = { navController.navigate(Routes.DayReport) },
+          onSalesSummary = { navController.navigate(Routes.SalesSummary) },
+          onUpgradePremium = { navController.navigate(Routes.UpgradePremium) },
+          onTrainingVideo = { navController.navigate(Routes.TrainingVideo) },
+          onBuyPrinters = { navController.navigate(Routes.BuyPrinters) },
+          onFeedback = { navController.navigate(Routes.Feedback) },
+          onContactUs = { navController.navigate(Routes.ContactUs) },
+          onSubscription = { navController.navigate(Routes.Subscription) },
+          onDeleteAccount = { navController.navigate(Routes.DeleteAccount) },
+          onLogOut = {
+            scope.launch {
+                app.container.authRepository.logout()
+                navController.navigate(Routes.Login) {
+                    popUpTo(Routes.Home) { inclusive = true }
+                }
+            }
+          },
+          userName = userSession?.name ?: "User",
+          userPhone = userSession?.phone ?: "No Phone",
+          contentPadding = padding
+        )
+      }
+      composable(Routes.Login) {
+        val vm: LoginViewModel = viewModel(factory = LoginViewModelFactory(app.container.authRepository))
+        LoginScreen(
+          vm = vm,
+          onLoginSuccess = {
+            navController.navigate(Routes.Home) {
+              popUpTo(Routes.Login) { inclusive = true }
+            }
+          },
+          onGoToSignup = { navController.navigate(Routes.Signup) },
+          contentPadding = padding
+        )
+      }
+      composable(Routes.Signup) {
+        val vm: SignupViewModel = viewModel(factory = SignupViewModelFactory(app.container.authRepository))
+        SignupScreen(
+          vm = vm,
+          onSignupSuccess = {
+            navController.navigate(Routes.Home) {
+              popUpTo(Routes.Signup) { inclusive = true }
+            }
+          },
+          onGoToLogin = { navController.navigate(Routes.Login) },
+          contentPadding = padding
+        )
+      }
+      composable(Routes.QuickBill) {
+        val vm: com.aslibill.ui.screens.QuickBillViewModel = viewModel(
+          factory = QuickBillViewModelFactory(app.container.billingRepository)
+        )
+        val btVm: BluetoothPrinterViewModel = viewModel(factory = BluetoothPrinterViewModelFactory(app))
+        QuickBillScreen(
+          contentPadding = padding,
+          vm = vm,
+          btVm = btVm,
+          onGoReport = { navController.navigate(Routes.Reports) },
+          onGoItemWise = { navController.navigate(Routes.ItemWiseBill) }
+        )
+      }
+      composable(Routes.ItemWiseBill) {
+        val vm: com.aslibill.ui.screens.ItemWiseBillViewModel = viewModel(
+          factory = ItemWiseBillViewModelFactory(
+            inventory = app.container.inventoryRepository,
+            billing = app.container.billingRepository
+          )
+        )
+        val btVm: BluetoothPrinterViewModel = viewModel(factory = BluetoothPrinterViewModelFactory(app))
+        ItemWiseBillScreen(
+          contentPadding = padding,
+          vm = vm,
+          btVm = btVm,
+          onGoReport = { navController.navigate(Routes.Reports) },
+          onGoQuickBill = { navController.navigate(Routes.QuickBill) }
+        )
+      }
+      composable(Routes.Inventory) {
+        val vm: com.aslibill.ui.screens.InventoryViewModel = viewModel(
+          factory = InventoryViewModelFactory(app.container.inventoryRepository)
+        )
+        InventoryScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.Reports) {
+        val vm: com.aslibill.ui.screens.ReportsViewModel = viewModel(
+          factory = ReportsViewModelFactory(app.container.billingRepository)
+        )
+        val btVm: BluetoothPrinterViewModel = viewModel(factory = BluetoothPrinterViewModelFactory(app))
+        ReportsScreen(
+          contentPadding = padding,
+          vm = vm,
+          btVm = btVm,
+          onGoQuickBill = { navController.navigate(Routes.QuickBill) },
+          onGoItemWise = { navController.navigate(Routes.ItemWiseBill) }
+        )
+      }
+      composable(Routes.BluetoothPrinter) {
+        val vm: BluetoothPrinterViewModel = viewModel(factory = BluetoothPrinterViewModelFactory(app))
+        BluetoothPrinterScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.PrintSettings) {
+        val vm: PrintSettingsViewModel = viewModel(factory = PrintSettingsViewModelFactory(app.container.settingsRepository))
+        PrintSettingsScreen(contentPadding = padding, vm = vm)
+      }
+
+      composable(Routes.StaffManagement) {
+        val vm: StaffManagementViewModel = viewModel(factory = StaffManagementViewModelFactory(app.container.staffRepository))
+        StaffManagementScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.CustomerManagement) {
+        val vm: CustomerManagementViewModel = viewModel(factory = CustomerManagementViewModelFactory(app.container.customerRepository))
+        CustomerManagementScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.CreditDetails) {
+        val vm: CreditDetailsViewModel = viewModel(factory = CreditDetailsViewModelFactory(app.container.analyticsRepository))
+        CreditDetailsScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.CashManagement) {
+        val vm: CashManagementViewModel = viewModel(factory = CashManagementViewModelFactory(app.container.cashRepository))
+        CashManagementScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.ItemWiseSalesReport) {
+        val vm: ItemWiseSalesReportViewModel = viewModel(factory = ItemWiseSalesReportViewModelFactory(app.container.analyticsRepository))
+        ItemWiseSalesReportScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.DayReport) {
+        val vm: DayReportViewModel = viewModel(factory = DayReportViewModelFactory(app.container.analyticsRepository))
+        DayReportScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.SalesSummary) {
+        val vm: SalesSummaryViewModel = viewModel(factory = SalesSummaryViewModelFactory(app.container.analyticsRepository))
+        SalesSummaryScreen(contentPadding = padding, vm = vm)
+      }
+      
+      // Placeholder routes for new features
+      composable(Routes.UpgradePremium) {
+        val vm: UpgradePremiumViewModel = viewModel()
+        UpgradePremiumScreen(
+          contentPadding = padding,
+          vm = vm,
+          onBack = { navController.popBackStack() }
+        )
+      }
+      composable(Routes.TrainingVideo) {
+        val vm: TrainingVideoViewModel = viewModel()
+        TrainingVideoScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.Feedback) {
+        val vm: FeedbackViewModel = viewModel()
+        FeedbackScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.ContactUs) {
+        val vm: ContactUsViewModel = viewModel()
+        ContactUsScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.Subscription) {
+        val vm: SubscriptionViewModel = viewModel()
+        SubscriptionScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.DeleteAccount) {
+        val vm: DeleteAccountViewModel = viewModel()
+        DeleteAccountScreen(contentPadding = padding, vm = vm)
+      }
+      composable(Routes.BuyPrinters) {
+        val vm: BuyPrintersViewModel = viewModel()
+        BuyPrintersScreen(contentPadding = padding, vm = vm)
+      }
+    }
+  }
+}
+
+@Composable
+fun PlaceholderScreen(title: String, contentPadding: androidx.compose.foundation.layout.PaddingValues) {
+  com.aslibill.ui.components.ScreenSurface {
+    androidx.compose.foundation.layout.Box(
+      modifier = androidx.compose.ui.Modifier
+        .fillMaxSize()
+        .padding(contentPadding),
+      contentAlignment = androidx.compose.ui.Alignment.Center
+    ) {
+      androidx.compose.material3.Text(
+        text = "$title Feature Coming Soon",
+        style = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
+        color = com.aslibill.ui.theme.AsliColors.TextPrimary
+      )
+    }
+  }
+}
+
+object Routes {
+  const val Home = "home"
+  const val QuickBill = "quickBill"
+  const val ItemWiseBill = "itemWiseBill"
+  const val Inventory = "inventory"
+  const val Reports = "reports"
+  const val BluetoothPrinter = "bluetoothPrinter"
+  const val PrintSettings = "printSettings"
+  const val StaffManagement = "staffManagement"
+  const val CustomerManagement = "customerManagement"
+  const val CreditDetails = "creditDetails"
+  const val CashManagement = "cashManagement"
+  const val ItemWiseSalesReport = "itemWiseSalesReport"
+  const val DayReport = "dayReport"
+  const val SalesSummary = "salesSummary"
+  const val UpgradePremium = "upgradePremium"
+  const val TrainingVideo = "trainingVideo"
+  const val Feedback = "feedback"
+  const val ContactUs = "contactUs"
+  const val Subscription = "subscription"
+  const val DeleteAccount = "deleteAccount"
+  const val BuyPrinters = "buyPrinters"
+  const val Login = "login"
+  const val Signup = "signup"
+}
+

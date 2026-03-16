@@ -1,0 +1,37 @@
+# Built artifacts
+bin/
+gen/
+out/
+build/
+app/build/
+.gradle/
+
+# JetBrains IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Android Studio
+/local.properties
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.ap_
+*.dex
+
+# Large files / Heap dumps
+*.hprof
+java_pid*.hprof
+
+# Kotlin
+.kotlin/
+
+# OS specific
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Project specific
+android-sdk/
