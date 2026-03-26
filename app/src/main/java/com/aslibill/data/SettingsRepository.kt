@@ -2,6 +2,9 @@ package com.aslibill.data
 
 import android.content.Context
 import com.aslibill.printing.StoreConfig
+import com.aslibill.ui.theme.ThemeMode
+import com.aslibill.ui.theme.ThemePalette
+import com.aslibill.ui.theme.UiPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,9 +14,11 @@ class SettingsRepository(context: Context) {
 
     private val _settings = MutableStateFlow(loadSettings())
     val settings: StateFlow<StoreConfig> = _settings.asStateFlow()
+    private val _uiPreferences = MutableStateFlow(loadUiPreferences())
+    val uiPreferences: StateFlow<UiPreferences> = _uiPreferences.asStateFlow()
 
     private fun loadSettings(): StoreConfig {
-        val storeName = prefs.getString("store_name", "ASLI BILL") ?: "ASLI BILL"
+        val storeName = prefs.getString("store_name", "NOVABILL") ?: "NOVABILL"
         val address1 = prefs.getString("address_1", "Address line 1") ?: "Address line 1"
         val address2 = prefs.getString("address_2", "Address line 2") ?: "Address line 2"
         val phone = prefs.getString("phone", "") ?: ""
@@ -43,5 +48,23 @@ class SettingsRepository(context: Context) {
             apply()
         }
         _settings.value = config
+    }
+
+    private fun loadUiPreferences(): UiPreferences {
+        val mode = prefs.getString("theme_mode", ThemeMode.LIGHT.name)
+        val palette = prefs.getString("theme_palette", ThemePalette.BLUE.name)
+        return UiPreferences(
+            mode = runCatching { ThemeMode.valueOf(mode ?: ThemeMode.LIGHT.name) }.getOrDefault(ThemeMode.LIGHT),
+            palette = runCatching { ThemePalette.valueOf(palette ?: ThemePalette.BLUE.name) }.getOrDefault(ThemePalette.BLUE)
+        )
+    }
+
+    fun saveUiPreferences(mode: ThemeMode, palette: ThemePalette) {
+        prefs.edit().apply {
+            putString("theme_mode", mode.name)
+            putString("theme_palette", palette.name)
+            apply()
+        }
+        _uiPreferences.value = UiPreferences(mode = mode, palette = palette)
     }
 }

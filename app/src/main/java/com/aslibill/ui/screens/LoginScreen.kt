@@ -15,6 +15,7 @@ import com.aslibill.ui.components.AsliTextField
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.Brand
 
 @Composable
 fun LoginScreen(
@@ -28,7 +29,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .padding(24.dp),
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -39,7 +40,7 @@ fun LoginScreen(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Sign in to continue",
+                text = "Sign in to ${Brand.AppName}",
                 color = AsliColors.TextSecondary,
                 style = MaterialTheme.typography.bodyMedium
             )

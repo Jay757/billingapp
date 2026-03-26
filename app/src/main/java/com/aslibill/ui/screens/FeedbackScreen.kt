@@ -48,7 +48,7 @@ fun FeedbackScreen(
         .fillMaxSize()
         .padding(contentPadding)
         .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(20.dp),
+      verticalArrangement = Arrangement.spacedBy(16.dp),
       horizontalAlignment = Alignment.CenterHorizontally
     ) {
       SectionHeader("Give Feedback")

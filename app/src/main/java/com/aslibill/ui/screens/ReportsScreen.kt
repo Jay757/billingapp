@@ -80,7 +80,7 @@ fun ReportsScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(12.dp),
+        .padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

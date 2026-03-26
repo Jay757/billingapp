@@ -10,7 +10,7 @@ android {
   compileSdk = 35
 
   defaultConfig {
-    applicationId = "com.aslibill"
+    applicationId = "com.novabill"
     minSdk = 24
     targetSdk = 35
     versionCode = 1

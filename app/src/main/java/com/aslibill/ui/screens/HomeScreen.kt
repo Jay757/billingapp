@@ -1,6 +1,7 @@
 package com.aslibill.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -50,6 +51,13 @@ import com.aslibill.ui.components.PremiumBanner
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.Brand
+
+private data class HomeTile(
+  val label: String,
+  val icon: androidx.compose.ui.graphics.vector.ImageVector,
+  val onClick: () -> Unit
+)
 
 @Composable
 fun HomeScreen(
@@ -89,76 +97,108 @@ fun HomeScreen(
     ) {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Column {
-          Text("Welcome, $userName !", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
+          Text("Welcome, $userName", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
           Text(userPhone, color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelLarge)
         }
         DarkCard(modifier = Modifier.padding(top = 2.dp)) {
           Row(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
             Image(painter = painterResource(id = R.drawable.billing_icon), contentDescription = null, modifier = Modifier.size(24.dp))
-            Text("ASLI\nBILL", color = Color.White, style = MaterialTheme.typography.labelMedium)
+            Text("NOVA\nBILL", color = AsliColors.TextPrimary, style = MaterialTheme.typography.labelMedium)
           }
         }
       }
 
+      Text(
+        text = Brand.AppTagline,
+        color = AsliColors.TextSecondary,
+        style = MaterialTheme.typography.bodyMedium
+      )
+
       SectionHeader("Billing")
       DarkCard {
-        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-          Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            IconTile("Quick\nBill", Icons.AutoMirrored.Outlined.ReceiptLong, onQuickBill, modifier = Modifier.weight(1f))
-            IconTile("Item\nWise Bill", Icons.AutoMirrored.Outlined.List, onItemWiseBill, modifier = Modifier.weight(1f))
-            IconTile("Category/\nProduct", Icons.Outlined.Inventory2, onInventory, modifier = Modifier.weight(1f))
-            IconTile("Staff\nManagement", Icons.Outlined.Groups, onClick = onStaffManagement, modifier = Modifier.weight(1f))
-          }
-          Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            IconTile("Customer\nManagement", Icons.Outlined.Person, onClick = onCustomerManagement, modifier = Modifier.weight(1f))
-            IconTile("Credit\nDetails", Icons.Outlined.CreditCard, onClick = onCreditDetails, modifier = Modifier.weight(1f))
-            IconTile("Cash\nManagement", Icons.Outlined.AccountBalanceWallet, onClick = onCashManagement, modifier = Modifier.weight(1f))
-            IconTile("Training\nVideo", Icons.Outlined.PlayCircle, onClick = onTrainingVideo, modifier = Modifier.weight(1f))
-          }
-        }
+        HomeTileSection(
+          tiles = listOf(
+            HomeTile("Quick Bill", Icons.AutoMirrored.Outlined.ReceiptLong, onQuickBill),
+            HomeTile("Item Wise Bill", Icons.AutoMirrored.Outlined.List, onItemWiseBill),
+            HomeTile("Category / Product", Icons.Outlined.Inventory2, onInventory),
+            HomeTile("Staff Management", Icons.Outlined.Groups, onStaffManagement),
+            HomeTile("Customer Management", Icons.Outlined.Person, onCustomerManagement),
+            HomeTile("Credit Details", Icons.Outlined.CreditCard, onCreditDetails),
+            HomeTile("Cash Management", Icons.Outlined.AccountBalanceWallet, onCashManagement),
+            HomeTile("Training Video", Icons.Outlined.PlayCircle, onTrainingVideo)
+          )
+        )
       }
 
       SectionHeader("Reports")
       DarkCard {
-        Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-          IconTile("Bill\nReport", Icons.Outlined.Description, onReports, modifier = Modifier.weight(1f))
-          IconTile("Item Wise\nSales Report", Icons.AutoMirrored.Outlined.ShowChart, onClick = onItemWiseSalesReport, modifier = Modifier.weight(1f))
-          IconTile("Day\nReport", Icons.Outlined.Today, onClick = onDayReport, modifier = Modifier.weight(1f))
-          IconTile("Sales\nSummary", Icons.Outlined.BarChart, onClick = onSalesSummary, modifier = Modifier.weight(1f))
-        }
+        HomeTileSection(
+          tiles = listOf(
+            HomeTile("Bill Report", Icons.Outlined.Description, onReports),
+            HomeTile("Item Wise Sales Report", Icons.AutoMirrored.Outlined.ShowChart, onItemWiseSalesReport),
+            HomeTile("Day Report", Icons.Outlined.Today, onDayReport),
+            HomeTile("Sales Summary", Icons.Outlined.BarChart, onSalesSummary)
+          )
+        )
       }
 
-      SectionHeader("Print")
+      SectionHeader("Settings")
       DarkCard {
-        Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-          IconTile("Bluetooth", Icons.Outlined.Bluetooth, onBluetoothPrinter, modifier = Modifier.weight(1f))
-          IconTile("Print\nSetting", Icons.Outlined.Print, onPrintSettings, modifier = Modifier.weight(1f))
-          Spacer(modifier = Modifier.weight(1f))
-          Spacer(modifier = Modifier.weight(1f))
-        }
+        HomeTileSection(
+          tiles = listOf(
+            HomeTile("Bluetooth Devices", Icons.Outlined.Bluetooth, onBluetoothPrinter),
+            HomeTile("App Settings", Icons.Outlined.Print, onPrintSettings)
+          )
+        )
       }
 
       SectionHeader("Others")
       DarkCard {
-        Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-          IconTile("Buy Printers\nHere", Icons.Outlined.Sell, onClick = onBuyPrinters, modifier = Modifier.weight(1f))
-          IconTile("Feedback", Icons.Outlined.Feedback, onClick = onFeedback, modifier = Modifier.weight(1f))
-          IconTile("Contact Us", Icons.Outlined.SupportAgent, onClick = onContactUs, modifier = Modifier.weight(1f))
-          Spacer(modifier = Modifier.weight(1f))
-        }
+        HomeTileSection(
+          tiles = listOf(
+            HomeTile("Buy Printers Here", Icons.Outlined.Sell, onBuyPrinters),
+            HomeTile("Feedback", Icons.Outlined.Feedback, onFeedback),
+            HomeTile("Contact Us", Icons.Outlined.SupportAgent, onContactUs)
+          )
+        )
       }
 
       SectionHeader("Account")
       DarkCard {
-        Row(modifier = Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-          IconTile("Subscription", Icons.Outlined.WorkspacePremium, onClick = onSubscription, modifier = Modifier.weight(1f))
-          IconTile("Delete\nAccount", Icons.Outlined.DeleteForever, onClick = onDeleteAccount, modifier = Modifier.weight(1f))
-          IconTile("Log Out", Icons.AutoMirrored.Outlined.Logout, onClick = onLogOut, modifier = Modifier.weight(1f))
-          Spacer(modifier = Modifier.weight(1f))
-        }
+        HomeTileSection(
+          tiles = listOf(
+            HomeTile("Subscription", Icons.Outlined.WorkspacePremium, onSubscription),
+            HomeTile("Delete Account", Icons.Outlined.DeleteForever, onDeleteAccount),
+            HomeTile("Log Out", Icons.AutoMirrored.Outlined.Logout, onLogOut)
+          )
+        )
       }
 
       PremiumBanner(onClick = onUpgradePremium)
+    }
+  }
+}
+
+@Composable
+private fun HomeTileSection(tiles: List<HomeTile>) {
+  BoxWithConstraints(modifier = Modifier.padding(12.dp)) {
+    val columns = if (maxWidth < 520.dp) 2 else 3
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+      tiles.chunked(columns).forEach { rowTiles ->
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+          rowTiles.forEach { tile ->
+            IconTile(
+              label = tile.label,
+              icon = tile.icon,
+              onClick = tile.onClick,
+              modifier = Modifier.weight(1f)
+            )
+          }
+          repeat(columns - rowTiles.size) {
+            Spacer(modifier = Modifier.weight(1f))
+          }
+        }
+      }
     }
   }
 }

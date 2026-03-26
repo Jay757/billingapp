@@ -24,6 +24,8 @@ import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.Chip
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.ThemeMode
+import com.aslibill.ui.theme.ThemePalette
 
 @Composable
 fun PrintSettingsScreen(
@@ -31,6 +33,7 @@ fun PrintSettingsScreen(
     vm: PrintSettingsViewModel
 ) {
     val settings by vm.settings.collectAsState()
+    val uiPreferences by vm.uiPreferences.collectAsState()
 
     var storeName by remember(settings) { mutableStateOf(settings.storeName) }
     var address1 by remember(settings) { mutableStateOf(settings.addressLines.getOrNull(0) ?: "") }
@@ -39,6 +42,8 @@ fun PrintSettingsScreen(
     var gst by remember(settings) { mutableStateOf(settings.gstNumber ?: "") }
     var thankYou by remember(settings) { mutableStateOf(settings.thankYouMessage ?: "") }
     var paperWidth by remember(settings) { mutableStateOf(settings.paperWidthChars) }
+    var themeMode by remember(uiPreferences) { mutableStateOf(uiPreferences.mode) }
+    var palette by remember(uiPreferences) { mutableStateOf(uiPreferences.palette) }
 
     ScreenSurface {
         Column(
@@ -50,7 +55,7 @@ fun PrintSettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                "Print Settings",
+                "App Settings",
                 color = AsliColors.TextPrimary,
                 style = MaterialTheme.typography.headlineMedium
             )
@@ -109,6 +114,20 @@ fun PrintSettingsScreen(
                 Chip(text = "80mm (42 chars)", selected = paperWidth == 42, onClick = { paperWidth = 42 })
             }
 
+            Text("Theme Mode", color = AsliColors.TextSecondary)
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Chip(text = "Light", selected = themeMode == ThemeMode.LIGHT, onClick = { themeMode = ThemeMode.LIGHT })
+                Chip(text = "Dark", selected = themeMode == ThemeMode.DARK, onClick = { themeMode = ThemeMode.DARK })
+                Chip(text = "System", selected = themeMode == ThemeMode.SYSTEM, onClick = { themeMode = ThemeMode.SYSTEM })
+            }
+
+            Text("Color Palette", color = AsliColors.TextSecondary)
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Chip(text = "Blue", selected = palette == ThemePalette.BLUE, onClick = { palette = ThemePalette.BLUE })
+                Chip(text = "Orange", selected = palette == ThemePalette.ORANGE, onClick = { palette = ThemePalette.ORANGE })
+                Chip(text = "Green", selected = palette == ThemePalette.GREEN, onClick = { palette = ThemePalette.GREEN })
+            }
+
             OrangeButton(
                 text = "Save Settings",
                 onClick = {
@@ -121,6 +140,7 @@ fun PrintSettingsScreen(
                         thankYou = thankYou,
                         paperWidth = paperWidth
                     )
+                    vm.saveAppearance(themeMode, palette)
                 },
                 modifier = Modifier.fillMaxWidth()
             )

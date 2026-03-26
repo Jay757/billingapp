@@ -70,11 +70,11 @@ fun InventoryScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(12.dp)
+        .padding(16.dp)
     ) {
       Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
       ) {
         Row(
           modifier = Modifier.fillMaxWidth(),
