@@ -16,6 +16,9 @@ android {
     versionCode = 1
     versionName = "1.0"
 
+    // Backend API base URL (change for real devices as needed).
+    buildConfigField("String", "API_BASE_URL", "\"http://127.0.0.1:8000\"")
+
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables { useSupportLibrary = true }
   }
@@ -36,7 +39,10 @@ android {
   }
   kotlinOptions { jvmTarget = "17" }
 
-  buildFeatures { compose = true }
+  buildFeatures {
+    compose = true
+    buildConfig = true
+  }
 
   packaging {
     resources {

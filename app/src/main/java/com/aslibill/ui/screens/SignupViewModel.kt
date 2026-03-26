@@ -6,10 +6,12 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import android.util.Log
 import com.aslibill.data.AuthRepository
 import kotlinx.coroutines.launch
 
 class SignupViewModel(private val authRepository: AuthRepository) : ViewModel() {
+    private val tag = "AuthFlow"
     var name by mutableStateOf("")
     var phone by mutableStateOf("")
     var password by mutableStateOf("")
@@ -17,8 +19,10 @@ class SignupViewModel(private val authRepository: AuthRepository) : ViewModel() 
     var error by mutableStateOf<String?>(null)
 
     fun onSignup(onSuccess: () -> Unit) {
+        Log.i(tag, "Signup tapped. nameLen=${name.length}, phoneLen=${phone.length}, passLen=${password.length}")
         if (name.isBlank() || phone.isBlank() || password.isBlank()) {
             error = "Please fill all fields"
+            Log.w(tag, "Signup blocked: empty fields")
             return
         }
         isLoading = true
@@ -27,9 +31,12 @@ class SignupViewModel(private val authRepository: AuthRepository) : ViewModel() 
             val success = authRepository.signup(name, phone, password)
             isLoading = false
             if (success) {
+                Log.i(tag, "Signup success")
                 onSuccess()
             } else {
-                error = "Signup failed"
+                val reason = authRepository.lastError.value
+                error = reason ?: "Signup failed"
+                Log.e(tag, "Signup failed in viewmodel: ${error}")
             }
         }
     }

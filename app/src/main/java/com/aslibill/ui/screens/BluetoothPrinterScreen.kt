@@ -124,15 +124,23 @@ fun BluetoothPrinterScreen(
             GrayButton(
               text = if (state.status == BtConnectionState.Status.CONNECTED) "Disconnect" else "Stop",
               onClick = {
-                if (state.status == BtConnectionState.Status.CONNECTED) vm.disconnect() else vm.stopScan()
+                if (state.status == BtConnectionState.Status.CONNECTED) {
+                  if (!hasAllPerms()) permLauncher.launch(permissions) else vm.disconnect()
+                } else {
+                  if (!hasAllPerms()) permLauncher.launch(permissions) else vm.stopScan()
+                }
               },
               modifier = Modifier.weight(1f)
             )
             GrayButton(
               text = "Test Print",
               onClick = {
-                vm.testPrint { ok, err ->
-                  toastText = if (ok) "Test print sent" else (err ?: "Test print failed")
+                if (!hasAllPerms()) {
+                  permLauncher.launch(permissions)
+                } else {
+                  vm.testPrint { ok, err ->
+                    toastText = if (ok) "Test print sent" else (err ?: "Test print failed")
+                  }
                 }
               },
               modifier = Modifier.weight(1f)
@@ -154,7 +162,9 @@ fun BluetoothPrinterScreen(
           DeviceRow(
             device = d,
             connected = state.status == BtConnectionState.Status.CONNECTED && state.connectedAddress == d.address,
-            onConnect = { vm.connect(d.address) }
+            onConnect = {
+              if (!hasAllPerms()) permLauncher.launch(permissions) else vm.connect(d.address)
+            }
           )
         }
       }

@@ -1,16 +1,27 @@
 package com.aslibill.data
 
 import android.content.Context
+import com.aslibill.bluetooth.BluetoothPrinterManager
 import com.aslibill.data.db.AppDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 class AppContainer(context: Context) {
+  private val appScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
   private val db = AppDatabase.get(context)
-  val inventoryRepository = InventoryRepository(db.categoryDao(), db.productDao())
-  val billingRepository = BillingRepository(db.billDao())
-  val customerRepository = CustomerRepository(db.customerDao())
-  val staffRepository = StaffRepository(db.staffDao())
-  val cashRepository = CashRepository(db.cashDao())
-  val analyticsRepository = AnalyticsRepository(db.billAnalyticsDao())
   val authRepository = AuthRepository(context)
+  val inventoryRepository = InventoryRepository(db.categoryDao(), db.productDao(), authRepository)
+  val billingRepository = BillingRepository(db.billDao(), authRepository)
+  val customerRepository = CustomerRepository(db.customerDao(), authRepository)
+  val staffRepository = StaffRepository(db.staffDao(), authRepository)
+  val cashRepository = CashRepository(db.cashDao(), authRepository)
+  val analyticsRepository = AnalyticsRepository(db.billAnalyticsDao())
   val settingsRepository = SettingsRepository(context)
+
+  // Keep Bluetooth manager alive across navigation so an active printer connection persists.
+  val bluetoothPrinterManager = BluetoothPrinterManager(context, appScope)
+
+  val bluetoothPrinterConfigRepository = BluetoothPrinterConfigRepository(context, authRepository)
 }

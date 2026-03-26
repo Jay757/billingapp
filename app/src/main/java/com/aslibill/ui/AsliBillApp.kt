@@ -51,14 +51,17 @@ import com.aslibill.ui.screens.SalesSummaryViewModel
 import com.aslibill.ui.screens.SalesSummaryViewModelFactory
 import com.aslibill.ui.screens.FeedbackScreen
 import com.aslibill.ui.screens.FeedbackViewModel
+import com.aslibill.ui.screens.FeedbackViewModelFactory
 import com.aslibill.ui.screens.TrainingVideoScreen
 import com.aslibill.ui.screens.TrainingVideoViewModel
 import com.aslibill.ui.screens.ContactUsScreen
 import com.aslibill.ui.screens.ContactUsViewModel
 import com.aslibill.ui.screens.SubscriptionScreen
 import com.aslibill.ui.screens.SubscriptionViewModel
+import com.aslibill.ui.screens.SubscriptionViewModelFactory
 import com.aslibill.ui.screens.DeleteAccountScreen
 import com.aslibill.ui.screens.DeleteAccountViewModel
+import com.aslibill.ui.screens.DeleteAccountViewModelFactory
 import com.aslibill.ui.screens.BuyPrintersScreen
 import com.aslibill.ui.screens.BuyPrintersViewModel
 import com.aslibill.ui.screens.LoginScreen
@@ -110,6 +113,8 @@ fun AsliBillApp() {
           onLogOut = {
             scope.launch {
                 app.container.authRepository.logout()
+                // Security/safety: disconnect any active printer session on logout.
+                app.container.bluetoothPrinterManager.disconnect()
                 navController.navigate(Routes.Login) {
                     popUpTo(Routes.Home) { inclusive = true }
                 }
@@ -246,7 +251,7 @@ fun AsliBillApp() {
         TrainingVideoScreen(contentPadding = padding, vm = vm)
       }
       composable(Routes.Feedback) {
-        val vm: FeedbackViewModel = viewModel()
+        val vm: FeedbackViewModel = viewModel(factory = FeedbackViewModelFactory(app.container.authRepository))
         FeedbackScreen(contentPadding = padding, vm = vm)
       }
       composable(Routes.ContactUs) {
@@ -254,11 +259,11 @@ fun AsliBillApp() {
         ContactUsScreen(contentPadding = padding, vm = vm)
       }
       composable(Routes.Subscription) {
-        val vm: SubscriptionViewModel = viewModel()
+        val vm: SubscriptionViewModel = viewModel(factory = SubscriptionViewModelFactory(app.container.authRepository))
         SubscriptionScreen(contentPadding = padding, vm = vm)
       }
       composable(Routes.DeleteAccount) {
-        val vm: DeleteAccountViewModel = viewModel()
+        val vm: DeleteAccountViewModel = viewModel(factory = DeleteAccountViewModelFactory(app.container.authRepository))
         DeleteAccountScreen(contentPadding = padding, vm = vm)
       }
       composable(Routes.BuyPrinters) {
