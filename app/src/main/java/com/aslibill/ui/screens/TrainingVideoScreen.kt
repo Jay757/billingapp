@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
+import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AsliColors
 
 @Composable
@@ -44,12 +45,15 @@ fun TrainingVideoScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(AppSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             SectionHeader("Training Videos")
 
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+            ) {
                 items(videos) { video ->
                     VideoListItem(video = video, onClick = { vm.playVideo(video) })
                 }
@@ -66,9 +70,9 @@ private fun VideoListItem(video: TrainingVideo, onClick: () -> Unit) {
             .clickable(onClick = onClick)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(AppSpacing.sm),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             // Placeholder for Thumbnail
             Box(

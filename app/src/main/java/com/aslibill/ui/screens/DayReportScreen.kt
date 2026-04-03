@@ -27,6 +27,7 @@ import com.aslibill.ui.components.DateBox
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
 import com.aslibill.ui.components.openDatePicker
+import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AsliColors
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -50,12 +51,12 @@ fun DayReportScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+        .padding(AppSpacing.md),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
       Text("Day Report", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
 
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
         DateBox(label = "FROM", value = fromText, onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } }, modifier = Modifier.weight(1f))
         DateBox(label = "TO", value = toText, onClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } }, modifier = Modifier.weight(1f))
       }
@@ -63,11 +64,14 @@ fun DayReportScreen(
       SectionHeader("Daily Totals")
 
       if (rows.isEmpty()) {
-        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl), contentAlignment = Alignment.Center) {
           Text("No data for selected period.", color = AsliColors.TextSecondary)
         }
       } else {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        LazyColumn(
+          modifier = Modifier.weight(1f),
+          verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+        ) {
           items(rows) { row -> DayReportCard(row = row) }
         }
       }
@@ -85,8 +89,8 @@ private fun DayReportCard(row: DayReportRow) {
       }
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Column {
-          Text("Cash: ₹ ${String.format("%.2f", row.cashTotal)}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
-          Text("Online: ₹ ${String.format("%.2f", row.onlineTotal)}", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+          Text("Cash: ₹ ${String.format("%.2f", row.cashTotal)}", color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium)
+          Text("Online: ₹ ${String.format("%.2f", row.onlineTotal)}", color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium)
         }
         Text("Total: ₹ ${String.format("%.2f", row.grandTotal)}", color = AsliColors.Green, style = MaterialTheme.typography.titleLarge)
       }

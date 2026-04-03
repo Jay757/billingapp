@@ -35,6 +35,7 @@ import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
+import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AsliColors
 
 @Composable
@@ -51,8 +52,8 @@ fun CustomerManagementScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+        .padding(AppSpacing.md),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
         Text("Customers", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
@@ -62,11 +63,14 @@ fun CustomerManagementScreen(
       SectionHeader("All Customers (${customers.size})")
 
       if (customers.isEmpty()) {
-        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl), contentAlignment = Alignment.Center) {
           Text("No customers yet. Tap '+ Add' to begin.", color = AsliColors.TextSecondary)
         }
       } else {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        LazyColumn(
+          modifier = Modifier.weight(1f),
+          verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+        ) {
           items(customers, key = { it.id }) { customer ->
             CustomerCard(
               customer = customer,

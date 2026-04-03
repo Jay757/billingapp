@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 data class ContactInfo(
-    val phone: String = "+91 9207080178",
-    val email: String = "support@aslibill.com",
+    val phone: String = "+91 9586028425",
+    val email: String = "jaymungara757@gamil.com",
     val workingHours: String = "Mon-Sat, 9 AM - 6 PM"
 )
 

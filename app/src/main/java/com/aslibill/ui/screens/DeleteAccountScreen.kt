@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
+import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AsliColors
 
 @Composable
@@ -52,8 +53,8 @@ fun DeleteAccountScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+                .padding(AppSpacing.md),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SectionHeader("Delete Account")

@@ -41,6 +41,7 @@ import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.GrayButton
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
+import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AsliColors
 import com.aslibill.ui.screens.BluetoothPrinterViewModel
 import com.aslibill.ui.components.DateBox
@@ -80,18 +81,18 @@ fun ReportsScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(10.dp)
+        .padding(AppSpacing.md),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
     ) {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text("Report", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text("Reports", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
+        Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
           OrangeButton("Quick Bill", onClick = { onGoQuickBill?.invoke() })
           GrayButton("Item Wise Bill", onClick = { onGoItemWise?.invoke() })
         }
       }
 
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
         DateBox(
           label = "FROM",
           value = fromText,
@@ -123,7 +124,7 @@ fun ReportsScreen(
 
       LazyColumn(
         modifier = Modifier.weight(1f),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
       ) {
         items(bills, key = { it.billId }) { row ->
           BillCard(
@@ -237,7 +238,7 @@ private fun BillCard(
       IconButton(onClick = onDelete, modifier = Modifier.align(Alignment.TopEnd)) {
         Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red)
       }
-      Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+      Column(modifier = Modifier.padding(AppSpacing.sm), verticalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
           Column {
             Text("Invoice : ${row.billId}", color = AsliColors.TextPrimary)
@@ -256,7 +257,7 @@ private fun BillCard(
             Text("Total : ${row.total}", color = AsliColors.TextPrimary)
           }
         }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
           Chip("EDIT", selected = false, onClick = { /* TODO */ })
           Chip("VIEW", selected = false, onClick = onView)
           Chip("SHARE", selected = false, onClick = { /* TODO */ })

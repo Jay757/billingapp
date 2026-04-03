@@ -25,6 +25,7 @@ import com.aslibill.data.db.CreditSummaryRow
 import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
+import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AsliColors
 
 @Composable
@@ -40,8 +41,8 @@ fun CreditDetailsScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+        .padding(AppSpacing.md),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
       Text("Credit Details", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
 
@@ -66,11 +67,14 @@ fun CreditDetailsScreen(
       SectionHeader("Credit by Customer")
 
       if (credits.isEmpty()) {
-        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl), contentAlignment = Alignment.Center) {
           Text("No credit bills found. Create a bill with CREDIT payment to see it here.", color = AsliColors.TextSecondary)
         }
       } else {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        LazyColumn(
+          modifier = Modifier.weight(1f),
+          verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+        ) {
           items(credits) { row -> CreditCard(row = row) }
         }
       }

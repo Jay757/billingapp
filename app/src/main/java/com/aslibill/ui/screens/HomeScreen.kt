@@ -31,7 +31,6 @@ import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Print
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
-import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Summarize
@@ -76,7 +75,6 @@ fun HomeScreen(
   onSalesSummary: () -> Unit,
   onUpgradePremium: () -> Unit,
   onTrainingVideo: () -> Unit,
-  onBuyPrinters: () -> Unit,
   onFeedback: () -> Unit,
   onContactUs: () -> Unit,
   onSubscription: () -> Unit,
@@ -156,7 +154,6 @@ fun HomeScreen(
       DarkCard {
         HomeTileSection(
           tiles = listOf(
-            HomeTile("Buy Printers Here", Icons.Outlined.Sell, onBuyPrinters),
             HomeTile("Feedback", Icons.Outlined.Feedback, onFeedback),
             HomeTile("Contact Us", Icons.Outlined.SupportAgent, onContactUs)
           )

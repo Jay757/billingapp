@@ -105,7 +105,6 @@ fun NovaBillApp() {
           onSalesSummary = { navController.navigate(Routes.SalesSummary) },
           onUpgradePremium = { navController.navigate(Routes.UpgradePremium) },
           onTrainingVideo = { navController.navigate(Routes.TrainingVideo) },
-          onBuyPrinters = { navController.navigate(Routes.BuyPrinters) },
           onFeedback = { navController.navigate(Routes.Feedback) },
           onContactUs = { navController.navigate(Routes.ContactUs) },
           onSubscription = { navController.navigate(Routes.Subscription) },

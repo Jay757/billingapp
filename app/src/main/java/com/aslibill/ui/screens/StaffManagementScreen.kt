@@ -39,6 +39,7 @@ import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
+import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AsliColors
 
 @Composable
@@ -55,8 +56,8 @@ fun StaffManagementScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+        .padding(AppSpacing.md),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
         Text("Staff Management", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
@@ -66,11 +67,14 @@ fun StaffManagementScreen(
       SectionHeader("All Staff (${staffList.size})")
 
       if (staffList.isEmpty()) {
-        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl), contentAlignment = Alignment.Center) {
           Text("No staff added yet. Tap '+ Add' to begin.", color = AsliColors.TextSecondary)
         }
       } else {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        LazyColumn(
+          modifier = Modifier.weight(1f),
+          verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+        ) {
           items(staffList, key = { it.id }) { staff ->
             StaffCard(
               staff = staff,
