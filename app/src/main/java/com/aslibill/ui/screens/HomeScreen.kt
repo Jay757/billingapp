@@ -1,6 +1,7 @@
 package com.aslibill.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,6 +42,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -51,6 +54,19 @@ import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
 import com.aslibill.ui.theme.AsliColors
 import com.aslibill.ui.theme.Brand
+import com.aslibill.ui.components.StatsCard
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.outlined.TrendingUp
+import androidx.compose.material.icons.outlined.Receipt
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 
 private data class HomeTile(
   val label: String,
@@ -82,8 +98,11 @@ fun HomeScreen(
   onLogOut: () -> Unit,
   userName: String,
   userPhone: String,
-  contentPadding: PaddingValues
+  contentPadding: PaddingValues,
+  homeVm: HomeViewModel
 ) {
+  val todaySales by homeVm.todaySalesTotal.collectAsState()
+  val todayBillCount by homeVm.todayBillCount.collectAsState()
   ScreenSurface {
     Column(
       modifier = Modifier
@@ -93,27 +112,56 @@ fun HomeScreen(
         .verticalScroll(rememberScrollState()),
       verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
         Column {
-          Text("Welcome, $userName", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
-          Text(userPhone, color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelLarge)
+          Text(
+            "Hello, $userName!",
+            color = AsliColors.TextPrimary,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+          )
+          Text(
+            userPhone,
+            color = AsliColors.TextSecondary,
+            style = MaterialTheme.typography.bodyMedium
+          )
         }
-        DarkCard(modifier = Modifier.padding(top = 2.dp)) {
-          Row(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-            Image(painter = painterResource(id = R.drawable.billing_icon), contentDescription = null, modifier = Modifier.size(24.dp))
-            Text("NOVA\nBILL", color = AsliColors.TextPrimary, style = MaterialTheme.typography.labelMedium)
-          }
+        Box(
+          modifier = Modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(AsliColors.PrimaryLight),
+          contentAlignment = Alignment.Center
+        ) {
+          Icon(Icons.Outlined.Person, contentDescription = null, tint = AsliColors.Primary)
         }
       }
 
-      Text(
-        text = Brand.AppTagline,
-        color = AsliColors.TextSecondary,
-        style = MaterialTheme.typography.bodyMedium
-      )
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+      ) {
+        StatsCard(
+          label = "Today's Sales",
+          value = "₹ ${todaySales.toInt()}",
+          icon = Icons.Outlined.TrendingUp,
+          color = AsliColors.Primary,
+          modifier = Modifier.weight(1f)
+        )
+        StatsCard(
+          label = "Total Bills",
+          value = "$todayBillCount",
+          icon = Icons.Outlined.Receipt,
+          color = AsliColors.Orange,
+          modifier = Modifier.weight(1f)
+        )
+      }
 
-      SectionHeader("Billing")
-      DarkCard {
+      SectionHeader("Quick Actions")
+      DarkCard(modifier = Modifier.fillMaxWidth()) {
         HomeTileSection(
           tiles = listOf(
             HomeTile("Quick Bill", Icons.AutoMirrored.Outlined.ReceiptLong, onQuickBill),
@@ -129,7 +177,7 @@ fun HomeScreen(
       }
 
       SectionHeader("Reports")
-      DarkCard {
+      DarkCard(modifier = Modifier.fillMaxWidth()) {
         HomeTileSection(
           tiles = listOf(
             HomeTile("Bill Report", Icons.Outlined.Description, onReports),
@@ -141,7 +189,7 @@ fun HomeScreen(
       }
 
       SectionHeader("Settings")
-      DarkCard {
+      DarkCard(modifier = Modifier.fillMaxWidth()) {
         HomeTileSection(
           tiles = listOf(
             HomeTile("Bluetooth Devices", Icons.Outlined.Bluetooth, onBluetoothPrinter),
@@ -151,7 +199,7 @@ fun HomeScreen(
       }
 
       SectionHeader("Others")
-      DarkCard {
+      DarkCard(modifier = Modifier.fillMaxWidth()) {
         HomeTileSection(
           tiles = listOf(
             HomeTile("Feedback", Icons.Outlined.Feedback, onFeedback),
@@ -161,7 +209,7 @@ fun HomeScreen(
       }
 
       SectionHeader("Account")
-      DarkCard {
+      DarkCard(modifier = Modifier.fillMaxWidth()) {
         HomeTileSection(
           tiles = listOf(
             HomeTile("Subscription", Icons.Outlined.WorkspacePremium, onSubscription),
@@ -178,11 +226,11 @@ fun HomeScreen(
 
 @Composable
 private fun HomeTileSection(tiles: List<HomeTile>) {
-  BoxWithConstraints(modifier = Modifier.padding(12.dp)) {
+  BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
     val columns = if (maxWidth < 520.dp) 2 else 3
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
       tiles.chunked(columns).forEach { rowTiles ->
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
           rowTiles.forEach { tile ->
             IconTile(
               label = tile.label,

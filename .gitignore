@@ -34,3 +34,5 @@ Desktop.ini
 
 # Project-specific local SDK folder
 android-sdk/
+
+*.jks

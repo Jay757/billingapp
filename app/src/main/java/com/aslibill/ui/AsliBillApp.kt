@@ -26,6 +26,8 @@ import com.aslibill.ui.screens.ItemWiseBillViewModelFactory
 import com.aslibill.ui.screens.ReportsViewModelFactory
 import com.aslibill.ui.screens.QuickBillViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.aslibill.ui.screens.HomeViewModel
+import com.aslibill.ui.screens.HomeViewModelFactory
 import com.aslibill.ui.screens.BluetoothPrinterViewModel
 import com.aslibill.ui.screens.BluetoothPrinterViewModelFactory
 import com.aslibill.ui.screens.StaffManagementScreen
@@ -89,6 +91,7 @@ fun NovaBillApp() {
       modifier = Modifier
     ) {
       composable(Routes.Home) {
+        val homeVm: HomeViewModel = viewModel(factory = HomeViewModelFactory(app.container.billDao))
         HomeScreen(
           onQuickBill = { navController.navigate(Routes.QuickBill) },
           onItemWiseBill = { navController.navigate(Routes.ItemWiseBill) },
@@ -121,7 +124,8 @@ fun NovaBillApp() {
           },
           userName = userSession?.name ?: "User",
           userPhone = userSession?.phone ?: "No Phone",
-          contentPadding = padding
+          contentPadding = padding,
+          homeVm = homeVm
         )
       }
       composable(Routes.Login) {

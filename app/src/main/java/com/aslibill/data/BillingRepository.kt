@@ -10,8 +10,11 @@ import kotlinx.coroutines.flow.Flow
 import org.json.JSONArray
 import org.json.JSONObject
 
+import com.aslibill.data.db.ProductDao
+
 class BillingRepository(
   private val billDao: BillDao,
+  private val productDao: ProductDao,
   private val authRepository: AuthRepository
 ) {
   private val client = ApiHttpClient(BuildConfig.API_BASE_URL)
@@ -21,6 +24,14 @@ class BillingRepository(
     items: List<BillItemEntity>
   ): Long {
     val id = billDao.insertBillWithItems(bill, items)
+    
+    // Decrement local stock for each product in the bill
+    items.forEach { item ->
+      item.productId?.let { pid ->
+        productDao.decrementStock(pid, item.qty)
+      }
+    }
+
     runCatching {
       val token = authRepository.currentToken() ?: return@runCatching
       val body = JSONObject().apply {

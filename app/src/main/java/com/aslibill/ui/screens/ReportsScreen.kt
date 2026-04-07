@@ -17,6 +17,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FilterAlt
+import androidx.compose.material.icons.outlined.Print
+import androidx.compose.material.icons.outlined.Receipt
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import com.aslibill.ui.components.StatsCard
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -84,12 +90,16 @@ fun ReportsScreen(
         .padding(AppSpacing.md),
       verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
     ) {
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text("Reports", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
-        Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
-          OrangeButton("Quick Bill", onClick = { onGoQuickBill?.invoke() })
-          GrayButton("Item Wise Bill", onClick = { onGoItemWise?.invoke() })
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Column {
+          Text("Reports", color = AsliColors.TextPrimary, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
+          Text("Track your sales and performance", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodySmall)
         }
+        Icon(Icons.Outlined.FilterAlt, contentDescription = "Filter", tint = AsliColors.Primary)
       }
 
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
@@ -114,11 +124,23 @@ fun ReportsScreen(
         }
       }
 
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text("Total record : ${bills.size}", color = AsliColors.TextSecondary)
-        Text(
-          if (bills.isEmpty()) "0 - 0" else "1 - ${bills.size}",
-          color = AsliColors.TextSecondary
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+      ) {
+        StatsCard(
+          label = "Total Sales",
+          value = "₹ ${totalAmount.toInt()}",
+          icon = Icons.Outlined.CalendarMonth,
+          color = AsliColors.Primary,
+          modifier = Modifier.weight(1.5f)
+        )
+        StatsCard(
+          label = "Record count",
+          value = "${bills.size}",
+          icon = Icons.Outlined.Receipt,
+          color = AsliColors.Orange,
+          modifier = Modifier.weight(1f)
         )
       }
 
@@ -163,9 +185,12 @@ fun ReportsScreen(
         }
       }
 
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text("Total Amount : ₹ ${totalAmount.toInt()}", color = AsliColors.TextPrimary)
-        GrayButton("Delete All", onClick = { showDeleteAll = true })
+      if (bills.isNotEmpty()) {
+        GrayButton(
+          "Clear All Reports",
+          onClick = { showDeleteAll = true },
+          modifier = Modifier.fillMaxWidth()
+        )
       }
 
       if (!printMessage.isNullOrBlank()) {
@@ -214,7 +239,9 @@ fun ReportsScreen(
       )
     }
   }
-}@Composable
+}
+
+@Composable
 private fun BillCard(
   row: BillWithItemsRow,
   dateTime: String,
@@ -222,46 +249,84 @@ private fun BillCard(
   onView: () -> Unit,
   onPrint: () -> Unit
 ) {
-  val paymentBg = when (row.paymentMethod.uppercase(Locale.getDefault())) {
-    "CASH" -> AsliColors.Orange
-    "NONE" -> AsliColors.Card2
-    else -> AsliColors.Green
+  val paymentColor = when (row.paymentMethod.uppercase(Locale.getDefault())) {
+    "CASH" -> AsliColors.Primary
+    "UP" -> AsliColors.Green
+    else -> AsliColors.Orange
   }
-  val cardBg = if (row.billId % 3L == 1L) Color(0xFF0B4F1E) else AsliColors.Card
 
-  DarkCard(modifier = Modifier.fillMaxWidth()) {
-    Box(
-      modifier = Modifier
-        .fillMaxWidth()
-        .background(cardBg, RoundedCornerShape(14.dp))
+  DarkCard(
+    modifier = Modifier
+      .fillMaxWidth()
+      .clickable(onClick = onView)
+  ) {
+    Column(
+      modifier = Modifier.padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-      IconButton(onClick = onDelete, modifier = Modifier.align(Alignment.TopEnd)) {
-        Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red)
-      }
-      Column(modifier = Modifier.padding(AppSpacing.sm), verticalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-          Column {
-            Text("Invoice : ${row.billId}", color = AsliColors.TextPrimary)
-            Text("Date : $dateTime", color = AsliColors.TextSecondary)
-            Text("Qty : ${row.itemCount}", color = AsliColors.TextSecondary)
-          }
-          Column(horizontalAlignment = Alignment.End, modifier = Modifier.padding(end = 24.dp)) {
-            Text("Biller : ${row.cashierName ?: "user"}", color = AsliColors.TextSecondary)
-            Box(
-              modifier = Modifier
-                .background(paymentBg, RoundedCornerShape(8.dp))
-                .padding(horizontal = 10.dp, vertical = 4.dp)
-            ) {
-              Text(row.paymentMethod, color = Color.Black)
-            }
-            Text("Total : ${row.total}", color = AsliColors.TextPrimary)
-          }
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Column {
+          Text(
+            "Invoice #${row.billId}",
+            color = AsliColors.TextPrimary,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+          )
+          Text(
+            dateTime,
+            color = AsliColors.TextSecondary,
+            style = MaterialTheme.typography.bodySmall
+          )
         }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
-          Chip("EDIT", selected = false, onClick = { /* TODO */ })
-          Chip("VIEW", selected = false, onClick = onView)
-          Chip("SHARE", selected = false, onClick = { /* TODO */ })
-          Chip("PRINT", selected = false, onClick = onPrint)
+        
+        Box(
+          modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(paymentColor.copy(alpha = 0.15f))
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+        ) {
+          Text(
+            row.paymentMethod,
+            color = paymentColor,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+          )
+        }
+      }
+
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom
+      ) {
+        Column {
+          Text(
+            "Items: ${row.itemCount}",
+            color = AsliColors.TextSecondary,
+            style = MaterialTheme.typography.bodySmall
+          )
+          Text(
+            "₹${row.total.toInt()}",
+            color = AsliColors.TextPrimary,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold)
+          )
+        }
+        
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          IconButton(
+            onClick = onPrint, 
+            modifier = Modifier.size(36.dp).background(AsliColors.Card2, CircleShape)
+          ) {
+            Icon(Icons.Outlined.Print, contentDescription = "Print", tint = AsliColors.TextPrimary, modifier = Modifier.size(18.dp))
+          }
+          IconButton(
+            onClick = onDelete, 
+            modifier = Modifier.size(36.dp).background(AsliColors.Card2, CircleShape)
+          ) {
+            Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Orange, modifier = Modifier.size(18.dp))
+          }
         }
       }
     }

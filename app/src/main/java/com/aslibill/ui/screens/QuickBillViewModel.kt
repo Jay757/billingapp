@@ -78,6 +78,10 @@ class QuickBillViewModel(
     _mode.value = QuickInputMode.QTY
   }
 
+  fun removeItem(index: Int) {
+    _lines.value = _lines.value.filterIndexed { i, _ -> i != index }
+  }
+
   fun saveBill(
     paymentMode: PaymentMode = PaymentMode.CASH,
     cashierName: String? = "user",

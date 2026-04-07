@@ -16,15 +16,26 @@ android {
     versionCode = 1
     versionName = "1.0"
 
-    // Backend API base URL (change for real devices as needed).
-    buildConfigField("String", "API_BASE_URL", "\"http://127.0.0.1:8000\"")
-
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     vectorDrawables { useSupportLibrary = true }
   }
 
+  signingConfigs {
+    create("release") {
+      storeFile = file("../billing-apk-key.jks")
+      storePassword = "Test@123"
+      keyAlias = "my-key-alias"
+      keyPassword = "Test@123"
+    }
+  }
+
   buildTypes {
+    debug {
+      buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000\"") // Use 10.0.2.2 for Android Emulators
+    }
     release {
+      buildConfigField("String", "API_BASE_URL", "\"https://billingappbackend-cjxo.onrender.com\"")
+      signingConfig = signingConfigs.getByName("release")
       isMinifyEnabled = false
       proguardFiles(
         getDefaultProguardFile("proguard-android-optimize.txt"),

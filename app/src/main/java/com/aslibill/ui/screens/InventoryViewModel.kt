@@ -29,11 +29,11 @@ class InventoryViewModel(
   fun updateCategory(id: Long, name: String) = viewModelScope.launch { repo.updateCategory(id, name) }
   fun deleteCategory(entity: CategoryEntity) = viewModelScope.launch { repo.deleteCategory(entity) }
 
-  fun addProduct(categoryId: Long, name: String, price: Double) =
-    viewModelScope.launch { repo.addProduct(categoryId, name, price) }
+  fun addProduct(categoryId: Long, name: String, price: Double, stock: Double) =
+    viewModelScope.launch { repo.addProduct(categoryId, name, price, stock) }
 
-  fun updateProduct(id: Long, categoryId: Long, name: String, price: Double, isActive: Boolean) =
-    viewModelScope.launch { repo.updateProduct(id, categoryId, name, price, isActive) }
+  fun updateProduct(id: Long, categoryId: Long, name: String, price: Double, stock: Double, isActive: Boolean) =
+    viewModelScope.launch { repo.updateProduct(id, categoryId, name, price, stock, isActive) }
 
   fun deleteProduct(entity: ProductEntity) = viewModelScope.launch { repo.deleteProduct(entity) }
 }
