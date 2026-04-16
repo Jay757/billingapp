@@ -61,7 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.outlined.TrendingUp
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.outlined.Receipt
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
@@ -147,7 +147,7 @@ fun HomeScreen(
         StatsCard(
           label = "Today's Sales",
           value = "₹ ${todaySales.toInt()}",
-          icon = Icons.Outlined.TrendingUp,
+          icon = Icons.AutoMirrored.Outlined.TrendingUp,
           color = AsliColors.Primary,
           modifier = Modifier.weight(1f)
         )

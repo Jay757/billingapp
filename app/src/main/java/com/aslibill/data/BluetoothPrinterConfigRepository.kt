@@ -41,8 +41,8 @@ class BluetoothPrinterConfigRepository(
     return try {
       val resp = client.getJson("/bluetooth/printer", token = token)
       BluetoothPrinterConfig(
-        deviceAddress = resp.optString("deviceAddress", null)?.takeIf { !it.isNullOrBlank() },
-        deviceName = resp.optString("deviceName", null)?.takeIf { !it.isNullOrBlank() }
+        deviceAddress = resp.optString("deviceAddress").takeIf { it.isNotBlank() },
+        deviceName = resp.optString("deviceName").takeIf { it.isNotBlank() }
       )
     } catch (_: Throwable) {
       loadLocalConfig()
