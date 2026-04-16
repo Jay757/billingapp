@@ -110,30 +110,31 @@ fun InventoryScreen(
 
         if (tab == InventoryTab.Category) {
           LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(1),
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 80.dp)
           ) {
             items(categories, key = { it.id }) { cat ->
               DarkCard(modifier = Modifier.fillMaxWidth()) {
                 Row(
-                  modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                  modifier = Modifier.padding(16.dp),
                   horizontalArrangement = Arrangement.SpaceBetween,
                   verticalAlignment = Alignment.CenterVertically
                 ) {
                   Text(
                     cat.name,
                     color = AsliColors.TextPrimary,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
                     modifier = Modifier.weight(1f)
                   )
-                  Row {
-                    IconButton(onClick = { editCategory = cat; showAdd = true }, modifier = Modifier.size(36.dp)) {
+                  Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    IconButton(onClick = { editCategory = cat; showAdd = true }, modifier = Modifier.size(32.dp)) {
                       Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
                     }
-                    IconButton(onClick = { vm.deleteCategory(cat) }, modifier = Modifier.size(36.dp)) {
-                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Orange, modifier = Modifier.size(20.dp))
+                    IconButton(onClick = { vm.deleteCategory(cat) }, modifier = Modifier.size(32.dp)) {
+                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
                     }
                   }
                 }
@@ -142,30 +143,51 @@ fun InventoryScreen(
           }
         } else {
           LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Fixed(1),
             modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 80.dp)
           ) {
             items(products, key = { it.id }) { p ->
               DarkCard(modifier = Modifier.fillMaxWidth()) {
                 Row(
-                  modifier = Modifier.padding(14.dp),
+                  modifier = Modifier.padding(16.dp),
                   horizontalArrangement = Arrangement.SpaceBetween,
                   verticalAlignment = Alignment.CenterVertically
                 ) {
                   Column(
-                    modifier = Modifier.weight(1f).padding(vertical = 4.dp),
+                    modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                   ) {
-                    Text(p.name, color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                      Text("₹${p.price.toInt()}", color = AsliColors.Primary, style = MaterialTheme.typography.titleSmall)
-                      Text("| Stock: ${p.stock.toInt()}", color = if (p.stock <= 5) AsliColors.Orange else AsliColors.TextSecondary, style = MaterialTheme.typography.labelSmall)
+                    Text(
+                      p.name,
+                      color = AsliColors.TextPrimary,
+                      style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    )
+                    Row(
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                      Text(
+                        "₹${p.price.toInt()}",
+                        color = AsliColors.Primary,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                      )
+                      Text(
+                        "| Stock: ${p.stock.toInt()}",
+                        color = if (p.stock <= 5) AsliColors.Red else AsliColors.TextSecondary,
+                        style = MaterialTheme.typography.bodyMedium
+                      )
                     }
-                    Text(p.categoryName, color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelSmall)
+                    Text(
+                      p.categoryName,
+                      color = AsliColors.TextSecondary,
+                      style = MaterialTheme.typography.bodySmall
+                    )
                   }
-                  Row {
+                  
+                  Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     IconButton(
                       onClick = {
                         editProduct = ProductDraft(
@@ -177,7 +199,7 @@ fun InventoryScreen(
                         )
                         showAdd = true
                       },
-                      modifier = Modifier.size(36.dp)
+                      modifier = Modifier.size(32.dp)
                     ) {
                       Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
                     }
@@ -193,9 +215,9 @@ fun InventoryScreen(
                           )
                         )
                       },
-                      modifier = Modifier.size(36.dp)
+                      modifier = Modifier.size(32.dp)
                     ) {
-                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Orange, modifier = Modifier.size(20.dp))
+                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
                     }
                   }
                 }
@@ -207,10 +229,10 @@ fun InventoryScreen(
 
       FloatingActionButton(
         onClick = { editCategory = null; editProduct = null; showAdd = true },
-        containerColor = AsliColors.Orange,
-        contentColor = Color.Black,
+        containerColor = AsliColors.Primary,
+        contentColor = Color.White,
         modifier = Modifier
-          .padding(6.dp)
+          .padding(16.dp)
           .align(Alignment.BottomEnd)
       ) {
         Icon(Icons.Outlined.Add, contentDescription = "Add")

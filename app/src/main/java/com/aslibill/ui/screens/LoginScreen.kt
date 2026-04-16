@@ -60,7 +60,6 @@ fun LoginScreen(
                 value = vm.password,
                 onValueChange = { vm.password = it },
                 label = "Password",
-                visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
 

@@ -45,6 +45,14 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.MilitaryTech
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 
 @Composable
 fun ScreenSurface(content: @Composable () -> Unit) {
@@ -134,10 +142,10 @@ fun GrayButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier)
   Button(
     onClick = onClick,
     modifier = modifier,
-    colors = ButtonDefaults.buttonColors(containerColor = AsliColors.Card2, contentColor = AsliColors.TextPrimary),
+    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = AsliColors.TextPrimary),
     shape = RoundedCornerShape(10.dp),
-    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 12.dp)
-  ) { Text(text, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+  ) { Text(text, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis) }
 }
 
 @Composable
@@ -186,16 +194,27 @@ fun AsliTextField(
     onValueChange: (String) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
-    visualTransformation: androidx.compose.ui.text.input.VisualTransformation = androidx.compose.ui.text.input.VisualTransformation.None,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: androidx.compose.foundation.text.KeyboardOptions = androidx.compose.foundation.text.KeyboardOptions.Default
 ) {
+    val isPassword = keyboardOptions.keyboardType == KeyboardType.Password
+    val passwordVisible = remember { mutableStateOf(false) }
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         modifier = modifier.fillMaxWidth(),
-        visualTransformation = visualTransformation,
+        visualTransformation = if (isPassword && !passwordVisible.value) PasswordVisualTransformation() else VisualTransformation.None,
         keyboardOptions = keyboardOptions,
+        trailingIcon = {
+            if (isPassword) {
+                val icon = if (passwordVisible.value) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
+                IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
+                    Icon(icon, contentDescription = if (passwordVisible.value) "Hide password" else "Show password", tint = AsliColors.TextSecondary)
+                }
+            }
+        },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
