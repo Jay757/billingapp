@@ -23,6 +23,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -70,40 +71,40 @@ fun InventoryScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(12.dp)
+        .padding(16.dp)
     ) {
       Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
       ) {
         Row(
           modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Column {
+            Text("Inventory", color = AsliColors.TextPrimary, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
+            Text("Manage your stock and prices", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodySmall)
+          }
+          GrayButton("Bulk Upload", onClick = { /* TODO */ })
+        }
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
           verticalAlignment = Alignment.CenterVertically
         ) {
           Chip(
             modifier = Modifier.weight(1f),
-            text = "Category",
+            text = "Categories",
             selected = tab == InventoryTab.Category,
             onClick = { tab = InventoryTab.Category }
           )
           Chip(
             modifier = Modifier.weight(1f),
-            text = "Product",
+            text = "Products",
             selected = tab == InventoryTab.Product,
             onClick = { tab = InventoryTab.Product }
-          )
-          Chip(
-            modifier = Modifier.weight(1f),
-            text = "Upload",
-            selected = false,
-            onClick = { /* TODO bulk upload */ }
-          )
-          Chip(
-            modifier = Modifier.weight(1.2f),
-            text = "Item Wise\nBill",
-            selected = true,
-            onClick = { /* TODO navigate */ }
           )
         }
 
@@ -117,22 +118,22 @@ fun InventoryScreen(
             items(categories, key = { it.id }) { cat ->
               DarkCard(modifier = Modifier.fillMaxWidth()) {
                 Row(
-                  modifier = Modifier.padding(14.dp),
+                  modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
                   horizontalArrangement = Arrangement.SpaceBetween,
                   verticalAlignment = Alignment.CenterVertically
                 ) {
                   Text(
                     cat.name,
                     color = AsliColors.TextPrimary,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
                     modifier = Modifier.weight(1f)
                   )
-                  Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { editCategory = cat; showAdd = true }) {
-                      Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Green)
+                  Row {
+                    IconButton(onClick = { editCategory = cat; showAdd = true }, modifier = Modifier.size(36.dp)) {
+                      Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
                     }
-                    IconButton(onClick = { vm.deleteCategory(cat) }) {
-                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red)
+                    IconButton(onClick = { vm.deleteCategory(cat) }, modifier = Modifier.size(36.dp)) {
+                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Orange, modifier = Modifier.size(20.dp))
                     }
                   }
                 }
@@ -154,26 +155,31 @@ fun InventoryScreen(
                   verticalAlignment = Alignment.CenterVertically
                 ) {
                   Column(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).padding(vertical = 4.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                   ) {
-                    Text(p.name, color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleMedium)
-                    Text("₹${p.price.toInt()}", color = AsliColors.Orange, style = MaterialTheme.typography.titleSmall)
+                    Text(p.name, color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                      Text("₹${p.price.toInt()}", color = AsliColors.Primary, style = MaterialTheme.typography.titleSmall)
+                      Text("| Stock: ${p.stock.toInt()}", color = if (p.stock <= 5) AsliColors.Orange else AsliColors.TextSecondary, style = MaterialTheme.typography.labelSmall)
+                    }
                     Text(p.categoryName, color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelSmall)
                   }
-                  Row(verticalAlignment = Alignment.CenterVertically) {
+                  Row {
                     IconButton(
                       onClick = {
                         editProduct = ProductDraft(
                           id = p.id,
                           categoryId = p.categoryId,
                           name = p.name,
-                          price = p.price
+                          price = p.price,
+                          stock = p.stock
                         )
                         showAdd = true
-                      }
+                      },
+                      modifier = Modifier.size(36.dp)
                     ) {
-                      Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Green)
+                      Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
                     }
                     IconButton(
                       onClick = {
@@ -186,9 +192,10 @@ fun InventoryScreen(
                             isActive = p.isActive
                           )
                         )
-                      }
+                      },
+                      modifier = Modifier.size(36.dp)
                     ) {
-                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red)
+                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Orange, modifier = Modifier.size(20.dp))
                     }
                   }
                 }
@@ -227,9 +234,9 @@ fun InventoryScreen(
             onDismiss = { showAdd = false; editProduct = null },
             onSave = { draft ->
               if (draft.id == null) {
-                vm.addProduct(draft.categoryId, draft.name, draft.price)
+                vm.addProduct(draft.categoryId, draft.name, draft.price, draft.stock)
               } else {
-                vm.updateProduct(draft.id, draft.categoryId, draft.name, draft.price, isActive = true)
+                vm.updateProduct(draft.id, draft.categoryId, draft.name, draft.price, draft.stock, isActive = true)
               }
               showAdd = false
               editProduct = null
@@ -247,7 +254,8 @@ private data class ProductDraft(
   val id: Long? = null,
   val categoryId: Long,
   val name: String,
-  val price: Double
+  val price: Double,
+  val stock: Double = 0.0
 )
 
 @Composable
@@ -264,17 +272,10 @@ private fun CategoryDialog(
     textContentColor = AsliColors.TextSecondary,
     title = { Text(if (initial == null) "Add Category" else "Edit Category") },
     text = {
-      OutlinedTextField(
+      com.aslibill.ui.components.AsliTextField(
         value = name,
         onValueChange = { name = it },
-        label = { Text("Category Name") },
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
-        colors = OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = AsliColors.Orange,
-          unfocusedBorderColor = Color.Gray,
-          focusedLabelColor = AsliColors.Orange
-        )
+        label = "Category Name"
       )
     },
     confirmButton = {
@@ -306,6 +307,7 @@ private fun ProductDialog(
   }
   var name by remember(initial) { mutableStateOf(initial?.name.orEmpty()) }
   var priceText by remember(initial) { mutableStateOf(if (initial == null) "" else initial.price.toString()) }
+  var stockText by remember(initial) { mutableStateOf(if (initial == null) "" else initial.stock.toString()) }
 
   var expanded by remember { mutableStateOf(false) }
   val selectedCategory = categories.find { it.id == categoryId }
@@ -324,21 +326,13 @@ private fun ProductDialog(
           onExpandedChange = { expanded = !expanded },
           modifier = Modifier.fillMaxWidth()
         ) {
-          OutlinedTextField(
+          com.aslibill.ui.components.AsliTextField(
             value = selectedCategory?.name ?: "Select Category",
             onValueChange = {},
-            readOnly = true,
-            label = { Text("Category") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(
-              focusedBorderColor = AsliColors.Orange,
-              unfocusedBorderColor = Color.Gray,
-              focusedLabelColor = AsliColors.Orange
-            ),
-            modifier = Modifier
-              .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-              .fillMaxWidth()
+            label = "Category",
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable)
           )
+          
           ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
@@ -356,29 +350,24 @@ private fun ProductDialog(
           }
         }
 
-        OutlinedTextField(
+        com.aslibill.ui.components.AsliTextField(
           value = name,
           onValueChange = { name = it },
-          label = { Text("Product Name") },
-          singleLine = true,
-          modifier = Modifier.fillMaxWidth(),
-          colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = AsliColors.Orange,
-            unfocusedBorderColor = Color.Gray,
-            focusedLabelColor = AsliColors.Orange
-          )
+          label = "Product Name"
         )
-        OutlinedTextField(
+        
+        com.aslibill.ui.components.AsliTextField(
           value = priceText,
           onValueChange = { priceText = it },
-          label = { Text("Price") },
-          singleLine = true,
-          modifier = Modifier.fillMaxWidth(),
-          colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = AsliColors.Orange,
-            unfocusedBorderColor = Color.Gray,
-            focusedLabelColor = AsliColors.Orange
-          )
+          label = "Price",
+          keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+        )
+        
+        com.aslibill.ui.components.AsliTextField(
+          value = stockText,
+          onValueChange = { stockText = it },
+          label = "Initial Stock",
+          keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
         )
       }
     },
@@ -391,13 +380,14 @@ private fun ProductDialog(
               id = initial?.id,
               categoryId = categoryId,
               name = name,
-              price = price ?: 0.0
+              price = price ?: 0.0,
+              stock = stockText.toDoubleOrNull() ?: 0.0
             )
           )
         },
-        enabled = categoryId != 0L && name.trim().isNotEmpty() && priceText.toDoubleOrNull() != null
+        enabled = categoryId != 0L && name.trim().isNotEmpty() && priceText.toDoubleOrNull() != null && stockText.toDoubleOrNull() != null
       ) {
-        Text("SAVE", color = if (categoryId != 0L && name.trim().isNotEmpty() && priceText.toDoubleOrNull() != null) AsliColors.Orange else Color.Gray)
+        Text("SAVE", color = if (categoryId != 0L && name.trim().isNotEmpty() && priceText.toDoubleOrNull() != null && stockText.toDoubleOrNull() != null) AsliColors.Orange else Color.Gray)
       }
     },
     dismissButton = {

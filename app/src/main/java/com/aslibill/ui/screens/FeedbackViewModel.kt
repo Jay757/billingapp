@@ -1,13 +1,17 @@
 package com.aslibill.ui.screens
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.aslibill.data.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class FeedbackViewModel : ViewModel() {
+class FeedbackViewModel(
+    private val authRepository: AuthRepository
+) : ViewModel() {
     private val _message = MutableStateFlow("")
     val message: StateFlow<String> = _message.asStateFlow()
 
@@ -33,20 +37,32 @@ class FeedbackViewModel : ViewModel() {
 
         viewModelScope.launch {
             _isSubmitting.value = true
-            // Simulate network/database delay
-            kotlinx.coroutines.delay(1500)
-            
-            // In a real app, we would send this to a server or save to local DB
-            println("Feedback Submitted: ${_message.value}, Contact: ${_contactInfo.value}")
-            
+            val ok = authRepository.submitFeedback(
+                message = _message.value,
+                contactInfo = _contactInfo.value.ifBlank { null }
+            )
             _isSubmitting.value = false
-            _submissionSuccess.value = true
-            _message.value = ""
-            _contactInfo.value = ""
+            _submissionSuccess.value = ok
+            if (ok) {
+                _message.value = ""
+                _contactInfo.value = ""
+            }
         }
     }
 
     fun resetSuccess() {
         _submissionSuccess.value = false
+    }
+}
+
+class FeedbackViewModelFactory(
+    private val authRepository: AuthRepository
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(FeedbackViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return FeedbackViewModel(authRepository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

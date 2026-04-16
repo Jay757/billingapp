@@ -1,9 +1,13 @@
 package com.aslibill.data
 
 import android.content.Context
+import android.util.Log
+import com.aslibill.BuildConfig
+import com.aslibill.network.ApiHttpClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.json.JSONObject
 
 data class UserSession(
     val name: String,
@@ -11,49 +15,156 @@ data class UserSession(
 )
 
 class AuthRepository(context: Context) {
+    private val tag = "AuthRepository"
     private val prefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
     
     private val _userSession = MutableStateFlow<UserSession?>(null)
     val userSession: StateFlow<UserSession?> = _userSession.asStateFlow()
 
+    private val _token = MutableStateFlow<String?>(prefs.getString("token", null))
+    val token: StateFlow<String?> = _token.asStateFlow()
+    private val _lastError = MutableStateFlow<String?>(null)
+    val lastError: StateFlow<String?> = _lastError.asStateFlow()
+
+    private val client = ApiHttpClient(BuildConfig.API_BASE_URL)
+
     init {
         val name = prefs.getString("user_name", null)
         val phone = prefs.getString("user_phone", null)
+        val token = prefs.getString("token", null)
         if (name != null && phone != null) {
             _userSession.value = UserSession(name, phone)
+            // Token is optional to allow offline/dev flow.
+            _token.value = token
         }
     }
 
     suspend fun login(phone: String, password: String): Boolean {
-        // Simulated login: In this version, we just accept any login
-        // but normally we'd verify against a backend or local DB
-        val savedPhone = prefs.getString("user_phone", null)
-        val savedName = prefs.getString("user_name", "User")
-        
-        if (savedPhone == phone || savedPhone == null) {
-            val name = if (savedPhone == phone) savedName!! else "User"
-            saveSession(name, phone)
-            return true
+        return try {
+            val req = JSONObject()
+              .put("phone", phone)
+              .put("password", password)
+
+            val resp = client.postJson("/auth/login", token = null, body = req)
+            val token = resp.getString("token")
+            val userObj = resp.getJSONObject("user")
+            val name = userObj.getString("name")
+
+            saveSession(name = name, phone = phone, token = token)
+            _lastError.value = null
+            true
+        } catch (t: Throwable) {
+            Log.e(tag, "Login failed. baseUrl=${BuildConfig.API_BASE_URL}, phone=$phone", t)
+            _lastError.value = t.message ?: "Login failed"
+            false
         }
-        return false
     }
 
     suspend fun signup(name: String, phone: String, password: String): Boolean {
-        saveSession(name, phone)
-        return true
+        return try {
+            val req = JSONObject()
+              .put("name", name)
+              .put("phone", phone)
+              .put("password", password)
+
+            val resp = client.postJson("/auth/signup", token = null, body = req)
+            val token = resp.getString("token")
+            saveSession(name = name, phone = phone, token = token)
+            _lastError.value = null
+            true
+        } catch (t: Throwable) {
+            Log.e(tag, "Signup failed. baseUrl=${BuildConfig.API_BASE_URL}, phone=$phone", t)
+            _lastError.value = t.message ?: "Signup failed"
+            false
+        }
     }
 
-    private fun saveSession(name: String, phone: String) {
+    fun currentToken(): String? = _token.value
+
+    private fun saveSession(name: String, phone: String, token: String) {
         prefs.edit().apply {
             putString("user_name", name)
             putString("user_phone", phone)
+            putString("token", token)
             apply()
         }
         _userSession.value = UserSession(name, phone)
+        _token.value = token
     }
 
     suspend fun logout() {
         prefs.edit().clear().apply()
         _userSession.value = null
+        _token.value = null
+    }
+
+    suspend fun submitFeedback(message: String, contactInfo: String?): Boolean {
+        val token = currentToken() ?: return false
+        return try {
+            val body = JSONObject()
+              .put("message", message)
+              .put("contactInfo", contactInfo)
+            client.postJson("/support/feedback", token = token, body = body)
+            true
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
+    suspend fun submitContactMessage(message: String, name: String?, phone: String?): Boolean {
+        return try {
+            val body = JSONObject()
+              .put("message", message)
+              .put("name", name)
+              .put("phone", phone)
+            client.postJson("/support/contact", token = currentToken(), body = body)
+            true
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
+    suspend fun getSubscriptionPlan(): String {
+        val token = currentToken() ?: return "FREE"
+        return try {
+            val resp = client.getJson("/subscription", token)
+            resp.optString("plan", "FREE")
+        } catch (_: Throwable) {
+            "FREE"
+        }
+    }
+
+    suspend fun upgradeSubscription(): Boolean {
+        val token = currentToken() ?: return false
+        return try {
+            client.postJson("/subscription/upgrade", token, JSONObject())
+            true
+        } catch (_: Throwable) {
+            false
+        }
+    }
+
+    suspend fun deleteAccount(reason: String?): Boolean {
+        val token = currentToken() ?: return false
+        val contact = _userSession.value
+
+        // Best-effort: send reason to support before account deletion.
+        runCatching {
+            if (!reason.isNullOrBlank()) {
+                submitContactMessage(
+                    message = "Account deletion requested. Reason: $reason",
+                    name = contact?.name,
+                    phone = contact?.phone
+                )
+            }
+        }
+
+        return try {
+            client.delete("/account", token)
+            logout()
+            true
+        } catch (_: Throwable) {
+            false
+        }
     }
 }

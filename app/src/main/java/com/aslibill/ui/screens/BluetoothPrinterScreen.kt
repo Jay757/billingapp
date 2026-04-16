@@ -44,6 +44,7 @@ import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.GrayButton
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
+import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AsliColors
 
 @Composable
@@ -83,11 +84,11 @@ fun BluetoothPrinterScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(12.dp),
-      verticalArrangement = Arrangement.spacedBy(12.dp)
+        .padding(AppSpacing.md),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text("Bluetooth", color = AsliColors.TextPrimary)
+        Text("Bluetooth Devices", color = AsliColors.TextPrimary)
         IconButton(onClick = {
           if (!hasAllPerms()) permLauncher.launch(permissions) else vm.startScan()
         }) {
@@ -96,14 +97,14 @@ fun BluetoothPrinterScreen(
       }
 
       DarkCard(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(modifier = Modifier.padding(AppSpacing.sm), verticalArrangement = Arrangement.spacedBy(AppSpacing.xs)) {
           val msg = when {
             !vm.isAvailable() -> "Bluetooth not available on this device"
             !vm.isEnabled() -> "Bluetooth is OFF. Turn it ON to scan printers."
             !hasAllPerms() -> "Permission required. Tap Scan to allow."
             else -> state.message ?: state.status.name
           }
-          Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+          Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
             val icon = when (state.status) {
               BtConnectionState.Status.CONNECTED -> Icons.Outlined.CheckCircle
               BtConnectionState.Status.ERROR -> Icons.Outlined.Warning
@@ -113,7 +114,7 @@ fun BluetoothPrinterScreen(
             Text(msg, color = AsliColors.TextPrimary)
           }
 
-          Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+          Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
             OrangeButton(
               text = if (state.status == BtConnectionState.Status.SCANNING) "Scanning..." else "Scan",
               onClick = {
@@ -124,15 +125,23 @@ fun BluetoothPrinterScreen(
             GrayButton(
               text = if (state.status == BtConnectionState.Status.CONNECTED) "Disconnect" else "Stop",
               onClick = {
-                if (state.status == BtConnectionState.Status.CONNECTED) vm.disconnect() else vm.stopScan()
+                if (state.status == BtConnectionState.Status.CONNECTED) {
+                  if (!hasAllPerms()) permLauncher.launch(permissions) else vm.disconnect()
+                } else {
+                  if (!hasAllPerms()) permLauncher.launch(permissions) else vm.stopScan()
+                }
               },
               modifier = Modifier.weight(1f)
             )
             GrayButton(
               text = "Test Print",
               onClick = {
-                vm.testPrint { ok, err ->
-                  toastText = if (ok) "Test print sent" else (err ?: "Test print failed")
+                if (!hasAllPerms()) {
+                  permLauncher.launch(permissions)
+                } else {
+                  vm.testPrint { ok, err ->
+                    toastText = if (ok) "Test print sent" else (err ?: "Test print failed")
+                  }
                 }
               },
               modifier = Modifier.weight(1f)
@@ -147,14 +156,16 @@ fun BluetoothPrinterScreen(
 
       Text("Available devices", color = AsliColors.TextSecondary)
       LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        modifier = Modifier.weight(1f).fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
       ) {
         items(devices, key = { it.address }) { d ->
           DeviceRow(
             device = d,
             connected = state.status == BtConnectionState.Status.CONNECTED && state.connectedAddress == d.address,
-            onConnect = { vm.connect(d.address) }
+            onConnect = {
+              if (!hasAllPerms()) permLauncher.launch(permissions) else vm.connect(d.address)
+            }
           )
         }
       }

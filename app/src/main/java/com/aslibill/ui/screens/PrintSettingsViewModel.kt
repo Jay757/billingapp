@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aslibill.data.SettingsRepository
 import com.aslibill.printing.StoreConfig
+import com.aslibill.ui.theme.ThemeMode
+import com.aslibill.ui.theme.ThemePalette
+import com.aslibill.ui.theme.UiPreferences
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -12,6 +15,7 @@ class PrintSettingsViewModel(
 ) : ViewModel() {
 
     val settings: StateFlow<StoreConfig> = settingsRepository.settings
+    val uiPreferences: StateFlow<UiPreferences> = settingsRepository.uiPreferences
 
     fun saveSettings(
         storeName: String,
@@ -32,6 +36,12 @@ class PrintSettingsViewModel(
         )
         viewModelScope.launch {
             settingsRepository.saveSettings(config)
+        }
+    }
+
+    fun saveAppearance(mode: ThemeMode, palette: ThemePalette) {
+        viewModelScope.launch {
+            settingsRepository.saveUiPreferences(mode, palette)
         }
     }
 }

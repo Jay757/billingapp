@@ -114,6 +114,9 @@ class BluetoothPrinterManager(
       try { context.unregisterReceiver(it) } catch (_: Throwable) { }
     }
     receiver = null
+    if (_state.value.status == BtConnectionState.Status.SCANNING) {
+      _state.value = BtConnectionState(BtConnectionState.Status.DISCONNECTED, message = "Scan stopped")
+    }
   }
 
   @SuppressLint("MissingPermission")

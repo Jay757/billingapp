@@ -1,17 +1,42 @@
 package com.aslibill.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.mutableStateOf
 
 object AsliColors {
-  val Bg = Color(0xFF0F0F10)
-  val Card = Color(0xFF242526)
-  val Card2 = Color(0xFF2C2D2F)
-  val DividerOrange = Color(0xFFFF8A00)
-  val Orange = Color(0xFFFF8A00)
-  val Orange2 = Color(0xFFFFA000)
-  val Green = Color(0xFF1DB954)
-  val Red = Color(0xFFE05A5A)
-  val TextPrimary = Color(0xFFF2F2F2)
-  val TextSecondary = Color(0xFFB8B8B8)
+  private val paletteState = mutableStateOf(ThemePalette.BLUE)
+
+  fun applyPalette(palette: ThemePalette) {
+    paletteState.value = palette
+  }
+
+  val Bg = Color(0xFFF8FAFC)
+  val Card = Color(0xFFFFFFFF)
+  val Card2 = Color(0xFFF1F5F9)
+  
+  val Primary: Color
+    get() = when (paletteState.value) {
+      ThemePalette.BLUE -> Color(0xFF2563EB)
+      ThemePalette.ORANGE -> Color(0xFFEA580C)
+      ThemePalette.GREEN -> Color(0xFF16A34A)
+    }
+
+  val PrimaryLight: Color
+    get() = when (paletteState.value) {
+      ThemePalette.BLUE -> Color(0xFFDBEAFE)
+      ThemePalette.ORANGE -> Color(0xFFFFEDD5)
+      ThemePalette.GREEN -> Color(0xFFDCFCE7)
+    }
+
+  val Orange: Color get() = Primary
+  val Orange2: Color get() = PrimaryLight
+  val DividerOrange: Color get() = Primary
+
+  val Green = Color(0xFF22C55E)
+  val Red = Color(0xFFEF4444)
+  val TextPrimary = Color(0xFF0F172A)
+  val TextSecondary = Color(0xFF64748B)
+  val Surface = Color(0xFFFFFFFF)
 }
+
 

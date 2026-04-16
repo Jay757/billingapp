@@ -14,6 +14,7 @@ import com.aslibill.ui.components.AsliTextField
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.Brand
 
 @Composable
 fun SignupScreen(
@@ -27,7 +28,7 @@ fun SignupScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .padding(24.dp),
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -38,7 +39,7 @@ fun SignupScreen(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Register to start billing",
+                text = "Create your ${Brand.AppName} account",
                 color = AsliColors.TextSecondary,
                 style = MaterialTheme.typography.bodyMedium
             )

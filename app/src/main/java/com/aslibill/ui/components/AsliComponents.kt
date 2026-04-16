@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,10 +29,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.AppSpacing
+import com.aslibill.ui.theme.Brand
 import java.util.Calendar
 import android.app.DatePickerDialog
 import android.content.Context
@@ -54,7 +59,7 @@ fun SectionHeader(title: String, modifier: Modifier = Modifier) {
       style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
       color = AsliColors.TextPrimary
     )
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(AppSpacing.sm))
     Box(
       Modifier
         .fillMaxWidth()
@@ -69,7 +74,8 @@ fun DarkCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
   Card(
     modifier = modifier,
     colors = CardDefaults.cardColors(containerColor = AsliColors.Card),
-    shape = RoundedCornerShape(14.dp)
+    shape = RoundedCornerShape(12.dp),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
   ) { content() }
 }
 
@@ -86,20 +92,27 @@ fun IconTile(
       .clip(RoundedCornerShape(12.dp))
       .background(AsliColors.Card2)
       .clickable(onClick = onClick)
-      .padding(vertical = 16.dp, horizontal = 10.dp),
+      .padding(vertical = AppSpacing.lg, horizontal = AppSpacing.md),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(8.dp)
   ) {
     Box(
       modifier = Modifier
-        .clip(RoundedCornerShape(10.dp))
-        .background(Color(0xFF1B1B1C))
-        .padding(10.dp),
+        .clip(RoundedCornerShape(12.dp))
+        .background(AsliColors.PrimaryLight)
+        .padding(12.dp),
       contentAlignment = Alignment.Center
     ) {
-      Icon(icon, contentDescription = null, tint = AsliColors.TextSecondary, modifier = Modifier.height(iconSize))
+      Icon(icon, contentDescription = null, tint = AsliColors.Primary, modifier = Modifier.height(iconSize))
     }
-    Text(label, color = AsliColors.TextPrimary, style = MaterialTheme.typography.labelMedium)
+    Text(
+      text = label,
+      color = AsliColors.TextPrimary,
+      style = MaterialTheme.typography.labelMedium,
+      maxLines = 3,
+      overflow = TextOverflow.Ellipsis,
+      textAlign = TextAlign.Center
+    )
   }
 }
 
@@ -108,10 +121,13 @@ fun OrangeButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifie
   Button(
     onClick = onClick,
     modifier = modifier,
-    colors = ButtonDefaults.buttonColors(containerColor = AsliColors.Orange, contentColor = Color.Black),
-    shape = RoundedCornerShape(10.dp)
-  ) { Text(text, fontWeight = FontWeight.SemiBold) }
+    colors = ButtonDefaults.buttonColors(containerColor = AsliColors.Primary, contentColor = Color.White),
+    shape = RoundedCornerShape(10.dp),
+    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 12.dp),
+    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp, pressedElevation = 0.dp)
+  ) { Text(text, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis) }
 }
+
 
 @Composable
 fun GrayButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -119,8 +135,9 @@ fun GrayButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier)
     onClick = onClick,
     modifier = modifier,
     colors = ButtonDefaults.buttonColors(containerColor = AsliColors.Card2, contentColor = AsliColors.TextPrimary),
-    shape = RoundedCornerShape(10.dp)
-  ) { Text(text, fontWeight = FontWeight.SemiBold) }
+    shape = RoundedCornerShape(10.dp),
+    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 12.dp)
+  ) { Text(text, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.labelLarge, maxLines = 1, overflow = TextOverflow.Ellipsis) }
 }
 
 @Composable
@@ -130,19 +147,20 @@ fun Chip(
   onClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val bg = if (selected) AsliColors.Orange else AsliColors.Card2
-  val fg = if (selected) Color.Black else AsliColors.TextPrimary
+  val bg = if (selected) AsliColors.Primary else AsliColors.Card2
+  val fg = if (selected) Color.White else AsliColors.TextSecondary
   Box(
     modifier = modifier
-      .clip(RoundedCornerShape(10.dp))
+      .clip(RoundedCornerShape(20.dp))
       .background(bg)
       .clickable(onClick = onClick)
-      .padding(horizontal = 14.dp, vertical = 8.dp),
+      .padding(horizontal = 16.dp, vertical = 8.dp),
     contentAlignment = Alignment.Center
   ) {
-    Text(text, color = fg, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+    Text(text, color = fg, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
   }
 }
+
 
 @Composable
 fun CircularKey(
@@ -208,6 +226,37 @@ fun DateBox(label: String, value: String, onClick: () -> Unit, modifier: Modifie
 }
 
 @Composable
+fun StatsCard(
+    label: String,
+    value: String,
+    icon: ImageVector,
+    color: Color = AsliColors.Primary,
+    modifier: Modifier = Modifier
+) {
+    DarkCard(modifier = modifier) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(color.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
+            }
+            Column {
+                Text(label, color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelMedium)
+                Text(value, color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+            }
+        }
+    }
+}
+
+@Composable
 fun PremiumBanner(onClick: () -> Unit, modifier: Modifier = Modifier) {
   DarkCard(
     modifier = modifier
@@ -216,7 +265,7 @@ fun PremiumBanner(onClick: () -> Unit, modifier: Modifier = Modifier) {
   ) {
     Row(
       modifier = Modifier
-        .padding(12.dp),
+        .padding(AppSpacing.md),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -228,14 +277,14 @@ fun PremiumBanner(onClick: () -> Unit, modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center
       ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-          Text("ASLI", color = Color.Black, style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp, fontWeight = FontWeight.Bold))
+          Text("NOVA", color = Color.Black, style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp, fontWeight = FontWeight.Bold))
           Text("BILL", color = Color.Black, style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp, fontWeight = FontWeight.Bold))
         }
       }
       
       Column(modifier = Modifier.weight(1f)) {
         Text(
-          "Upgrade to",
+          "Upgrade to ${Brand.AppName}",
           color = AsliColors.TextPrimary,
           style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
         )

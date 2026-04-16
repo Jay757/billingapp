@@ -44,7 +44,7 @@ fun SubscriptionScreen(
                 .fillMaxSize()
                 .padding(contentPadding)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             SectionHeader("Subscription")
 

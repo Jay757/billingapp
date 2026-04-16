@@ -20,12 +20,14 @@ import com.aslibill.ui.screens.PrintSettingsViewModel
 import com.aslibill.ui.screens.PrintSettingsViewModelFactory
 import com.aslibill.ui.screens.QuickBillScreen
 import com.aslibill.ui.screens.ReportsScreen
-import com.aslibill.AsliBillApplication
+import com.aslibill.NovaBillApplication
 import com.aslibill.ui.screens.InventoryViewModelFactory
 import com.aslibill.ui.screens.ItemWiseBillViewModelFactory
 import com.aslibill.ui.screens.ReportsViewModelFactory
 import com.aslibill.ui.screens.QuickBillViewModelFactory
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.aslibill.ui.screens.HomeViewModel
+import com.aslibill.ui.screens.HomeViewModelFactory
 import com.aslibill.ui.screens.BluetoothPrinterViewModel
 import com.aslibill.ui.screens.BluetoothPrinterViewModelFactory
 import com.aslibill.ui.screens.StaffManagementScreen
@@ -51,14 +53,17 @@ import com.aslibill.ui.screens.SalesSummaryViewModel
 import com.aslibill.ui.screens.SalesSummaryViewModelFactory
 import com.aslibill.ui.screens.FeedbackScreen
 import com.aslibill.ui.screens.FeedbackViewModel
+import com.aslibill.ui.screens.FeedbackViewModelFactory
 import com.aslibill.ui.screens.TrainingVideoScreen
 import com.aslibill.ui.screens.TrainingVideoViewModel
 import com.aslibill.ui.screens.ContactUsScreen
 import com.aslibill.ui.screens.ContactUsViewModel
 import com.aslibill.ui.screens.SubscriptionScreen
 import com.aslibill.ui.screens.SubscriptionViewModel
+import com.aslibill.ui.screens.SubscriptionViewModelFactory
 import com.aslibill.ui.screens.DeleteAccountScreen
 import com.aslibill.ui.screens.DeleteAccountViewModel
+import com.aslibill.ui.screens.DeleteAccountViewModelFactory
 import com.aslibill.ui.screens.BuyPrintersScreen
 import com.aslibill.ui.screens.BuyPrintersViewModel
 import com.aslibill.ui.screens.LoginScreen
@@ -72,10 +77,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun AsliBillApp() {
+fun NovaBillApp() {
   val navController = rememberNavController()
   val context = LocalContext.current
-  val app = context.applicationContext as AsliBillApplication
+  val app = context.applicationContext as NovaBillApplication
   val userSession = app.container.authRepository.userSession.collectAsState(initial = null).value
   val scope = rememberCoroutineScope()
 
@@ -86,6 +91,7 @@ fun AsliBillApp() {
       modifier = Modifier
     ) {
       composable(Routes.Home) {
+        val homeVm: HomeViewModel = viewModel(factory = HomeViewModelFactory(app.container.billDao))
         HomeScreen(
           onQuickBill = { navController.navigate(Routes.QuickBill) },
           onItemWiseBill = { navController.navigate(Routes.ItemWiseBill) },
@@ -102,7 +108,6 @@ fun AsliBillApp() {
           onSalesSummary = { navController.navigate(Routes.SalesSummary) },
           onUpgradePremium = { navController.navigate(Routes.UpgradePremium) },
           onTrainingVideo = { navController.navigate(Routes.TrainingVideo) },
-          onBuyPrinters = { navController.navigate(Routes.BuyPrinters) },
           onFeedback = { navController.navigate(Routes.Feedback) },
           onContactUs = { navController.navigate(Routes.ContactUs) },
           onSubscription = { navController.navigate(Routes.Subscription) },
@@ -110,6 +115,8 @@ fun AsliBillApp() {
           onLogOut = {
             scope.launch {
                 app.container.authRepository.logout()
+                // Security/safety: disconnect any active printer session on logout.
+                app.container.bluetoothPrinterManager.disconnect()
                 navController.navigate(Routes.Login) {
                     popUpTo(Routes.Home) { inclusive = true }
                 }
@@ -117,7 +124,8 @@ fun AsliBillApp() {
           },
           userName = userSession?.name ?: "User",
           userPhone = userSession?.phone ?: "No Phone",
-          contentPadding = padding
+          contentPadding = padding,
+          homeVm = homeVm
         )
       }
       composable(Routes.Login) {
@@ -246,7 +254,7 @@ fun AsliBillApp() {
         TrainingVideoScreen(contentPadding = padding, vm = vm)
       }
       composable(Routes.Feedback) {
-        val vm: FeedbackViewModel = viewModel()
+        val vm: FeedbackViewModel = viewModel(factory = FeedbackViewModelFactory(app.container.authRepository))
         FeedbackScreen(contentPadding = padding, vm = vm)
       }
       composable(Routes.ContactUs) {
@@ -254,11 +262,11 @@ fun AsliBillApp() {
         ContactUsScreen(contentPadding = padding, vm = vm)
       }
       composable(Routes.Subscription) {
-        val vm: SubscriptionViewModel = viewModel()
+        val vm: SubscriptionViewModel = viewModel(factory = SubscriptionViewModelFactory(app.container.authRepository))
         SubscriptionScreen(contentPadding = padding, vm = vm)
       }
       composable(Routes.DeleteAccount) {
-        val vm: DeleteAccountViewModel = viewModel()
+        val vm: DeleteAccountViewModel = viewModel(factory = DeleteAccountViewModelFactory(app.container.authRepository))
         DeleteAccountScreen(contentPadding = padding, vm = vm)
       }
       composable(Routes.BuyPrinters) {

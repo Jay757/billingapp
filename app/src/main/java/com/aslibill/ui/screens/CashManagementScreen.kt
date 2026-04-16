@@ -33,6 +33,7 @@ import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
+import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AsliColors
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -54,8 +55,8 @@ fun CashManagementScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+        .padding(AppSpacing.md),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
       Text("Cash Management", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
 
@@ -67,8 +68,8 @@ fun CashManagementScreen(
           verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
           Text("Current Balance", color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelMedium)
-          Text("₹ ${String.format("%.2f", balance)}", color = Color.White, style = MaterialTheme.typography.headlineMedium)
-          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+          Text("₹ ${String.format("%.2f", balance)}", color = AsliColors.TextPrimary, style = MaterialTheme.typography.headlineMedium)
+          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
             OrangeButton("Cash IN", onClick = { showAddDialog = "IN" }, modifier = Modifier.weight(1f))
             OrangeButton("Cash OUT", onClick = { showAddDialog = "OUT" }, modifier = Modifier.weight(1f))
           }
@@ -78,11 +79,14 @@ fun CashManagementScreen(
       SectionHeader("Recent Transactions")
 
       if (transactions.isEmpty()) {
-        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl), contentAlignment = Alignment.Center) {
           Text("No cash transactions yet.", color = AsliColors.TextSecondary)
         }
       } else {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        LazyColumn(
+          modifier = Modifier.weight(1f),
+          verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+        ) {
           items(transactions) { tx ->
             CashTxCard(tx = tx, dateStr = df.format(Date(tx.createdAtEpochMs)))
           }
@@ -102,8 +106,8 @@ fun CashManagementScreen(
             val colors = OutlinedTextFieldDefaults.colors(
               focusedBorderColor = AsliColors.Orange,
               unfocusedBorderColor = AsliColors.TextSecondary,
-              focusedTextColor = Color.White,
-              unfocusedTextColor = Color.White
+            focusedTextColor = AsliColors.TextPrimary,
+            unfocusedTextColor = AsliColors.TextPrimary
             )
             OutlinedTextField(
               value = amount,
@@ -131,7 +135,7 @@ fun CashManagementScreen(
           }) { Text("SAVE", color = AsliColors.Orange) }
         },
         dismissButton = {
-          TextButton(onClick = { showAddDialog = null }) { Text("CANCEL", color = Color.White) }
+          TextButton(onClick = { showAddDialog = null }) { Text("CANCEL", color = AsliColors.TextPrimary) }
         }
       )
     }

@@ -10,7 +10,7 @@ android {
   compileSdk = 35
 
   defaultConfig {
-    applicationId = "com.aslibill"
+    applicationId = "com.novabill"
     minSdk = 24
     targetSdk = 35
     versionCode = 1
@@ -20,8 +20,22 @@ android {
     vectorDrawables { useSupportLibrary = true }
   }
 
+  signingConfigs {
+    create("release") {
+      storeFile = file("../billing-apk-key.jks")
+      storePassword = "Test@123"
+      keyAlias = "my-key-alias"
+      keyPassword = "Test@123"
+    }
+  }
+
   buildTypes {
+    debug {
+      buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8000\"") // Use 10.0.2.2 for Android Emulators
+    }
     release {
+      buildConfigField("String", "API_BASE_URL", "\"https://billingappbackend-cjxo.onrender.com\"")
+      signingConfig = signingConfigs.getByName("release")
       isMinifyEnabled = false
       proguardFiles(
         getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -36,7 +50,10 @@ android {
   }
   kotlinOptions { jvmTarget = "17" }
 
-  buildFeatures { compose = true }
+  buildFeatures {
+    compose = true
+    buildConfig = true
+  }
 
   packaging {
     resources {

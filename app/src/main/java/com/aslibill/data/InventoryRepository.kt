@@ -1,16 +1,22 @@
 package com.aslibill.data
 
+import com.aslibill.BuildConfig
 import com.aslibill.data.db.CategoryDao
 import com.aslibill.data.db.CategoryEntity
 import com.aslibill.data.db.ProductDao
 import com.aslibill.data.db.ProductEntity
 import com.aslibill.data.db.ProductWithCategory
+import com.aslibill.network.ApiHttpClient
 import kotlinx.coroutines.flow.Flow
+import org.json.JSONObject
 
 class InventoryRepository(
   private val categoryDao: CategoryDao,
-  private val productDao: ProductDao
+  private val productDao: ProductDao,
+  private val authRepository: AuthRepository
 ) {
+  private val client = ApiHttpClient(BuildConfig.API_BASE_URL)
+
   fun observeCategories(): Flow<List<CategoryEntity>> = categoryDao.observeAll()
   fun observeProductsWithCategory(): Flow<List<ProductWithCategory>> = productDao.observeActiveWithCategory()
 
@@ -23,26 +29,89 @@ class InventoryRepository(
     val cat2Id = categoryDao.insert(CategoryEntity(name = "Category 2"))
 
     if (productDao.count() == 0L) {
-      productDao.insert(ProductEntity(categoryId = milkId, name = "Amul milk", price = 28.0))
-      productDao.insert(ProductEntity(categoryId = riceId, name = "Basmati rice", price = 50.0))
-      productDao.insert(ProductEntity(categoryId = soapId, name = "Dove soap", price = 50.0))
-      productDao.insert(ProductEntity(categoryId = soapId, name = "Lux soap", price = 26.0))
-      productDao.insert(ProductEntity(categoryId = milkId, name = "Motherdairy milk", price = 30.0))
-      productDao.insert(ProductEntity(categoryId = riceId, name = "Sonabhog rice", price = 80.0))
-      productDao.insert(ProductEntity(categoryId = cat2Id, name = "Sample item", price = 10.0))
+      productDao.insert(ProductEntity(categoryId = milkId, name = "Amul milk", price = 28.0, stock = 100.0))
+      productDao.insert(ProductEntity(categoryId = riceId, name = "Basmati rice", price = 50.0, stock = 50.0))
+      productDao.insert(ProductEntity(categoryId = soapId, name = "Dove soap", price = 50.0, stock = 20.0))
+      productDao.insert(ProductEntity(categoryId = soapId, name = "Lux soap", price = 26.0, stock = 30.0))
+      productDao.insert(ProductEntity(categoryId = milkId, name = "Motherdairy milk", price = 30.0, stock = 10.0))
+      productDao.insert(ProductEntity(categoryId = riceId, name = "Sonabhog rice", price = 80.0, stock = 15.0))
+      productDao.insert(ProductEntity(categoryId = cat2Id, name = "Sample item", price = 10.0, stock = 5.0))
+    }
+
+  }
+
+  suspend fun addCategory(name: String) {
+    val trimmed = name.trim()
+    categoryDao.insert(CategoryEntity(name = trimmed))
+    runCatching {
+      val token = authRepository.currentToken() ?: return@runCatching
+      val body = JSONObject().put("name", trimmed)
+      client.postJson("/categories", token, body)
     }
   }
 
-  suspend fun addCategory(name: String) = categoryDao.insert(CategoryEntity(name = name.trim()))
-  suspend fun updateCategory(id: Long, name: String) = categoryDao.update(CategoryEntity(id = id, name = name.trim()))
-  suspend fun deleteCategory(category: CategoryEntity) = categoryDao.delete(category)
+  suspend fun updateCategory(id: Long, name: String) {
+    val trimmed = name.trim()
+    categoryDao.update(CategoryEntity(id = id, name = trimmed))
+    runCatching {
+      val token = authRepository.currentToken() ?: return@runCatching
+      val body = JSONObject().put("name", trimmed)
+      client.putJson("/categories/$id", token, body)
+    }
+  }
 
-  suspend fun addProduct(categoryId: Long, name: String, price: Double) =
-    productDao.insert(ProductEntity(categoryId = categoryId, name = name.trim(), price = price))
+  suspend fun deleteCategory(category: CategoryEntity) {
+    categoryDao.delete(category)
+    runCatching {
+      val token = authRepository.currentToken() ?: return@runCatching
+      client.delete("/categories/${category.id}", token)
+    }
+  }
 
-  suspend fun updateProduct(id: Long, categoryId: Long, name: String, price: Double, isActive: Boolean) =
-    productDao.update(ProductEntity(id = id, categoryId = categoryId, name = name.trim(), price = price, isActive = isActive))
+  suspend fun addProduct(categoryId: Long, name: String, price: Double, stock: Double = 0.0) {
+    val trimmed = name.trim()
+    productDao.insert(ProductEntity(categoryId = categoryId, name = trimmed, price = price, stock = stock))
+    runCatching {
+      val token = authRepository.currentToken() ?: return@runCatching
+      val body = JSONObject()
+        .put("categoryId", categoryId)
+        .put("name", trimmed)
+        .put("price", price)
+        .put("stock", stock)
+        .put("isActive", true)
+      client.postJson("/products", token, body)
+    }
+  }
 
-  suspend fun deleteProduct(entity: ProductEntity) = productDao.delete(entity)
+  suspend fun updateProduct(id: Long, categoryId: Long, name: String, price: Double, stock: Double, isActive: Boolean) {
+    val trimmed = name.trim()
+    productDao.update(ProductEntity(id = id, categoryId = categoryId, name = trimmed, price = price, stock = stock, isActive = isActive))
+    runCatching {
+      val token = authRepository.currentToken() ?: return@runCatching
+      val body = JSONObject()
+        .put("categoryId", categoryId)
+        .put("name", trimmed)
+        .put("price", price)
+        .put("stock", stock)
+        .put("isActive", isActive)
+      client.putJson("/products/$id", token, body)
+    }
+  }
+
+  suspend fun deleteProduct(entity: ProductEntity) {
+    productDao.delete(entity)
+    runCatching {
+      val token = authRepository.currentToken() ?: return@runCatching
+      client.delete("/products/${entity.id}", token)
+    }
+  }
+
+  suspend fun decrementStock(productId: Long, qty: Double) {
+    productDao.decrementStock(productId, qty)
+  }
+
+  suspend fun syncFromRemote() {
+    // Reserved for future full two-way sync.
+  }
 }
 

@@ -10,14 +10,19 @@
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
+    <!-- Backend connectivity -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
-        android:name=".AsliBillApplication"
+        android:name=".NovaBillApplication"
         android:allowBackup="true"
+        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
-        android:label="Asli Bill"
+        android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AsliBill">
+        android:theme="@style/Theme.NovaBill">
 
         <activity
             android:name=".MainActivity"
