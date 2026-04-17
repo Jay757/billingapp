@@ -3,6 +3,7 @@ package com.aslibill.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
@@ -46,7 +48,18 @@ import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.GrayButton
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
+import com.aslibill.ui.components.GlassButton
+import com.aslibill.ui.components.PremiumSegmentedControl
+import com.aslibill.ui.components.AsliTextField
 import com.aslibill.ui.theme.AsliColors
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -82,120 +95,119 @@ fun ItemWiseBillScreen(
         .padding(16.dp),
       verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Column {
-          Text("Item Wise Bill", color = AsliColors.TextPrimary, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
-          Text("Select items to add to bill", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodySmall)
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          GrayButton("Quick Bill", onClick = { onGoQuickBill?.invoke() })
-          OrangeButton("Report", onClick = { onGoReport?.invoke() })
-        }
-      }
-
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .background(AsliColors.PrimaryLight, RoundedCornerShape(8.dp))
-          .padding(horizontal = 12.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-      ) {
-        Text("ITEM", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), modifier = Modifier.weight(1.4f))
-        Text("QTY", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), modifier = Modifier.weight(0.5f))
-        Text("RATE", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), modifier = Modifier.weight(0.7f))
-        Text("TOTAL", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
-        Spacer(modifier = Modifier.width(36.dp))
-      }
-
-      DarkCard(modifier = Modifier.fillMaxWidth().weight(1f)) {
-        if (cart.isEmpty()) {
-          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-              Icon(Icons.Outlined.ShoppingCart, contentDescription = null, tint = AsliColors.TextSecondary, modifier = Modifier.size(48.dp))
-              Text("Cart is empty", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
-            }
+      BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val isWide = maxWidth > 600.dp
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Column(modifier = Modifier.weight(1f)) {
+            Text(
+              "Item Wise Bill", 
+              color = AsliColors.TextPrimary, 
+              style = (if (isWide) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium).copy(
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-1).sp
+              )
+            )
+            Text("Select items to add to bill", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodySmall)
           }
-        } else {
-          Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            cart.forEach { line ->
+          Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            GlassButton(if (isWide) "View Reports" else "Report", onClick = { onGoReport?.invoke() })
+            OrangeButton(if (isWide) "Quick Billing" else "Quick", onClick = { onGoQuickBill?.invoke() })
+          }
+        }
+      }
+
+      DarkCard(modifier = Modifier.fillMaxWidth().weight(1f), alpha = 0.95f) {
+        Column(modifier = Modifier.fillMaxSize()) {
+          // Integrated Header
+          Row(
+            modifier = Modifier
+              .fillMaxWidth()
+              .background(AsliColors.Card2.copy(alpha = 0.6f))
+              .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.Start
+          ) {
+            Text("ITEM", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1.4f))
+            Text("QTY", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.5f))
+            Text("RATE", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f))
+            Text("TOTAL", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
+            Spacer(modifier = Modifier.width(48.dp))
+          }
+          
+          HorizontalDivider(thickness = 1.dp, color = AsliColors.Primary.copy(alpha = 0.2f))
+
+          if (cart.isEmpty()) {
+            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+              Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(Icons.Outlined.ShoppingCart, contentDescription = null, tint = AsliColors.TextSecondary, modifier = Modifier.size(48.dp))
+                Text("Cart is empty", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
+              }
+            }
+          } else {
+            Column(
+              modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState()),
+              verticalArrangement = Arrangement.spacedBy(0.dp)
+            ) {
+              cart.forEachIndexed { index, line ->
               Row(
                 modifier = Modifier
                   .fillMaxWidth()
-                  .background(AsliColors.Bg, RoundedCornerShape(8.dp))
                   .clickable { showQtyFor = line }
-                  .padding(horizontal = 10.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                  .padding(horizontal = 12.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
               ) {
-                Text(line.name, color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold), modifier = Modifier.weight(1.4f))
+                Text(line.name, color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), modifier = Modifier.weight(1.4f))
                 Text(line.qty.toInt().toString(), color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(0.5f))
-                Text("₹${line.rate.toInt()}", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(0.7f))
-                Text("₹${line.total.toInt()}", color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
-                IconButton(onClick = { vm.setQty(line.productId, 0.0) }, modifier = Modifier.size(36.dp)) {
-                  Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Orange, modifier = Modifier.size(20.dp))
+                Text("₹${line.rate.toInt()}", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.7f))
+                Text("₹${line.total.toInt()}", color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.ExtraBold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
+                Box(modifier = Modifier.width(48.dp), contentAlignment = Alignment.Center) {
+                  IconButton(onClick = { vm.setQty(line.productId, 0.0) }, modifier = Modifier.size(36.dp)) {
+                    Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red.copy(alpha = 0.8f), modifier = Modifier.size(20.dp))
+                  }
                 }
+              }
+              if (index < cart.size - 1) {
+                HorizontalDivider(
+                  modifier = Modifier.padding(horizontal = 8.dp),
+                  thickness = 0.5.dp,
+                  color = AsliColors.Primary.copy(alpha = 0.1f)
+                )
               }
             }
           }
         }
       }
+    }
 
-      DarkCard(modifier = Modifier.fillMaxWidth()) {
+      DarkCard(modifier = Modifier.fillMaxWidth(), alpha = 0.9f) {
         Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
+          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically
         ) {
           Column {
-            Text("Total Items", color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelMedium)
-            Text(cart.sumOf { it.qty }.toInt().toString(), color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
+            Text("Total Items", color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelSmall)
+            Text(cart.sumOf { it.qty }.toInt().toString(), color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold))
           }
           Column(horizontalAlignment = Alignment.End) {
-            Text("Grand Total", color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelMedium)
-            Text("₹ ${subtotal.toInt()}", color = AsliColors.Primary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
+            Text("Grand Total", color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelSmall)
+            Text("₹ ${subtotal.toInt()}", color = AsliColors.Primary, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black))
           }
         }
       }
 
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        GrayButton("Clear", onClick = vm::clearCart, modifier = Modifier.weight(1f))
-        GrayButton("Search", onClick = { showSearch = true }, modifier = Modifier.weight(1f))
-        GrayButton("Print Draft", onClick = {
-            if (cart.isEmpty()) {
-                printMessage = "Cart is empty"
-                return@GrayButton
-            }
-            printMessage = "Printing..."
-            val billRow = com.aslibill.data.db.BillWithItemsRow(
-                billId = 0,
-                createdAtEpochMs = System.currentTimeMillis(),
-                cashierName = "user",
-                subtotal = subtotal,
-                tax = 0.0,
-                total = subtotal,
-                paymentMethod = "CASH",
-                itemCount = cart.size
-            )
-            val items = cart.map {
-                com.aslibill.data.db.BillItemEntity(
-                    billId = 0,
-                    productId = it.productId,
-                    productNameSnapshot = it.name,
-                    qty = it.qty,
-                    rate = it.rate,
-                    lineTotal = it.total
-                )
-            }
-            btVm.printBill(billRow, items) { ok, err ->
-                printMessage = if (ok) "Print sent" else (err ?: "Print failed")
-            }
-        }, modifier = Modifier.weight(1.2f))
-        OrangeButton("Save", onClick = { isSaveAndPrint = false; showSave = true }, modifier = Modifier.weight(0.8f))
-        OrangeButton("Save & Print", onClick = { isSaveAndPrint = true; showSave = true }, modifier = Modifier.weight(1.4f))
+        GlassButton("Clear", onClick = vm::clearCart, modifier = Modifier.weight(1f))
+        GlassButton("Search", onClick = { showSearch = true }, modifier = Modifier.weight(1.2f))
+        OrangeButton("Save", onClick = { isSaveAndPrint = false; showSave = true }, modifier = Modifier.weight(1f))
+        OrangeButton("Save & Print", onClick = { isSaveAndPrint = true; showSave = true }, modifier = Modifier.weight(1.6f))
       }
 
       if (!printMessage.isNullOrBlank()) {
@@ -219,18 +231,30 @@ fun ItemWiseBillScreen(
       }
 
       LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Adaptive(minSize = 160.dp),
         modifier = Modifier
           .fillMaxWidth()
-          .height(220.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+          .height(240.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
       ) {
         items(products, key = { it.id }) { p ->
-          DarkCard(modifier = Modifier.fillMaxWidth().clickable { vm.addProduct(p) }) {
-            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-              Text(p.name, color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleMedium)
-              Text("₹${p.price.toInt()}", color = AsliColors.Orange, style = MaterialTheme.typography.titleSmall)
+          DarkCard(modifier = Modifier.fillMaxWidth().clickable { vm.addProduct(p) }, alpha = 0.8f) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+              Text(
+                p.name, 
+                color = AsliColors.TextPrimary, 
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+              )
+              Box(
+                modifier = Modifier
+                  .background(AsliColors.PrimaryLight.copy(alpha = 0.6f), RoundedCornerShape(6.dp))
+                  .padding(horizontal = 6.dp, vertical = 2.dp)
+              ) {
+                Text("₹${p.price.toInt()}", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold))
+              }
             }
           }
         }
@@ -269,15 +293,14 @@ fun ItemWiseBillScreen(
         onDismissRequest = { showSearch = false },
         title = { Text("Search Product") },
         text = {
-          Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            OutlinedTextField(
+          Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            AsliTextField(
               value = searchQuery,
               onValueChange = vm::setSearchQuery,
-              label = { Text("Search") },
-              singleLine = true
+              label = "Search by name..."
             )
-            DarkCard(modifier = Modifier.fillMaxWidth()) {
-              Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            DarkCard(modifier = Modifier.fillMaxWidth(), alpha = 0.9f) {
+              Column(modifier = Modifier.padding(8.dp)) {
                 products.take(8).forEach { p ->
                   Row(
                     modifier = Modifier

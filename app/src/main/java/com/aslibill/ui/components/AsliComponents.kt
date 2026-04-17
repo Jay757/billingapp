@@ -34,6 +34,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.core.*
+import androidx.compose.animation.*
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.draw.shadow
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import com.aslibill.ui.theme.AsliColors
 import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.Brand
@@ -78,12 +89,26 @@ fun SectionHeader(title: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun DarkCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+fun DarkCard(
+    modifier: Modifier = Modifier,
+    alpha: Float = 1f,
+    content: @Composable () -> Unit
+) {
   Card(
-    modifier = modifier,
-    colors = CardDefaults.cardColors(containerColor = AsliColors.Card),
-    shape = RoundedCornerShape(12.dp),
-    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    modifier = modifier.shadow(
+      elevation = 8.dp,
+      shape = RoundedCornerShape(16.dp),
+      ambientColor = AsliColors.Primary.copy(alpha = 0.1f),
+      spotColor = AsliColors.Primary.copy(alpha = 0.2f)
+    ),
+    colors = CardDefaults.cardColors(
+      containerColor = AsliColors.Card.copy(alpha = alpha)
+    ),
+    shape = RoundedCornerShape(16.dp),
+    border = androidx.compose.foundation.BorderStroke(
+        width = 1.dp,
+        color = AsliColors.Card2.copy(alpha = 0.5f)
+    )
   ) { content() }
 }
 
@@ -159,14 +184,115 @@ fun Chip(
   val fg = if (selected) Color.White else AsliColors.TextSecondary
   Box(
     modifier = modifier
-      .clip(RoundedCornerShape(20.dp))
+      .clip(RoundedCornerShape(12.dp))
       .background(bg)
       .clickable(onClick = onClick)
       .padding(horizontal = 16.dp, vertical = 8.dp),
     contentAlignment = Alignment.Center
   ) {
-    Text(text, color = fg, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+    Text(text, color = fg, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
   }
+}
+
+@Composable
+fun PremiumSegmentedControl(
+    options: List<String>,
+    selectedIndex: Int,
+    onOptionSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(AsliColors.Card2.copy(alpha = 0.5f))
+            .padding(4.dp)
+    ) {
+        val transition = updateTransition(selectedIndex, label = "SelectedTab")
+        val indicatorOffset by transition.animateDp(
+            transitionSpec = { spring(stiffness = Spring.StiffnessLow) },
+            label = "IndicatorOffset"
+        ) { index ->
+            // This is a bit simplified, but works for 2 tabs. 
+            // For N tabs, we'd need more logic. 
+            if (index == 0) 0.dp else 1.dp // We'll handle this in the BoxWithConstraints below
+            0.dp 
+        }
+
+        androidx.compose.foundation.layout.BoxWithConstraints {
+            val tabWidth = maxWidth / options.size
+            val offset by transition.animateDp(
+                transitionSpec = { spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioLowBouncy) },
+                label = "Offset"
+            ) { tabWidth * it }
+
+            Box(
+                modifier = Modifier
+                    .offset(x = offset)
+                    .fillMaxHeight()
+                    .width(tabWidth)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(AsliColors.Primary, AsliColors.Primary.copy(alpha = 0.8f))
+                        )
+                    )
+                    .shadow(4.dp, RoundedCornerShape(20.dp))
+            )
+
+            Row(modifier = Modifier.fillMaxSize()) {
+                options.forEachIndexed { index, title ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable(
+                                interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                indication = null,
+                                onClick = { onOptionSelected(index) }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = title,
+                            color = if (selectedIndex == index) Color.White else AsliColors.TextSecondary,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = if (selectedIndex == index) FontWeight.Bold else FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun GlassButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    containerColor: Color = AsliColors.Card.copy(alpha = 0.7f)
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier.clip(RoundedCornerShape(12.dp)),
+        color = containerColor,
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.3f))
+    ) {
+        Box(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge,
+                color = AsliColors.Primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
 }
 
 
@@ -195,7 +321,8 @@ fun AsliTextField(
     label: String,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    keyboardOptions: androidx.compose.foundation.text.KeyboardOptions = androidx.compose.foundation.text.KeyboardOptions.Default
+    keyboardOptions: androidx.compose.foundation.text.KeyboardOptions = androidx.compose.foundation.text.KeyboardOptions.Default,
+    trailingIcon: @Composable (() -> Unit)? = null
 ) {
     val isPassword = keyboardOptions.keyboardType == KeyboardType.Password
     val passwordVisible = remember { mutableStateOf(false) }
@@ -213,6 +340,8 @@ fun AsliTextField(
                 IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
                     Icon(icon, contentDescription = if (passwordVisible.value) "Hide password" else "Show password", tint = AsliColors.TextSecondary)
                 }
+            } else {
+                trailingIcon?.invoke()
             }
         },
         colors = TextFieldDefaults.colors(

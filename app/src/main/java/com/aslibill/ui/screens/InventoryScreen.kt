@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -42,13 +43,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.shadow
 import com.aslibill.data.db.CategoryEntity
 import com.aslibill.data.db.ProductEntity
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import com.aslibill.ui.components.Chip
 import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.GrayButton
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
+import com.aslibill.ui.components.PremiumSegmentedControl
+import com.aslibill.ui.components.GlassButton
 import com.aslibill.ui.theme.AsliColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,153 +87,169 @@ fun InventoryScreen(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
       ) {
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Column {
-            Text("Inventory", color = AsliColors.TextPrimary, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
-            Text("Manage your stock and prices", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodySmall)
-          }
-          GrayButton("Bulk Upload", onClick = { /* TODO */ })
-        }
-
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(10.dp),
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Chip(
-            modifier = Modifier.weight(1f),
-            text = "Categories",
-            selected = tab == InventoryTab.Category,
-            onClick = { tab = InventoryTab.Category }
-          )
-          Chip(
-            modifier = Modifier.weight(1f),
-            text = "Products",
-            selected = tab == InventoryTab.Product,
-            onClick = { tab = InventoryTab.Product }
-          )
-        }
-
-        if (tab == InventoryTab.Category) {
-          LazyVerticalGrid(
-            columns = GridCells.Fixed(1),
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 80.dp)
+        // Use BoxWithConstraints to adjust header design based on width
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+          val isWide = maxWidth > 600.dp
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
           ) {
-            items(categories, key = { it.id }) { cat ->
-              DarkCard(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                  modifier = Modifier.padding(16.dp),
-                  horizontalArrangement = Arrangement.SpaceBetween,
-                  verticalAlignment = Alignment.CenterVertically
-                ) {
-                  Text(
-                    cat.name,
-                    color = AsliColors.TextPrimary,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
-                    modifier = Modifier.weight(1f)
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                  "Inventory", 
+                  color = AsliColors.TextPrimary, 
+                  style = (if (isWide) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium).copy(
+                      fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold,
+                      letterSpacing = (-1).sp
                   )
-                  Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    IconButton(onClick = { editCategory = cat; showAdd = true }, modifier = Modifier.size(32.dp)) {
-                      Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
-                    }
-                    IconButton(onClick = { vm.deleteCategory(cat) }, modifier = Modifier.size(32.dp)) {
-                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
-                    }
-                  }
-                }
-              }
+              )
+              Text("Manage your stock and prices", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
             }
+            GlassButton(if (isWide) "Bulk Product Upload" else "Bulk Upload", onClick = { /* TODO */ })
           }
-        } else {
-          LazyVerticalGrid(
-            columns = GridCells.Fixed(1),
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 80.dp)
-          ) {
-            items(products, key = { it.id }) { p ->
-              DarkCard(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                  modifier = Modifier.padding(16.dp),
-                  horizontalArrangement = Arrangement.SpaceBetween,
-                  verticalAlignment = Alignment.CenterVertically
-                ) {
-                  Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                  ) {
-                    Text(
-                      p.name,
-                      color = AsliColors.TextPrimary,
-                      style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-                    )
+        }
+
+        PremiumSegmentedControl(
+            options = listOf("Categories", "Products"),
+            selectedIndex = if (tab == InventoryTab.Category) 0 else 1,
+            onOptionSelected = { tab = if (it == 0) InventoryTab.Category else InventoryTab.Product }
+        )
+
+        AnimatedContent(
+            targetState = tab,
+            transitionSpec = {
+                if (targetState > initialState) {
+                    slideInHorizontally { it } + fadeIn() togetherWith slideOutHorizontally { -it } + fadeOut()
+                } else {
+                    slideInHorizontally { -it } + fadeIn() togetherWith slideOutHorizontally { it } + fadeOut()
+                }.using(SizeTransform(clip = false))
+            },
+            label = "TabContent"
+        ) { currentTab ->
+            if (currentTab == InventoryTab.Category) {
+              LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 300.dp),
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 80.dp)
+              ) {
+                items(categories, key = { it.id }) { cat ->
+                  DarkCard(modifier = Modifier.fillMaxWidth()) {
                     Row(
-                      verticalAlignment = Alignment.CenterVertically,
-                      horizontalArrangement = Arrangement.spacedBy(8.dp)
+                      modifier = Modifier.padding(16.dp),
+                      horizontalArrangement = Arrangement.SpaceBetween,
+                      verticalAlignment = Alignment.CenterVertically
                     ) {
                       Text(
-                        "₹${p.price.toInt()}",
-                        color = AsliColors.Primary,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                        cat.name,
+                        color = AsliColors.TextPrimary,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                        modifier = Modifier.weight(1f)
                       )
-                      Text(
-                        "| Stock: ${p.stock.toInt()}",
-                        color = if (p.stock <= 5) AsliColors.Red else AsliColors.TextSecondary,
-                        style = MaterialTheme.typography.bodyMedium
-                      )
+                      Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        IconButton(onClick = { editCategory = cat; showAdd = true }, modifier = Modifier.size(36.dp).background(AsliColors.PrimaryLight.copy(alpha = 0.5f), CircleShape)) {
+                          Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
+                        }
+                        IconButton(onClick = { vm.deleteCategory(cat) }, modifier = Modifier.size(36.dp).background(AsliColors.Red.copy(alpha = 0.12f), CircleShape)) {
+                          Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red, modifier = Modifier.size(20.dp))
+                        }
+                      }
                     }
-                    Text(
-                      p.categoryName,
-                      color = AsliColors.TextSecondary,
-                      style = MaterialTheme.typography.bodySmall
-                    )
                   }
-                  
-                  Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    IconButton(
-                      onClick = {
-                        editProduct = ProductDraft(
-                          id = p.id,
-                          categoryId = p.categoryId,
-                          name = p.name,
-                          price = p.price,
-                          stock = p.stock
-                        )
-                        showAdd = true
-                      },
-                      modifier = Modifier.size(32.dp)
+                }
+              }
+            } else {
+              LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 350.dp),
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 80.dp)
+              ) {
+                items(products, key = { it.id }) { p ->
+                  DarkCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                      modifier = Modifier.padding(16.dp),
+                      horizontalArrangement = Arrangement.SpaceBetween,
+                      verticalAlignment = Alignment.CenterVertically
                     ) {
-                      Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
-                    }
-                    IconButton(
-                      onClick = {
-                        vm.deleteProduct(
-                          ProductEntity(
-                            id = p.id,
-                            categoryId = p.categoryId,
-                            name = p.name,
-                            price = p.price,
-                            isActive = p.isActive
+                      Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                      ) {
+                        Text(
+                          p.name,
+                          color = AsliColors.TextPrimary,
+                          style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                        )
+                        Row(
+                          verticalAlignment = Alignment.CenterVertically,
+                          horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                          Box(
+                              modifier = Modifier
+                                  .background(AsliColors.PrimaryLight.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                                  .padding(horizontal = 8.dp, vertical = 4.dp)
+                          ) {
+                              Text(
+                                "₹${p.price.toInt()}",
+                                color = AsliColors.Primary,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold)
+                              )
+                          }
+                          Text(
+                            "| Stock: ${p.stock.toInt()}",
+                            color = if (p.stock <= 5) AsliColors.Red else AsliColors.TextSecondary,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                           )
+                        }
+                        Text(
+                          p.categoryName,
+                          color = AsliColors.TextSecondary,
+                          style = MaterialTheme.typography.bodySmall
                         )
-                      },
-                      modifier = Modifier.size(32.dp)
-                    ) {
-                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
+                      }
+                      
+                      Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        IconButton(
+                          onClick = {
+                            editProduct = ProductDraft(
+                              id = p.id,
+                              categoryId = p.categoryId,
+                              name = p.name,
+                              price = p.price,
+                              stock = p.stock
+                            )
+                            showAdd = true
+                          },
+                          modifier = Modifier.size(36.dp).background(AsliColors.PrimaryLight.copy(alpha = 0.5f), CircleShape)
+                        ) {
+                          Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
+                        }
+                        IconButton(
+                          onClick = {
+                            vm.deleteProduct(
+                              ProductEntity(
+                                id = p.id,
+                                categoryId = p.categoryId,
+                                name = p.name,
+                                price = p.price,
+                                isActive = p.isActive
+                              )
+                            )
+                          },
+                          modifier = Modifier.size(36.dp).background(AsliColors.Red.copy(alpha = 0.12f), CircleShape)
+                        ) {
+                          Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red, modifier = Modifier.size(20.dp))
+                        }
+                      }
                     }
                   }
                 }
               }
             }
-          }
         }
       }
 
@@ -231,9 +257,11 @@ fun InventoryScreen(
         onClick = { editCategory = null; editProduct = null; showAdd = true },
         containerColor = AsliColors.Primary,
         contentColor = Color.White,
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
           .padding(16.dp)
           .align(Alignment.BottomEnd)
+          .shadow(12.dp, RoundedCornerShape(16.dp))
       ) {
         Icon(Icons.Outlined.Add, contentDescription = "Add")
       }
@@ -352,7 +380,8 @@ private fun ProductDialog(
             value = selectedCategory?.name ?: "Select Category",
             onValueChange = {},
             label = "Category",
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable)
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
           )
           
           ExposedDropdownMenu(

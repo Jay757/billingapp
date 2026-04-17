@@ -10,9 +10,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Delete
@@ -90,40 +99,76 @@ fun ReportsScreen(
         .padding(AppSpacing.md),
       verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
     ) {
+      // Header
       Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(bottom = AppSpacing.sm),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
       ) {
         Column {
-          Text("Reports", color = AsliColors.TextPrimary, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold))
-          Text("Track your sales and performance", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodySmall)
+          Text(
+            "Reports",
+            color = AsliColors.TextPrimary,
+            style = MaterialTheme.typography.displaySmall.copy(
+              fontWeight = FontWeight.Black,
+              letterSpacing = (-1).sp
+            )
+          )
+          Text(
+            "Track your sales and performance",
+            color = AsliColors.TextSecondary,
+            style = MaterialTheme.typography.bodyMedium
+          )
         }
-        Icon(Icons.Outlined.FilterAlt, contentDescription = "Filter", tint = AsliColors.Primary)
-      }
-
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
-        DateBox(
-          label = "FROM",
-          value = fromText,
-          onClick = {
-            openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) }
-          },
-          modifier = Modifier.weight(1f)
-        )
-        DateBox(
-          label = "TO",
-          value = toText,
-          onClick = {
-            openDatePicker(context, filters.toEpochMs) { vm.setTo(it) }
-          },
-          modifier = Modifier.weight(1f)
-        )
-        IconButton(onClick = { /* TODO filter */ }) {
-          Icon(Icons.Outlined.FilterAlt, contentDescription = "Filter", tint = AsliColors.TextSecondary)
+        Box(
+          modifier = Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(AsliColors.Card2),
+          contentAlignment = Alignment.Center
+        ) {
+          Icon(Icons.Outlined.FilterAlt, contentDescription = "Filter", tint = AsliColors.Primary, modifier = Modifier.size(22.dp))
         }
       }
 
+      // Unified Date Range Selector
+      DarkCard(modifier = Modifier.fillMaxWidth(), alpha = 0.5f) {
+        Row(
+          modifier = Modifier.fillMaxWidth().padding(12.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+          DateRangeOption(
+            label = "FROM",
+            value = fromText,
+            onClick = {
+              openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) }
+            },
+            modifier = Modifier.weight(1f)
+          )
+          
+          Box(
+            modifier = Modifier
+              .size(32.dp)
+              .clip(CircleShape)
+              .background(AsliColors.Primary.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+          ) {
+            Icon(Icons.Outlined.CalendarMonth, contentDescription = null, tint = AsliColors.Primary, modifier = Modifier.size(16.dp))
+          }
+
+          DateRangeOption(
+            label = "TO",
+            value = toText,
+            onClick = {
+              openDatePicker(context, filters.toEpochMs) { vm.setTo(it) }
+            },
+            modifier = Modifier.weight(1f)
+          )
+        }
+      }
+
+      // High-Contrast Sales Stats
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -133,10 +178,10 @@ fun ReportsScreen(
           value = "₹ ${totalAmount.toInt()}",
           icon = Icons.Outlined.CalendarMonth,
           color = AsliColors.Primary,
-          modifier = Modifier.weight(1.5f)
+          modifier = Modifier.weight(1.3f)
         )
         StatsCard(
-          label = "Record count",
+          label = "Records",
           value = "${bills.size}",
           icon = Icons.Outlined.Receipt,
           color = AsliColors.Orange,
@@ -252,33 +297,36 @@ private fun BillCard(
   val paymentColor = when (row.paymentMethod.uppercase(Locale.getDefault())) {
     "CASH" -> AsliColors.Primary
     "UP" -> AsliColors.Green
+    "UPI" -> AsliColors.Green
     else -> AsliColors.Orange
   }
 
   DarkCard(
     modifier = Modifier
       .fillMaxWidth()
-      .clickable(onClick = onView)
+      .clickable(onClick = onView),
+    alpha = 0.8f
   ) {
     Column(
       modifier = Modifier.padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(12.dp)
+      verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
       ) {
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
           Text(
             "Invoice #${row.billId}",
             color = AsliColors.TextPrimary,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black)
           )
+          Spacer(Modifier.height(4.dp))
           Text(
             dateTime,
             color = AsliColors.TextSecondary,
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.labelSmall
           )
         }
         
@@ -286,12 +334,12 @@ private fun BillCard(
           modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
             .background(paymentColor.copy(alpha = 0.15f))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = 10.dp, vertical = 6.dp)
         ) {
           Text(
-            row.paymentMethod,
+            row.paymentMethod.uppercase(Locale.getDefault()),
             color = paymentColor,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
           )
         }
       }
@@ -299,36 +347,66 @@ private fun BillCard(
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Bottom
+        verticalAlignment = Alignment.CenterVertically
       ) {
         Column {
           Text(
-            "Items: ${row.itemCount}",
+            "ITEMS: ${row.itemCount}",
             color = AsliColors.TextSecondary,
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.labelSmall
           )
           Text(
             "₹${row.total.toInt()}",
             color = AsliColors.TextPrimary,
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold)
+            style = MaterialTheme.typography.headlineMedium.copy(
+              fontWeight = FontWeight.ExtraBold,
+              letterSpacing = (-0.5).sp
+            )
           )
         }
         
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          IconButton(
-            onClick = onPrint, 
-            modifier = Modifier.size(36.dp).background(AsliColors.Card2, CircleShape)
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+          Box(
+            modifier = Modifier
+              .size(44.dp)
+              .clip(CircleShape)
+              .background(AsliColors.Card2)
+              .clickable(onClick = onPrint),
+            contentAlignment = Alignment.Center
           ) {
-            Icon(Icons.Outlined.Print, contentDescription = "Print", tint = AsliColors.TextPrimary, modifier = Modifier.size(18.dp))
+            Icon(Icons.Outlined.Print, contentDescription = "Print", tint = AsliColors.TextPrimary, modifier = Modifier.size(20.dp))
           }
-          IconButton(
-            onClick = onDelete, 
-            modifier = Modifier.size(36.dp).background(AsliColors.Card2, CircleShape)
+          Box(
+            modifier = Modifier
+              .size(44.dp)
+              .clip(CircleShape)
+              .background(AsliColors.Orange.copy(alpha = 0.1f))
+              .clickable(onClick = onDelete),
+            contentAlignment = Alignment.Center
           ) {
-            Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Orange, modifier = Modifier.size(18.dp))
+            Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Orange, modifier = Modifier.size(20.dp))
           }
         }
       }
     }
+  }
+}
+
+@Composable
+private fun DateRangeOption(
+  label: String,
+  value: String,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  Column(
+    modifier = modifier
+      .clip(RoundedCornerShape(12.dp))
+      .clickable(onClick = onClick)
+      .padding(8.dp),
+    verticalArrangement = Arrangement.spacedBy(4.dp)
+  ) {
+    Text(label, color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelSmall)
+    Text(value, color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
   }
 }
