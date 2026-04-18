@@ -16,6 +16,13 @@ import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.theme.AsliColors
 import com.aslibill.ui.theme.Brand
+import com.aslibill.ui.theme.AppTypography
+import com.aslibill.ui.theme.AppSpacing
+
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import com.aslibill.R
 
 @Composable
 fun LoginScreen(
@@ -28,61 +35,82 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(contentPadding),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Welcome Back",
-                color = AsliColors.TextPrimary,
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Sign in to ${Brand.AppName}",
-                color = AsliColors.TextSecondary,
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            Spacer(modifier = Modifier.height(40.dp))
-
-            AsliTextField(
-                value = vm.phone,
-                onValueChange = { vm.phone = it },
-                label = "Phone Number",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            AsliTextField(
-                value = vm.password,
-                onValueChange = { vm.password = it },
-                label = "Password",
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-            )
-
-            if (vm.error != null) {
-                Text(
-                    text = vm.error!!,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(top = 8.dp)
+            // High-Fidelity Hero Illustration
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                val heroHeight = if (maxWidth > 600.dp) 320.dp else 240.dp
+                Image(
+                    painter = painterResource(id = R.drawable.billing_icon),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxWidth().height(heroHeight),
+                    contentScale = ContentScale.Crop
                 )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = AppSpacing.xl, vertical = AppSpacing.lg),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
+            ) {
+                Text(
+                    text = "Welcome Back",
+                    color = AsliColors.TextPrimary,
+                    style = AppTypography.h1
+                )
+                Text(
+                    text = "Sign in to ${Brand.AppName}",
+                    color = AsliColors.TextSecondary,
+                    style = AppTypography.bodyMedium
+                )
 
-            OrangeButton(
-                text = if (vm.isLoading) "Logging in..." else "Login",
-                onClick = { vm.onLogin(onLoginSuccess) },
-                modifier = Modifier.fillMaxWidth().height(50.dp)
-            )
+                Spacer(modifier = Modifier.height(AppSpacing.lg))
 
-            Spacer(modifier = Modifier.height(16.dp))
+                AsliTextField(
+                    value = vm.phone,
+                    onValueChange = { vm.phone = it },
+                    label = "Phone Number",
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                )
 
-            TextButton(onClick = onGoToSignup) {
-                Text("Don't have an account? Sign Up", color = AsliColors.Orange)
+                AsliTextField(
+                    value = vm.password,
+                    onValueChange = { vm.password = it },
+                    label = "Password",
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                )
+
+                if (vm.error != null) {
+                    Text(
+                        text = vm.error!!,
+                        color = AsliColors.AlertOrange,
+                        style = AppTypography.bodySmall
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(AppSpacing.lg))
+
+                OrangeButton(
+                    text = if (vm.isLoading) "LOGGING IN..." else "LOGIN",
+                    onClick = { vm.onLogin(onLoginSuccess) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                TextButton(onClick = onGoToSignup) {
+                    Text(
+                        text = "Don't have an account? Sign Up",
+                        color = AsliColors.PrimaryBlue,
+                        style = AppTypography.bodyBold
+                    )
+                }
             }
         }
     }

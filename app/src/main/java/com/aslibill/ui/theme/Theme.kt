@@ -1,59 +1,68 @@
 package com.aslibill.ui.theme
 
+import android.app.Activity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.runtime.Composable
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
-private fun lightColors() = lightColorScheme(
-    primary = AsliColors.Orange,
-    secondary = AsliColors.Orange2,
-    tertiary = AsliColors.Green,
-    onPrimary = Color.White,
+private val DarkColorScheme = darkColorScheme(
+    primary = AsliColors.PrimaryDark,
+    secondary = AsliColors.SurfaceAccentDark,
+    background = AsliColors.BgDark,
+    surface = AsliColors.CardDark,
+    onPrimary = Color.Black,
     onSecondary = Color.White,
-    onTertiary = Color.White,
-    surface = Color(0xFFF7FAFF),
-    onSurface = Color(0xFF0F172A),
-    background = Color(0xFFF2F6FD),
-    onBackground = Color(0xFF0F172A),
-    error = AsliColors.Red,
-    onError = Color.White
+    onBackground = AsliColors.TextPrimaryDark,
+    onSurface = AsliColors.TextPrimaryDark,
+    surfaceVariant = AsliColors.SurfaceAccentDark,
+    onSurfaceVariant = AsliColors.TextSecondaryDark
 )
 
-private fun darkColors() = darkColorScheme(
-    primary = AsliColors.Orange,
-    secondary = AsliColors.Orange2,
-    tertiary = AsliColors.Green,
+private val LightColorScheme = lightColorScheme(
+    primary = AsliColors.PrimaryLight,
+    secondary = AsliColors.SurfaceAccentLight,
+    background = AsliColors.BgLight,
+    surface = AsliColors.CardLight,
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.Black,
-    surface = Color(0xFF121826),
-    onSurface = Color(0xFFF8FAFC),
-    background = Color(0xFF0B1220),
-    onBackground = Color(0xFFF8FAFC),
-    error = AsliColors.Red,
-    onError = Color.White
+    onSecondary = Color.Black,
+    onBackground = AsliColors.TextPrimaryLight,
+    onSurface = AsliColors.TextPrimaryLight,
+    surfaceVariant = AsliColors.SurfaceAccentLight,
+    onSurfaceVariant = AsliColors.TextSecondaryLight
 )
 
 @Composable
 fun NovaBillTheme(
-  mode: ThemeMode = ThemeMode.LIGHT,
-  palette: ThemePalette = ThemePalette.BLUE,
-  content: @Composable () -> Unit
+    mode: ThemeMode = ThemeMode.SYSTEM,
+    content: @Composable () -> Unit
 ) {
-  AsliColors.applyPalette(palette)
-  val useDarkTheme = when (mode) {
-    ThemeMode.DARK -> true
-    ThemeMode.LIGHT -> false
-    ThemeMode.SYSTEM -> isSystemInDarkTheme()
-  }
-  val scheme = if (useDarkTheme) darkColors() else lightColors()
-  MaterialTheme(
-    colorScheme = scheme,
-    typography = AppTypography,
-    content = content
-  )
-}
+    val darkTheme = when (mode) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    }
+    
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val view = LocalView.current
 
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.background.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = AppMainTypography,
+        content = content
+    )
+}

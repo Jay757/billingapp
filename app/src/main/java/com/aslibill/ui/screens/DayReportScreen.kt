@@ -1,5 +1,6 @@
 package com.aslibill.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,15 +22,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.aslibill.data.db.DayReportRow
 import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.DateBox
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
 import com.aslibill.ui.components.openDatePicker
-import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.AppTypography
+import com.aslibill.ui.theme.AppSpacing
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,7 +59,11 @@ fun DayReportScreen(
         .padding(AppSpacing.md),
       verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
-      Text("Day Report", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
+      Text(
+        "Day Report", 
+        color = AsliColors.TextPrimary, 
+        style = AppTypography.h1
+      )
 
       Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
         DateBox(label = "FROM", value = fromText, onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } }, modifier = Modifier.weight(1f))
@@ -82,17 +91,47 @@ fun DayReportScreen(
 @Composable
 private fun DayReportCard(row: DayReportRow) {
   DarkCard(modifier = Modifier.fillMaxWidth()) {
-    Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(row.dateLabel, color = AsliColors.Orange, style = MaterialTheme.typography.titleMedium)
-        Text("${row.billCount} Bill(s)", color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelLarge)
-      }
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Column {
-          Text("Cash: ₹ ${String.format("%.2f", row.cashTotal)}", color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium)
-          Text("Online: ₹ ${String.format("%.2f", row.onlineTotal)}", color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium)
+    Column(modifier = Modifier.padding(AppSpacing.lg), verticalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
+      Row(
+        modifier = Modifier.fillMaxWidth(), 
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text(
+          row.dateLabel, 
+          color = AsliColors.PrimaryBlue, 
+          style = AppTypography.h3
+        )
+        Box(
+          modifier = Modifier
+            .background(AsliColors.PrimaryBlue.copy(alpha = 0.1f), RoundedCornerShape(8.dp))
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+        ) {
+          Text(
+            "${row.billCount} Bill(s)", 
+            color = AsliColors.PrimaryBlue, 
+            style = AppTypography.labelCaps
+          )
         }
-        Text("Total: ₹ ${String.format("%.2f", row.grandTotal)}", color = AsliColors.Green, style = MaterialTheme.typography.titleLarge)
+      }
+      
+      Row(
+        modifier = Modifier.fillMaxWidth(), 
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom
+      ) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+          Text("Cash: ₹ ${String.format("%.0f", row.cashTotal)}", color = AsliColors.TextSecondary, style = AppTypography.bodyMedium)
+          Text("Online: ₹ ${String.format("%.0f", row.onlineTotal)}", color = AsliColors.TextSecondary, style = AppTypography.bodyMedium)
+        }
+        Column(horizontalAlignment = Alignment.End) {
+          Text("TOTAL AMOUNT", color = AsliColors.TextSecondary, style = AppTypography.labelCaps)
+          Text(
+            "₹ ${String.format("%.0f", row.grandTotal)}", 
+            color = AsliColors.SuccessGreen, 
+            style = AppTypography.h2
+          )
+        }
       }
     }
   }

@@ -20,12 +20,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+
 import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.AppSpacing
 
 @Composable
 fun ContactUsScreen(
@@ -39,16 +42,16 @@ fun ContactUsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(AppSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SectionHeader("Contact Us")
 
             DarkCard(modifier = Modifier.fillMaxWidth()) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier.padding(AppSpacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
                 ) {
                     ContactDetailRow(Icons.Outlined.Phone, "Phone/WhatsApp", info.phone)
                     ContactDetailRow(Icons.Outlined.Email, "Email", info.email)
@@ -58,7 +61,7 @@ fun ContactUsScreen(
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
                 OrangeButton(
                     "CALL SUPPORT",
@@ -89,12 +92,13 @@ private fun ContactDetailRow(icon: androidx.compose.ui.graphics.vector.ImageVect
         Icon(
             icon,
             contentDescription = null,
-            tint = AsliColors.Orange,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(24.dp)
         )
         Column {
-            Text(label, color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelSmall)
-            Text(value, color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyLarge)
+            Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+            Text(value, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
         }
+
     }
 }

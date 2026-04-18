@@ -38,13 +38,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
@@ -56,8 +58,9 @@ import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.GrayButton
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
-import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.AppTypography
+import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.screens.BluetoothPrinterViewModel
 import com.aslibill.ui.components.DateBox
 import com.aslibill.ui.components.openDatePicker
@@ -108,35 +111,34 @@ fun ReportsScreen(
         Column {
           Text(
             "Reports",
-            color = AsliColors.TextPrimary,
-            style = MaterialTheme.typography.displaySmall.copy(
-              fontWeight = FontWeight.Black,
-              letterSpacing = (-1).sp
-            )
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
           )
           Text(
             "Track your sales and performance",
-            color = AsliColors.TextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium
           )
         }
+
         Box(
           modifier = Modifier
             .size(44.dp)
             .clip(CircleShape)
-            .background(AsliColors.Card2),
+            .background(MaterialTheme.colorScheme.surfaceVariant),
           contentAlignment = Alignment.Center
         ) {
-          Icon(Icons.Outlined.FilterAlt, contentDescription = "Filter", tint = AsliColors.Primary, modifier = Modifier.size(22.dp))
+          Icon(Icons.Outlined.FilterAlt, contentDescription = "Filter", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
         }
+
       }
 
       // Unified Date Range Selector
       DarkCard(modifier = Modifier.fillMaxWidth(), alpha = 0.5f) {
         Row(
-          modifier = Modifier.fillMaxWidth().padding(12.dp),
+          modifier = Modifier.fillMaxWidth().padding(AppSpacing.md),
           verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(12.dp)
+          horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
           DateRangeOption(
             label = "FROM",
@@ -171,22 +173,23 @@ fun ReportsScreen(
       // High-Contrast Sales Stats
       Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
       ) {
         StatsCard(
           label = "Total Sales",
           value = "₹ ${totalAmount.toInt()}",
           icon = Icons.Outlined.CalendarMonth,
-          color = AsliColors.Primary,
+          color = AsliColors.SuccessGreen,
           modifier = Modifier.weight(1.3f)
         )
         StatsCard(
           label = "Records",
           value = "${bills.size}",
           icon = Icons.Outlined.Receipt,
-          color = AsliColors.Orange,
+          color = MaterialTheme.colorScheme.primary,
           modifier = Modifier.weight(1f)
         )
+
       }
 
       LazyColumn(
@@ -295,10 +298,10 @@ private fun BillCard(
   onPrint: () -> Unit
 ) {
   val paymentColor = when (row.paymentMethod.uppercase(Locale.getDefault())) {
-    "CASH" -> AsliColors.Primary
-    "UP" -> AsliColors.Green
-    "UPI" -> AsliColors.Green
-    else -> AsliColors.Orange
+    "CASH" -> AsliColors.PrimaryBlue
+    "UP" -> AsliColors.SuccessGreen
+    "UPI" -> AsliColors.SuccessGreen
+    else -> AsliColors.AlertOrange
   }
 
   DarkCard(
@@ -308,8 +311,8 @@ private fun BillCard(
     alpha = 0.8f
   ) {
     Column(
-      modifier = Modifier.padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+      modifier = Modifier.padding(AppSpacing.lg),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
     ) {
       Row(
         modifier = Modifier.fillMaxWidth(),
@@ -319,22 +322,22 @@ private fun BillCard(
         Column(modifier = Modifier.weight(1f)) {
           Text(
             "Invoice #${row.billId}",
-            color = AsliColors.TextPrimary,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black)
           )
           Spacer(Modifier.height(4.dp))
           Text(
             dateTime,
-            color = AsliColors.TextSecondary,
-            style = MaterialTheme.typography.labelSmall
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall
           )
         }
         
         Box(
           modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(paymentColor.copy(alpha = 0.15f))
-            .padding(horizontal = 10.dp, vertical = 6.dp)
+            .background(paymentColor.copy(alpha = 0.1f))
+            .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
           Text(
             row.paymentMethod.uppercase(Locale.getDefault()),
@@ -344,6 +347,7 @@ private fun BillCard(
         }
       }
 
+
       Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -352,42 +356,40 @@ private fun BillCard(
         Column {
           Text(
             "ITEMS: ${row.itemCount}",
-            color = AsliColors.TextSecondary,
-            style = MaterialTheme.typography.labelSmall
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
           )
           Text(
             "₹${row.total.toInt()}",
-            color = AsliColors.TextPrimary,
-            style = MaterialTheme.typography.headlineMedium.copy(
-              fontWeight = FontWeight.ExtraBold,
-              letterSpacing = (-0.5).sp
-            )
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
           )
         }
         
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
           Box(
             modifier = Modifier
               .size(44.dp)
               .clip(CircleShape)
-              .background(AsliColors.Card2)
+              .background(MaterialTheme.colorScheme.surfaceVariant)
               .clickable(onClick = onPrint),
             contentAlignment = Alignment.Center
           ) {
-            Icon(Icons.Outlined.Print, contentDescription = "Print", tint = AsliColors.TextPrimary, modifier = Modifier.size(20.dp))
+            Icon(Icons.Outlined.Print, contentDescription = "Print", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(20.dp))
           }
           Box(
             modifier = Modifier
               .size(44.dp)
               .clip(CircleShape)
-              .background(AsliColors.Orange.copy(alpha = 0.1f))
+              .background(AsliColors.Red.copy(alpha = 0.1f))
               .clickable(onClick = onDelete),
             contentAlignment = Alignment.Center
           ) {
-            Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Orange, modifier = Modifier.size(20.dp))
+            Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red, modifier = Modifier.size(20.dp))
           }
         }
       }
+
     }
   }
 }
@@ -399,14 +401,26 @@ private fun DateRangeOption(
   onClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Column(
-    modifier = modifier
-      .clip(RoundedCornerShape(12.dp))
-      .clickable(onClick = onClick)
-      .padding(8.dp),
-    verticalArrangement = Arrangement.spacedBy(4.dp)
+  Surface(
+    modifier = modifier.clickable(onClick = onClick),
+    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+    shape = RoundedCornerShape(12.dp),
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
   ) {
-    Text(label, color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelSmall)
-    Text(value, color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
+    Column(
+      modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+      verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+      Text(
+        text = label, 
+        color = MaterialTheme.colorScheme.onSurfaceVariant, 
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+      )
+      Text(
+        text = value, 
+        color = MaterialTheme.colorScheme.onSurface, 
+        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black)
+      )
+    }
   }
 }

@@ -4,13 +4,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,12 +21,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.aslibill.ui.components.AsliTextField
+import com.aslibill.ui.components.Chip
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
-import com.aslibill.ui.components.Chip
+import com.aslibill.ui.components.SectionHeader
+import com.aslibill.ui.theme.AppSpacing
+import com.aslibill.ui.theme.AppTypography
 import com.aslibill.ui.theme.AsliColors
 import com.aslibill.ui.theme.ThemeMode
-import com.aslibill.ui.theme.ThemePalette
 
 @Composable
 fun PrintSettingsScreen(
@@ -43,93 +47,82 @@ fun PrintSettingsScreen(
     var thankYou by remember(settings) { mutableStateOf(settings.thankYouMessage ?: "") }
     var paperWidth by remember(settings) { mutableStateOf(settings.paperWidthChars) }
     var themeMode by remember(uiPreferences) { mutableStateOf(uiPreferences.mode) }
-    var palette by remember(uiPreferences) { mutableStateOf(uiPreferences.palette) }
 
     ScreenSurface {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .padding(16.dp)
+                .padding(horizontal = AppSpacing.md)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
             Text(
                 "App Settings",
-                color = AsliColors.TextPrimary,
-                style = MaterialTheme.typography.headlineMedium
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Black),
+                modifier = Modifier.padding(top = AppSpacing.md)
             )
 
-            OutlinedTextField(
+
+            SectionHeader("STORE INFORMATION")
+
+            AsliTextField(
                 value = storeName,
                 onValueChange = { storeName = it },
-                label = { Text("Store Name") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = "Store Name"
             )
 
-            OutlinedTextField(
+            AsliTextField(
                 value = address1,
                 onValueChange = { address1 = it },
-                label = { Text("Address Line 1") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = "Address Line 1"
             )
 
-            OutlinedTextField(
+            AsliTextField(
                 value = address2,
                 onValueChange = { address2 = it },
-                label = { Text("Address Line 2") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = "Address Line 2"
             )
 
-            OutlinedTextField(
+            AsliTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = { Text("Phone") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = "Phone"
             )
 
-            OutlinedTextField(
+            AsliTextField(
                 value = gst,
                 onValueChange = { gst = it },
-                label = { Text("GST Number") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = "GST Number"
             )
 
-            OutlinedTextField(
+            AsliTextField(
                 value = thankYou,
                 onValueChange = { thankYou = it },
-                label = { Text("Thank You Message") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                label = "Thank You Message"
             )
 
-            Text("Paper Width", color = AsliColors.TextSecondary)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Chip(text = "58mm (32 chars)", selected = paperWidth == 32, onClick = { paperWidth = 32 })
-                Chip(text = "80mm (42 chars)", selected = paperWidth == 42, onClick = { paperWidth = 42 })
+            SectionHeader("PRINTER PREFERENCES")
+            Text("PAPER WIDTH", style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
+
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
+                Chip(text = "58mm", selected = paperWidth == 32, onSelected = { paperWidth = 32 })
+                Chip(text = "80mm", selected = paperWidth == 42, onSelected = { paperWidth = 42 })
             }
 
-            Text("Theme Mode", color = AsliColors.TextSecondary)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Chip(text = "Light", selected = themeMode == ThemeMode.LIGHT, onClick = { themeMode = ThemeMode.LIGHT })
-                Chip(text = "Dark", selected = themeMode == ThemeMode.DARK, onClick = { themeMode = ThemeMode.DARK })
-                Chip(text = "System", selected = themeMode == ThemeMode.SYSTEM, onClick = { themeMode = ThemeMode.SYSTEM })
+            SectionHeader("APPEARANCE")
+            Text("THEME MODE", style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
+
+            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
+                Chip(text = "Light", selected = themeMode == ThemeMode.LIGHT, onSelected = { themeMode = ThemeMode.LIGHT })
+                Chip(text = "Dark", selected = themeMode == ThemeMode.DARK, onSelected = { themeMode = ThemeMode.DARK })
+                Chip(text = "System", selected = themeMode == ThemeMode.SYSTEM, onSelected = { themeMode = ThemeMode.SYSTEM })
             }
 
-            Text("Color Palette", color = AsliColors.TextSecondary)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Chip(text = "Blue", selected = palette == ThemePalette.BLUE, onClick = { palette = ThemePalette.BLUE })
-                Chip(text = "Orange", selected = palette == ThemePalette.ORANGE, onClick = { palette = ThemePalette.ORANGE })
-                Chip(text = "Green", selected = palette == ThemePalette.GREEN, onClick = { palette = ThemePalette.GREEN })
-            }
-
+            Spacer(Modifier.height(AppSpacing.md))
             OrangeButton(
-                text = "Save Settings",
+                text = "SAVE SETTINGS",
                 onClick = {
                     vm.saveSettings(
                         storeName = storeName,
@@ -140,11 +133,11 @@ fun PrintSettingsScreen(
                         thankYou = thankYou,
                         paperWidth = paperWidth
                     )
-                    vm.saveAppearance(themeMode, palette)
+                    vm.saveAppearance(themeMode)
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+            Spacer(Modifier.height(AppSpacing.xl))
         }
     }
 }
-

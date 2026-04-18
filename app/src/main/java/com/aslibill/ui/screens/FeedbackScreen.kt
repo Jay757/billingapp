@@ -16,11 +16,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.ui.unit.dp
+
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.AppSpacing
 
 @Composable
 fun FeedbackScreen(
@@ -32,23 +36,15 @@ fun FeedbackScreen(
   val isSubmitting by vm.isSubmitting.collectAsState()
   val submissionSuccess by vm.submissionSuccess.collectAsState()
 
-  val fieldColors = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = AsliColors.Orange,
-    unfocusedBorderColor = AsliColors.TextSecondary,
-    focusedLabelColor = AsliColors.Orange,
-    unfocusedLabelColor = AsliColors.TextSecondary,
-    focusedTextColor = AsliColors.TextPrimary,
-    unfocusedTextColor = AsliColors.TextPrimary,
-    cursorColor = AsliColors.Orange
-  )
+
 
   ScreenSurface {
     Column(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp),
+        .padding(AppSpacing.lg),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
       horizontalAlignment = Alignment.CenterHorizontally
     ) {
       SectionHeader("Give Feedback")
@@ -56,32 +52,32 @@ fun FeedbackScreen(
       if (submissionSuccess) {
         Text(
           "Thank you for your feedback!",
-          color = AsliColors.Green,
-          style = MaterialTheme.typography.titleMedium
+          color = AsliColors.SuccessGreen,
+          style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
         )
+
         OrangeButton("NEW FEEDBACK", onClick = { vm.resetSuccess() })
       } else {
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-          OutlinedTextField(
+        Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
+          com.aslibill.ui.components.AsliTextField(
             value = message,
             onValueChange = { vm.onMessageChange(it) },
-            label = { Text("Your Message") },
-            colors = fieldColors,
-            modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
-            minLines = 5
+            label = "Your Message",
+            modifier = Modifier.fillMaxWidth().height(160.dp)
           )
 
-          OutlinedTextField(
+          com.aslibill.ui.components.AsliTextField(
             value = contactInfo,
             onValueChange = { vm.onContactInfoChange(it) },
-            label = { Text("Email or Mobile (Optional)") },
-            colors = fieldColors,
+            label = "Email or Mobile (Optional)",
             modifier = Modifier.fillMaxWidth()
           )
 
+
           if (isSubmitting) {
-            CircularProgressIndicator(color = AsliColors.Orange)
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
           } else {
+
             OrangeButton(
               "SUBMIT FEEDBACK",
               onClick = { vm.submitFeedback() },

@@ -45,8 +45,8 @@ fun TrainingVideoScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .padding(AppSpacing.md),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
+                .padding(AppSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
         ) {
             SectionHeader("Training Videos")
 
@@ -78,30 +78,32 @@ private fun VideoListItem(video: TrainingVideo, onClick: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(80.dp, 60.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(AsliColors.Card2),
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     Icons.Outlined.PlayCircle,
                     contentDescription = null,
-                    tint = AsliColors.Orange,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(32.dp)
                 )
             }
 
+
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     video.title,
-                    color = AsliColors.TextPrimary,
-                    style = MaterialTheme.typography.bodyLarge
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                 )
                 Text(
                     "Duration: ${video.duration}",
-                    color = AsliColors.TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.labelSmall
                 )
             }
+
         }
     }
 }
