@@ -58,8 +58,10 @@ import com.aslibill.ui.components.GrayButton
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.PremiumSegmentedControl
-import com.aslibill.ui.components.GlassButton
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.AppTypography
+import com.aslibill.ui.theme.AppSpacing
+import com.aslibill.ui.components.GlassButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,11 +83,11 @@ fun InventoryScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(16.dp)
+        .padding(AppSpacing.lg)
     ) {
       Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
       ) {
         // Use BoxWithConstraints to adjust header design based on width
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -98,14 +100,16 @@ fun InventoryScreen(
             Column(modifier = Modifier.weight(1f)) {
               Text(
                   "Inventory", 
-                  color = AsliColors.TextPrimary, 
-                  style = (if (isWide) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium).copy(
-                      fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold,
-                      letterSpacing = (-1).sp
-                  )
+                  color = MaterialTheme.colorScheme.onBackground, 
+                  style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
               )
-              Text("Manage your stock and prices", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
+              Text(
+                  "Manage your stock and prices", 
+                  color = MaterialTheme.colorScheme.onSurfaceVariant, 
+                  style = MaterialTheme.typography.bodyMedium
+              )
             }
+
             GlassButton(if (isWide) "Bulk Product Upload" else "Bulk Upload", onClick = { /* TODO */ })
           }
         }
@@ -129,10 +133,10 @@ fun InventoryScreen(
         ) { currentTab ->
             if (currentTab == InventoryTab.Category) {
               LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 300.dp),
+                columns = GridCells.Adaptive(minSize = 280.dp),
                 modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
                 contentPadding = PaddingValues(bottom = 80.dp)
               ) {
                 items(categories, key = { it.id }) { cat ->
@@ -144,28 +148,36 @@ fun InventoryScreen(
                     ) {
                       Text(
                         cat.name,
-                        color = AsliColors.TextPrimary,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                         modifier = Modifier.weight(1f)
                       )
+
                       Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        IconButton(onClick = { editCategory = cat; showAdd = true }, modifier = Modifier.size(36.dp).background(AsliColors.PrimaryLight.copy(alpha = 0.5f), CircleShape)) {
-                          Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
+                        IconButton(
+                          onClick = { editCategory = cat; showAdd = true }, 
+                          modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape)
+                        ) {
+                          Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
                         }
-                        IconButton(onClick = { vm.deleteCategory(cat) }, modifier = Modifier.size(36.dp).background(AsliColors.Red.copy(alpha = 0.12f), CircleShape)) {
-                          Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red, modifier = Modifier.size(20.dp))
+                        IconButton(
+                          onClick = { vm.deleteCategory(cat) }, 
+                          modifier = Modifier.size(40.dp).background(AsliColors.Red.copy(alpha = 0.1f), CircleShape)
+                        ) {
+                          Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red, modifier = Modifier.size(22.dp))
                         }
                       }
+
                     }
                   }
                 }
               }
             } else {
               LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 350.dp),
+                columns = GridCells.Adaptive(minSize = 320.dp),
                 modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
                 contentPadding = PaddingValues(bottom = 80.dp)
               ) {
                 items(products, key = { it.id }) { p ->
@@ -181,35 +193,37 @@ fun InventoryScreen(
                       ) {
                         Text(
                           p.name,
-                          color = AsliColors.TextPrimary,
-                          style = MaterialTheme.typography.titleLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                          color = MaterialTheme.colorScheme.onSurface,
+                          style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black)
                         )
+
                         Row(
                           verticalAlignment = Alignment.CenterVertically,
-                          horizontalArrangement = Arrangement.spacedBy(8.dp)
+                          horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                           Box(
                               modifier = Modifier
-                                  .background(AsliColors.PrimaryLight.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                                  .padding(horizontal = 8.dp, vertical = 4.dp)
+                                  .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f), RoundedCornerShape(8.dp))
+                                  .padding(horizontal = 10.dp, vertical = 6.dp)
                           ) {
                               Text(
                                 "₹${p.price.toInt()}",
-                                color = AsliColors.Primary,
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold)
+                                color = MaterialTheme.colorScheme.primary,
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                               )
                           }
                           Text(
-                            "| Stock: ${p.stock.toInt()}",
-                            color = if (p.stock <= 5) AsliColors.Red else AsliColors.TextSecondary,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            "Stock: ${p.stock.toInt()}",
+                            color = if (p.stock <= 5) AsliColors.Red else MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
                           )
                         }
                         Text(
-                          p.categoryName,
-                          color = AsliColors.TextSecondary,
-                          style = MaterialTheme.typography.bodySmall
+                          p.categoryName.uppercase(),
+                          color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
                         )
+
                       }
                       
                       Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -224,9 +238,9 @@ fun InventoryScreen(
                             )
                             showAdd = true
                           },
-                          modifier = Modifier.size(36.dp).background(AsliColors.PrimaryLight.copy(alpha = 0.5f), CircleShape)
+                          modifier = Modifier.size(40.dp).background(AsliColors.PrimaryBlue.copy(alpha = 0.1f), CircleShape)
                         ) {
-                          Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.Primary, modifier = Modifier.size(20.dp))
+                          Icon(Icons.Outlined.Edit, contentDescription = "Edit", tint = AsliColors.PrimaryBlue, modifier = Modifier.size(22.dp))
                         }
                         IconButton(
                           onClick = {
@@ -240,9 +254,9 @@ fun InventoryScreen(
                               )
                             )
                           },
-                          modifier = Modifier.size(36.dp).background(AsliColors.Red.copy(alpha = 0.12f), CircleShape)
+                          modifier = Modifier.size(40.dp).background(AsliColors.AlertOrange.copy(alpha = 0.1f), CircleShape)
                         ) {
-                          Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red, modifier = Modifier.size(20.dp))
+                          Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.AlertOrange, modifier = Modifier.size(22.dp))
                         }
                       }
                     }
@@ -255,16 +269,17 @@ fun InventoryScreen(
 
       FloatingActionButton(
         onClick = { editCategory = null; editProduct = null; showAdd = true },
-        containerColor = AsliColors.Primary,
+        containerColor = MaterialTheme.colorScheme.primary,
         contentColor = Color.White,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(18.dp),
         modifier = Modifier
-          .padding(16.dp)
+          .padding(24.dp)
           .align(Alignment.BottomEnd)
-          .shadow(12.dp, RoundedCornerShape(16.dp))
+          .shadow(12.dp, RoundedCornerShape(18.dp), spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
       ) {
-        Icon(Icons.Outlined.Add, contentDescription = "Add")
+        Icon(Icons.Outlined.Add, contentDescription = "Add", modifier = Modifier.size(28.dp))
       }
+
 
       if (showAdd) {
         if (tab == InventoryTab.Category) {
@@ -317,10 +332,7 @@ private fun CategoryDialog(
   var name by remember(initial) { mutableStateOf(initial?.name.orEmpty()) }
   AlertDialog(
     onDismissRequest = onDismiss,
-    containerColor = AsliColors.Card,
-    titleContentColor = AsliColors.TextPrimary,
-    textContentColor = AsliColors.TextSecondary,
-    title = { Text(if (initial == null) "Add Category" else "Edit Category") },
+    title = { Text(if (initial == null) "Add Category" else "Edit Category", style = MaterialTheme.typography.titleLarge) },
     text = {
       com.aslibill.ui.components.AsliTextField(
         value = name,
@@ -333,16 +345,17 @@ private fun CategoryDialog(
         onClick = { onSave(initial?.id, name) },
         enabled = name.trim().isNotEmpty()
       ) {
-        Text("SAVE", color = if (name.trim().isNotEmpty()) AsliColors.Orange else Color.Gray)
+        Text("SAVE", color = if (name.trim().isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Gray, fontWeight = FontWeight.Bold)
       }
     },
     dismissButton = {
       TextButton(onClick = onDismiss) {
-        Text("CANCEL", color = AsliColors.Orange)
+        Text("CANCEL")
       }
     }
   )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -364,12 +377,9 @@ private fun ProductDialog(
 
   AlertDialog(
     onDismissRequest = onDismiss,
-    containerColor = AsliColors.Card,
-    titleContentColor = AsliColors.TextPrimary,
-    textContentColor = AsliColors.TextSecondary,
-    title = { Text(if (initial == null) "Add Product" else "Edit Product") },
+    title = { Text(if (initial == null) "Add Product" else "Edit Product", style = MaterialTheme.typography.titleLarge) },
     text = {
-      Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+      Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         // Dropdown for Category
         ExposedDropdownMenuBox(
           expanded = expanded,
@@ -387,11 +397,11 @@ private fun ProductDialog(
           ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(AsliColors.Card)
+            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
           ) {
             categories.forEach { cat ->
               DropdownMenuItem(
-                text = { Text(cat.name, color = AsliColors.TextPrimary) },
+                text = { Text(cat.name, color = MaterialTheme.colorScheme.onSurface) },
                 onClick = {
                   categoryId = cat.id
                   expanded = false
@@ -438,14 +448,15 @@ private fun ProductDialog(
         },
         enabled = categoryId != 0L && name.trim().isNotEmpty() && priceText.toDoubleOrNull() != null && stockText.toDoubleOrNull() != null
       ) {
-        Text("SAVE", color = if (categoryId != 0L && name.trim().isNotEmpty() && priceText.toDoubleOrNull() != null && stockText.toDoubleOrNull() != null) AsliColors.Orange else Color.Gray)
+        Text("SAVE", color = if (categoryId != 0L && name.trim().isNotEmpty() && priceText.toDoubleOrNull() != null && stockText.toDoubleOrNull() != null) MaterialTheme.colorScheme.primary else Color.Gray, fontWeight = FontWeight.Bold)
       }
     },
     dismissButton = {
       TextButton(onClick = onDismiss) {
-        Text("CANCEL", color = AsliColors.Orange)
+        Text("CANCEL")
       }
     }
   )
 }
+
 

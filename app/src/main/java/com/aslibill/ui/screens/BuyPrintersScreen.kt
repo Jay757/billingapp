@@ -73,39 +73,41 @@ private fun PrinterItem(printer: PrinterProduct, onBuyClick: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .size(80.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(AsliColors.Card2),
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         Icons.Outlined.Print,
                         contentDescription = null,
-                        tint = AsliColors.Orange,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(40.dp)
                     )
                 }
 
+
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         printer.name,
-                        color = AsliColors.TextPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         printer.price,
-                        color = AsliColors.Orange,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Black
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black)
                     )
                 }
+
             }
 
             Text(
                 printer.description,
-                color = AsliColors.TextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium
             )
+
 
             OrangeButton(
                 "BUY NOW",

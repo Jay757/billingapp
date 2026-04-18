@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.aslibill.data.SettingsRepository
 import com.aslibill.printing.StoreConfig
 import com.aslibill.ui.theme.ThemeMode
-import com.aslibill.ui.theme.ThemePalette
 import com.aslibill.ui.theme.UiPreferences
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -39,9 +38,9 @@ class PrintSettingsViewModel(
         }
     }
 
-    fun saveAppearance(mode: ThemeMode, palette: ThemePalette) {
+    fun saveAppearance(mode: ThemeMode) {
         viewModelScope.launch {
-            settingsRepository.saveUiPreferences(mode, palette)
+            settingsRepository.saveUiPreferences(mode)
         }
     }
 }

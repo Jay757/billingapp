@@ -51,7 +51,10 @@ import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.GlassButton
 import com.aslibill.ui.components.PremiumSegmentedControl
 import com.aslibill.ui.components.AsliTextField
+import com.aslibill.ui.components.BillingTotalCard
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.AppTypography
+import com.aslibill.ui.theme.AppSpacing
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -92,8 +95,8 @@ fun ItemWiseBillScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(10.dp)
+        .padding(AppSpacing.lg),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
     ) {
       BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val isWide = maxWidth > 600.dp
@@ -105,45 +108,45 @@ fun ItemWiseBillScreen(
           Column(modifier = Modifier.weight(1f)) {
             Text(
               "Item Wise Bill", 
-              color = AsliColors.TextPrimary, 
-              style = (if (isWide) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium).copy(
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = (-1).sp
-              )
+              color = MaterialTheme.colorScheme.onBackground, 
+              style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
             )
-            Text("Select items to add to bill", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodySmall)
+            Text(
+              "Select items to add to bill", 
+              color = MaterialTheme.colorScheme.onSurfaceVariant, 
+              style = MaterialTheme.typography.bodyMedium
+            )
           }
+
           Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            GlassButton(if (isWide) "View Reports" else "Report", onClick = { onGoReport?.invoke() })
             OrangeButton(if (isWide) "Quick Billing" else "Quick", onClick = { onGoQuickBill?.invoke() })
           }
         }
       }
 
-      DarkCard(modifier = Modifier.fillMaxWidth().weight(1f), alpha = 0.95f) {
+      DarkCard(modifier = Modifier.fillMaxWidth().weight(1f), alpha = 1f) {
         Column(modifier = Modifier.fillMaxSize()) {
           // Integrated Header
           Row(
             modifier = Modifier
               .fillMaxWidth()
-              .background(AsliColors.Card2.copy(alpha = 0.6f))
-              .padding(horizontal = 16.dp, vertical = 12.dp),
+              .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+              .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
             horizontalArrangement = Arrangement.Start
           ) {
-            Text("ITEM", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1.4f))
-            Text("QTY", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.5f))
-            Text("RATE", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f))
-            Text("TOTAL", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
-            Spacer(modifier = Modifier.width(48.dp))
+            Text("ITEM", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1.4f))
+            Text("QTY", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.5f))
+            Text("RATE", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f))
+            Text("TOTAL", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
+            Spacer(modifier = Modifier.width(52.dp)) // Match row icon button + padding
           }
-          
-          HorizontalDivider(thickness = 1.dp, color = AsliColors.Primary.copy(alpha = 0.2f))
 
+          
           if (cart.isEmpty()) {
             Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
               Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Outlined.ShoppingCart, contentDescription = null, tint = AsliColors.TextSecondary, modifier = Modifier.size(48.dp))
-                Text("Cart is empty", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
+                Icon(Icons.Outlined.ShoppingCart, contentDescription = null, tint = AsliColors.TextSecondary.copy(alpha = 0.4f), modifier = Modifier.size(64.dp))
+                Text("Cart is empty", color = AsliColors.TextSecondary, style = AppTypography.bodyMedium)
               }
             }
           } else {
@@ -155,29 +158,30 @@ fun ItemWiseBillScreen(
               verticalArrangement = Arrangement.spacedBy(0.dp)
             ) {
               cart.forEachIndexed { index, line ->
-              Row(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .clickable { showQtyFor = line }
-                  .padding(horizontal = 12.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-              ) {
-                Text(line.name, color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), modifier = Modifier.weight(1.4f))
-                Text(line.qty.toInt().toString(), color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(0.5f))
-                Text("₹${line.rate.toInt()}", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.7f))
-                Text("₹${line.total.toInt()}", color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.ExtraBold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
-                Box(modifier = Modifier.width(48.dp), contentAlignment = Alignment.Center) {
-                  IconButton(onClick = { vm.setQty(line.productId, 0.0) }, modifier = Modifier.size(36.dp)) {
-                    Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red.copy(alpha = 0.8f), modifier = Modifier.size(20.dp))
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showQtyFor = line }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                  horizontalArrangement = Arrangement.Start,
+                  verticalAlignment = Alignment.CenterVertically
+                ) {
+                  Text(line.name, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1.4f))
+                  Text(line.qty.toInt().toString(), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(0.5f))
+                  Text("₹${line.rate.toInt()}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.7f))
+                  Text("₹${line.total.toInt()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
+                  Box(modifier = Modifier.width(52.dp), contentAlignment = Alignment.Center) {
+                    IconButton(onClick = { vm.setQty(line.productId, 0.0) }, modifier = Modifier.size(36.dp)) {
+                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red, modifier = Modifier.size(20.dp))
+                    }
                   }
                 }
-              }
+
               if (index < cart.size - 1) {
                 HorizontalDivider(
-                  modifier = Modifier.padding(horizontal = 8.dp),
+                  modifier = Modifier.padding(horizontal = 16.dp),
                   thickness = 0.5.dp,
-                  color = AsliColors.Primary.copy(alpha = 0.1f)
+                  color = AsliColors.TextSecondary.copy(alpha = 0.1f)
                 )
               }
             }
@@ -186,28 +190,20 @@ fun ItemWiseBillScreen(
       }
     }
 
-      DarkCard(modifier = Modifier.fillMaxWidth(), alpha = 0.9f) {
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Column {
-            Text("Total Items", color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelSmall)
-            Text(cart.sumOf { it.qty }.toInt().toString(), color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold))
-          }
-          Column(horizontalAlignment = Alignment.End) {
-            Text("Grand Total", color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelSmall)
-            Text("₹ ${subtotal.toInt()}", color = AsliColors.Primary, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black))
-          }
-        }
-      }
+      BillingTotalCard(
+        totalItems = cart.sumOf { it.qty }.toInt(),
+        grandTotal = subtotal
+      )
 
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
+      Row(
+        modifier = Modifier.fillMaxWidth(), 
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+      ) {
         GlassButton("Clear", onClick = vm::clearCart, modifier = Modifier.weight(1f))
-        GlassButton("Search", onClick = { showSearch = true }, modifier = Modifier.weight(1.2f))
+        GlassButton("Search", onClick = { showSearch = true }, modifier = Modifier.weight(1f))
         OrangeButton("Save", onClick = { isSaveAndPrint = false; showSave = true }, modifier = Modifier.weight(1f))
-        OrangeButton("Save & Print", onClick = { isSaveAndPrint = true; showSave = true }, modifier = Modifier.weight(1.6f))
+        OrangeButton("Save & Print", onClick = { isSaveAndPrint = true; showSave = true }, modifier = Modifier.weight(1.3f))
       }
 
       if (!printMessage.isNullOrBlank()) {
@@ -218,7 +214,7 @@ fun ItemWiseBillScreen(
         modifier = Modifier
           .fillMaxWidth()
           .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
       ) {
         Chip(text = "ALL", selected = selectedCategoryId == null, onClick = vm::selectAllCategories)
         categories.forEach { cat ->
@@ -234,29 +230,30 @@ fun ItemWiseBillScreen(
         columns = GridCells.Adaptive(minSize = 160.dp),
         modifier = Modifier
           .fillMaxWidth()
-          .height(240.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+          .weight(0.7f), // Flexible height based on weight
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
       ) {
         items(products, key = { it.id }) { p ->
           DarkCard(modifier = Modifier.fillMaxWidth().clickable { vm.addProduct(p) }, alpha = 0.8f) {
             Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
               Text(
                 p.name, 
-                color = AsliColors.TextPrimary, 
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface, 
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                 maxLines = 1,
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
               )
               Box(
                 modifier = Modifier
-                  .background(AsliColors.PrimaryLight.copy(alpha = 0.6f), RoundedCornerShape(6.dp))
-                  .padding(horizontal = 6.dp, vertical = 2.dp)
+                  .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f), RoundedCornerShape(6.dp))
+                  .padding(horizontal = 8.dp, vertical = 4.dp)
               ) {
-                Text("₹${p.price.toInt()}", color = AsliColors.Primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold))
+                Text("₹${p.price.toInt()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
               }
             }
           }
+
         }
       }
     }
@@ -387,74 +384,81 @@ private fun SaveBillDialog(
 
   AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text("Save Bill") },
+    title = { Text("Save Bill", style = MaterialTheme.typography.titleLarge) },
     text = {
-      Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        OutlinedTextField(value = "", onValueChange = {}, label = { Text("Select Customer...") }, singleLine = true, enabled = false)
-        OutlinedTextField(
+      Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        AsliTextField(value = "", onValueChange = {}, label = "Select Customer...", enabled = false)
+        AsliTextField(
           value = if (draft.discountPercent == 0.0) "" else draft.discountPercent.toString(),
           onValueChange = { onDraftChange(draft.copy(discountPercent = it.toDoubleOrNull() ?: 0.0)) },
-          label = { Text("% DISCOUNT") },
-          singleLine = true
+          label = "% DISCOUNT",
+          keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
         )
         Row(
           modifier = Modifier
             .fillMaxWidth()
-            .background(AsliColors.Card2, RoundedCornerShape(10.dp))
-            .padding(10.dp),
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
+            .padding(12.dp),
           horizontalArrangement = Arrangement.SpaceBetween,
           verticalAlignment = Alignment.CenterVertically
         ) {
-          Text("Include GST", color = AsliColors.TextPrimary)
+          Text("Include GST", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge)
           TextButton(onClick = { onDraftChange(draft.copy(includeGst = !draft.includeGst)) }) {
-            Text(if (draft.includeGst) "ON" else "OFF", color = AsliColors.Orange)
+            Text(if (draft.includeGst) "ON" else "OFF", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
           }
         }
 
         DarkCard(modifier = Modifier.fillMaxWidth()) {
-          Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+          Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-              Text("Total", color = AsliColors.TextSecondary)
-              Text("₹ ${subtotal.toInt()}", color = AsliColors.TextPrimary)
+              Text("Total", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+              Text("₹ ${subtotal.toInt()}", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
             }
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-              Text("Sub Total", color = AsliColors.TextSecondary)
-              Text("₹ ${subtotal.toInt()}", color = AsliColors.TextPrimary)
-            }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-              Text("Grand Total", color = AsliColors.TextPrimary)
-              Text("₹ ${subtotal.toInt()}", color = AsliColors.Orange)
+              val discounted = subtotal * (1 - draft.discountPercent / 100)
+              Text("Grand Total", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
+              Text("₹ ${discounted.toInt()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black))
             }
           }
         }
 
-        Text("Payment Mode :", color = AsliColors.TextSecondary)
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          PaymentChip("NONE", draft.paymentMode == PaymentMode.NONE) { onDraftChange(draft.copy(paymentMode = PaymentMode.NONE)) }
-          PaymentChip("CASH", draft.paymentMode == PaymentMode.CASH) { onDraftChange(draft.copy(paymentMode = PaymentMode.CASH)) }
-          PaymentChip("ONLINE", draft.paymentMode == PaymentMode.ONLINE) { onDraftChange(draft.copy(paymentMode = PaymentMode.ONLINE)) }
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          PaymentChip("CREDIT", draft.paymentMode == PaymentMode.CREDIT) { onDraftChange(draft.copy(paymentMode = PaymentMode.CREDIT)) }
-          PaymentChip("SPLIT", draft.paymentMode == PaymentMode.SPLIT) { onDraftChange(draft.copy(paymentMode = PaymentMode.SPLIT)) }
+        Text("Payment Mode :", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            PaymentChip("NONE", draft.paymentMode == PaymentMode.NONE) { onDraftChange(draft.copy(paymentMode = PaymentMode.NONE)) }
+            PaymentChip("CASH", draft.paymentMode == PaymentMode.CASH) { onDraftChange(draft.copy(paymentMode = PaymentMode.CASH)) }
+            PaymentChip("ONLINE", draft.paymentMode == PaymentMode.ONLINE) { onDraftChange(draft.copy(paymentMode = PaymentMode.ONLINE)) }
+          }
+          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            PaymentChip("CREDIT", draft.paymentMode == PaymentMode.CREDIT) { onDraftChange(draft.copy(paymentMode = PaymentMode.CREDIT)) }
+            PaymentChip("SPLIT", draft.paymentMode == PaymentMode.SPLIT) { onDraftChange(draft.copy(paymentMode = PaymentMode.SPLIT)) }
+          }
         }
 
-        OutlinedTextField(
+        AsliTextField(
           value = draft.note,
           onValueChange = { onDraftChange(draft.copy(note = it)) },
-          label = { Text("Note") },
-          singleLine = true
+          label = "Note"
         )
-        Text(now, color = AsliColors.TextSecondary)
+        Text(now, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
         if (!errorText.isNullOrBlank()) {
-          Text(errorText, color = AsliColors.Red)
+          Text(errorText, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
         }
       }
     },
-    confirmButton = { TextButton(onClick = onSave, enabled = subtotal > 0) { Text("SAVE") } },
-    dismissButton = { TextButton(onClick = onDismiss) { Text("CANCEL") } }
+    confirmButton = { 
+      TextButton(onClick = onSave, enabled = subtotal > 0) { 
+        Text("SAVE", color = if (subtotal > 0) MaterialTheme.colorScheme.primary else Color.Gray, fontWeight = FontWeight.Bold) 
+      } 
+    },
+    dismissButton = { 
+      TextButton(onClick = onDismiss) { 
+        Text("CANCEL") 
+      } 
+    }
   )
 }
+
 
 @Composable
 private fun PaymentChip(text: String, selected: Boolean, onClick: () -> Unit) {

@@ -29,6 +29,7 @@ import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
 import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.AppSpacing
 
 @Composable
 fun SubscriptionScreen(
@@ -43,17 +44,17 @@ fun SubscriptionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(AppSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
         ) {
             SectionHeader("Subscription")
 
             // Current Plan Card
             DarkCard(modifier = Modifier.fillMaxWidth()) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(AppSpacing.lg),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.lg)
                 ) {
                     Icon(
                         Icons.Outlined.Star,
@@ -86,7 +87,7 @@ fun SubscriptionScreen(
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
             ) {
                 items(features) { feature ->
                     FeatureItem(feature)

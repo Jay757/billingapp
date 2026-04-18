@@ -3,7 +3,6 @@ package com.aslibill.data
 import android.content.Context
 import com.aslibill.printing.StoreConfig
 import com.aslibill.ui.theme.ThemeMode
-import com.aslibill.ui.theme.ThemePalette
 import com.aslibill.ui.theme.UiPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,19 +51,16 @@ class SettingsRepository(context: Context) {
 
     private fun loadUiPreferences(): UiPreferences {
         val mode = prefs.getString("theme_mode", ThemeMode.LIGHT.name)
-        val palette = prefs.getString("theme_palette", ThemePalette.BLUE.name)
         return UiPreferences(
-            mode = runCatching { ThemeMode.valueOf(mode ?: ThemeMode.LIGHT.name) }.getOrDefault(ThemeMode.LIGHT),
-            palette = runCatching { ThemePalette.valueOf(palette ?: ThemePalette.BLUE.name) }.getOrDefault(ThemePalette.BLUE)
+            mode = runCatching { ThemeMode.valueOf(mode ?: ThemeMode.LIGHT.name) }.getOrDefault(ThemeMode.LIGHT)
         )
     }
 
-    fun saveUiPreferences(mode: ThemeMode, palette: ThemePalette) {
+    fun saveUiPreferences(mode: ThemeMode) {
         prefs.edit().apply {
             putString("theme_mode", mode.name)
-            putString("theme_palette", palette.name)
             apply()
         }
-        _uiPreferences.value = UiPreferences(mode = mode, palette = palette)
+        _uiPreferences.value = UiPreferences(mode = mode)
     }
 }

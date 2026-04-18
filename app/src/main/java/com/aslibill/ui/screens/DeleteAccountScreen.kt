@@ -49,14 +49,14 @@ fun DeleteAccountScreen(
     )
 
     ScreenSurface {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(AppSpacing.md),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.md),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    Column(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(contentPadding)
+        .padding(AppSpacing.lg),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
+      horizontalAlignment = Alignment.CenterHorizontally
+    ) {
             SectionHeader("Delete Account")
 
             if (deletionRequested) {

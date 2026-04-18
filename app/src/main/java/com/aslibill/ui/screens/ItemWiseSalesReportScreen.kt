@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aslibill.data.db.ItemSalesRow
 import com.aslibill.ui.components.DarkCard
@@ -26,6 +30,8 @@ import com.aslibill.ui.components.DateBox
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
 import com.aslibill.ui.components.openDatePicker
+import com.aslibill.ui.theme.AppSpacing
+import com.aslibill.ui.theme.AppTypography
 import com.aslibill.ui.theme.AsliColors
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -49,17 +55,35 @@ fun ItemWiseSalesReportScreen(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+        .padding(horizontal = AppSpacing.md),
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
-      Text("Item Wise Sales Report", color = AsliColors.TextPrimary, style = MaterialTheme.typography.titleLarge)
+      Text(
+        "Item Sales Report",
+        color = AsliColors.TextPrimary,
+        style = AppTypography.h2,
+        modifier = Modifier.padding(top = AppSpacing.md)
+      )
 
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        DateBox(label = "FROM", value = fromText, onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } }, modifier = Modifier.weight(1f))
-        DateBox(label = "TO", value = toText, onClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } }, modifier = Modifier.weight(1f))
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
+      ) {
+        DateBox(
+          label = "FROM",
+          date = fromText,
+          onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } },
+          modifier = Modifier.weight(1f)
+        )
+        DateBox(
+          label = "TO",
+          date = toText,
+          onClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } },
+          modifier = Modifier.weight(1f)
+        )
       }
 
-      SectionHeader("Sales Breakdown")
+      SectionHeader("SALES BREAKDOWN")
 
       if (items.isEmpty()) {
         Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
@@ -78,15 +102,39 @@ fun ItemWiseSalesReportScreen(
 private fun ItemSaleCard(row: ItemSalesRow) {
   DarkCard(modifier = Modifier.fillMaxWidth()) {
     Row(
-      modifier = Modifier.padding(14.dp).fillMaxWidth(),
+      modifier = Modifier
+        .padding(16.dp)
+        .fillMaxWidth(),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(row.productName, color = AsliColors.TextPrimary, style = MaterialTheme.typography.bodyLarge)
-        Text("Qty Sold: ${row.totalQty.toInt()}", color = AsliColors.TextSecondary, style = MaterialTheme.typography.labelMedium)
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          row.productName.uppercase(),
+          color = AsliColors.TextPrimary,
+          style = AppTypography.bodyBold,
+          fontWeight = FontWeight.Black
+        )
+        Text(
+          "QTY SOLD: ${row.totalQty.toInt()}",
+          color = AsliColors.PrimaryBlue,
+          style = AppTypography.labelCaps,
+          modifier = Modifier.padding(top = 4.dp)
+        )
       }
-      Text("₹ ${String.format("%.2f", row.totalRevenue)}", color = AsliColors.Orange, style = MaterialTheme.typography.titleMedium)
+      
+      Surface(
+        color = AsliColors.SuccessGreen.copy(alpha = 0.1f),
+        shape = RoundedCornerShape(4.dp)
+      ) {
+        Text(
+          "₹${String.format("%.2f", row.totalRevenue)}",
+          color = AsliColors.SuccessGreen,
+          style = AppTypography.bodyBold,
+          modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+          fontWeight = FontWeight.Black
+        )
+      }
     }
   }
 }

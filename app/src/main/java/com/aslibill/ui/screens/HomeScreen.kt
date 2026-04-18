@@ -1,76 +1,44 @@
 package com.aslibill.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.res.painterResource
-import com.aslibill.R
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AccountBalanceWallet
-import androidx.compose.material.icons.outlined.Bluetooth
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.CreditCard
-import androidx.compose.material.icons.outlined.DeleteForever
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Feedback
-import androidx.compose.material.icons.outlined.Groups
-import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.Print
 import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.automirrored.outlined.ShowChart
-import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material.icons.outlined.Summarize
-import androidx.compose.material.icons.outlined.SupportAgent
-import androidx.compose.material.icons.outlined.Today
-import androidx.compose.material.icons.outlined.WorkspacePremium
+import androidx.compose.material.icons.automirrored.outlined.TrendingUp
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.aslibill.ui.components.DarkCard
-import com.aslibill.ui.components.IconTile
-import com.aslibill.ui.components.PremiumBanner
-import com.aslibill.ui.components.ScreenSurface
-import com.aslibill.ui.components.SectionHeader
-import com.aslibill.ui.theme.AsliColors
-import com.aslibill.ui.theme.Brand
-import com.aslibill.ui.components.StatsCard
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.automirrored.outlined.TrendingUp
-import androidx.compose.material.icons.outlined.Receipt
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.aslibill.R
+import com.aslibill.ui.components.*
+import com.aslibill.ui.theme.AsliColors
+import com.aslibill.ui.theme.AppTypography
+import com.aslibill.ui.theme.AppSpacing
+import java.util.Locale
 
 private data class HomeTile(
   val label: String,
-  val icon: androidx.compose.ui.graphics.vector.ImageVector,
+  val icon: ImageVector,
   val onClick: () -> Unit
 )
 
@@ -103,66 +71,73 @@ fun HomeScreen(
 ) {
   val todaySales by homeVm.todaySalesTotal.collectAsState()
   val todayBillCount by homeVm.todayBillCount.collectAsState()
+  
   ScreenSurface {
     Column(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
-        .padding(16.dp)
+        .padding(horizontal = AppSpacing.lg)
         .verticalScroll(rememberScrollState()),
-      verticalArrangement = Arrangement.spacedBy(18.dp)
+      verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
     ) {
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Column {
+      Spacer(modifier = Modifier.height(12.dp))
+      
+      // Header Section
+      BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val imageSize = if (maxWidth > 600.dp) 140.dp else 100.dp
+        Column(modifier = Modifier.padding(top = AppSpacing.md).fillMaxWidth(0.7f)) {
           Text(
-            "Hello, $userName!",
-            color = AsliColors.TextPrimary,
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+            text = "Hello, ${userName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}!",
+            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+            color = MaterialTheme.colorScheme.onBackground
           )
           Text(
-            userPhone,
-            color = AsliColors.TextSecondary,
-            style = MaterialTheme.typography.bodyMedium
+            text = userPhone,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
           )
         }
-        Box(
+        Image(
+          painter = painterResource(id = R.drawable.billing_icon),
+          contentDescription = null,
+          contentScale = ContentScale.Fit,
           modifier = Modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .background(AsliColors.PrimaryLight),
-          contentAlignment = Alignment.Center
-        ) {
-          Icon(Icons.Outlined.Person, contentDescription = null, tint = AsliColors.Primary)
-        }
+            .size(imageSize)
+            .align(Alignment.TopEnd)
+            .offset(x = AppSpacing.sm, y = (-AppSpacing.sm))
+        )
       }
 
+
+      Spacer(modifier = Modifier.height(4.dp))
+
+      // Stats Section
       Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.lg)
       ) {
         StatsCard(
           label = "Today's Sales",
           value = "₹ ${todaySales.toInt()}",
           icon = Icons.AutoMirrored.Outlined.TrendingUp,
-          color = AsliColors.Primary,
+          color = AsliColors.SuccessGreen,
           modifier = Modifier.weight(1f)
         )
         StatsCard(
           label = "Total Bills",
           value = "$todayBillCount",
-          icon = Icons.Outlined.Receipt,
-          color = AsliColors.Orange,
+          icon = Icons.AutoMirrored.Outlined.ReceiptLong,
+          color = MaterialTheme.colorScheme.primary,
           modifier = Modifier.weight(1f)
         )
       }
 
+
+      // Quick Actions
       SectionHeader("Quick Actions")
       DarkCard(modifier = Modifier.fillMaxWidth()) {
-        HomeTileSection(
+        HomeGridSection(
           tiles = listOf(
             HomeTile("Quick Bill", Icons.AutoMirrored.Outlined.ReceiptLong, onQuickBill),
             HomeTile("Item Wise Bill", Icons.AutoMirrored.Outlined.List, onItemWiseBill),
@@ -176,75 +151,56 @@ fun HomeScreen(
         )
       }
 
+      // Reports
       SectionHeader("Reports")
       DarkCard(modifier = Modifier.fillMaxWidth()) {
-        HomeTileSection(
+        HomeGridSection(
           tiles = listOf(
             HomeTile("Bill Report", Icons.Outlined.Description, onReports),
-            HomeTile("Item Wise Sales Report", Icons.AutoMirrored.Outlined.ShowChart, onItemWiseSalesReport),
+            HomeTile("Item Wise Sales", Icons.AutoMirrored.Outlined.ShowChart, onItemWiseSalesReport),
             HomeTile("Day Report", Icons.Outlined.Today, onDayReport),
             HomeTile("Sales Summary", Icons.Outlined.BarChart, onSalesSummary)
           )
         )
       }
 
-      SectionHeader("Settings")
+      // Settings & Others
+      SectionHeader("Settings & More")
       DarkCard(modifier = Modifier.fillMaxWidth()) {
-        HomeTileSection(
+        HomeGridSection(
           tiles = listOf(
-            HomeTile("Bluetooth Devices", Icons.Outlined.Bluetooth, onBluetoothPrinter),
-            HomeTile("App Settings", Icons.Outlined.Print, onPrintSettings)
-          )
-        )
-      }
-
-      SectionHeader("Others")
-      DarkCard(modifier = Modifier.fillMaxWidth()) {
-        HomeTileSection(
-          tiles = listOf(
+            HomeTile("Printers", Icons.Outlined.Bluetooth, onBluetoothPrinter),
+            HomeTile("Settings", Icons.Outlined.Print, onPrintSettings),
             HomeTile("Feedback", Icons.Outlined.Feedback, onFeedback),
-            HomeTile("Contact Us", Icons.Outlined.SupportAgent, onContactUs)
-          )
-        )
-      }
-
-      SectionHeader("Account")
-      DarkCard(modifier = Modifier.fillMaxWidth()) {
-        HomeTileSection(
-          tiles = listOf(
-            HomeTile("Subscription", Icons.Outlined.WorkspacePremium, onSubscription),
-            HomeTile("Delete Account", Icons.Outlined.DeleteForever, onDeleteAccount),
+            HomeTile("Contact Us", Icons.Outlined.SupportAgent, onContactUs),
             HomeTile("Log Out", Icons.AutoMirrored.Outlined.Logout, onLogOut)
           )
         )
       }
 
       PremiumBanner(onClick = onUpgradePremium)
+      Spacer(modifier = Modifier.height(24.dp))
     }
   }
 }
 
 @Composable
-private fun HomeTileSection(tiles: List<HomeTile>) {
-  BoxWithConstraints(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-    val columns = if (maxWidth < 520.dp) 2 else 3
-    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-      tiles.chunked(columns).forEach { rowTiles ->
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-          rowTiles.forEach { tile ->
-            IconTile(
-              label = tile.label,
-              icon = tile.icon,
-              onClick = tile.onClick,
-              modifier = Modifier.weight(1f)
-            )
-          }
-          repeat(columns - rowTiles.size) {
-            Spacer(modifier = Modifier.weight(1f))
-          }
-        }
-      }
+private fun HomeGridSection(tiles: List<HomeTile>) {
+  androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+    columns = androidx.compose.foundation.lazy.grid.GridCells.Adaptive(minSize = 150.dp),
+    modifier = Modifier.fillMaxWidth().heightIn(max = 1000.dp).padding(AppSpacing.sm),
+    horizontalArrangement = Arrangement.spacedBy(AppSpacing.xs),
+    verticalArrangement = Arrangement.spacedBy(AppSpacing.xs),
+    userScrollEnabled = false
+  ) {
+    items(tiles.size) { index ->
+      val tile = tiles[index]
+      IconTile(
+        label = tile.label,
+        icon = tile.icon,
+        onClick = tile.onClick,
+        modifier = Modifier.fillMaxWidth()
+      )
     }
   }
 }
-
