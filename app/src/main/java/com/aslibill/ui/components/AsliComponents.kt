@@ -81,18 +81,28 @@ fun DarkCard(
     alpha: Float = 1f,
     content: @Composable () -> Unit
 ) {
-  Card(
-    modifier = modifier.shadow(
-      elevation = 4.dp,
-      shape = RoundedCornerShape(20.dp),
-      spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-    ),
-    colors = CardDefaults.cardColors(
-      containerColor = MaterialTheme.colorScheme.surface.copy(alpha = alpha)
-    ),
-    shape = RoundedCornerShape(20.dp),
-    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-  ) { content() }
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    Card(
+        modifier = modifier
+            .shadow(
+                elevation = if (isDark) 8.dp else 4.dp,
+                shape = RoundedCornerShape(24.dp),
+                spotColor = Color.Black.copy(alpha = if (isDark) 0.4f else 0.08f),
+                ambientColor = Color.Black.copy(alpha = if (isDark) 0.2f else 0.04f)
+            )
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.08f else 0.10f),
+                shape = RoundedCornerShape(24.dp)
+            ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = alpha)
+        ),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        content()
+    }
 }
 
 @Composable
@@ -207,29 +217,32 @@ fun OrangeButton(
     icon: ImageVector? = null,
     containerColor: Color = MaterialTheme.colorScheme.primary
 ) {
-  Button(
-    onClick = onClick,
-    modifier = modifier.heightIn(min = 48.dp),
-    colors = ButtonDefaults.buttonColors(
-        containerColor = containerColor,
-        contentColor = if (containerColor == MaterialTheme.colorScheme.primary) Color.White else MaterialTheme.colorScheme.onPrimary
-    ),
-    shape = RoundedCornerShape(12.dp),
-    contentPadding = PaddingValues(horizontal = AppSpacing.md, vertical = AppSpacing.sm),
-    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp, pressedElevation = 0.dp)
-  ) {
-    if (icon != null) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(8.dp))
+    Button(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = 54.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = containerColor,
+            contentColor = if (containerColor == MaterialTheme.colorScheme.primary) Color.White else MaterialTheme.colorScheme.onPrimary
+        ),
+        shape = RoundedCornerShape(16.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = AppSpacing.sm),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 0.dp)
+    ) {
+        if (icon != null) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(12.dp))
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge.copy(
+                letterSpacing = 0.5.sp,
+                fontWeight = FontWeight.Black,
+                fontSize = 16.sp
+            ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
-    Text(
-        text = text.uppercase(),
-        style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 0.5.sp),
-        fontWeight = FontWeight.Bold,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-    )
-  }
 }
 
 
@@ -336,26 +349,33 @@ fun AsliTextField(
     enabled: Boolean = true,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: androidx.compose.foundation.text.KeyboardOptions = androidx.compose.foundation.text.KeyboardOptions.Default,
+    leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null
-
 ) {
     val isPassword = keyboardOptions.keyboardType == KeyboardType.Password
     val passwordVisible = remember { mutableStateOf(false) }
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
 
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label, style = MaterialTheme.typography.bodyMedium) },
+        label = { 
+            Text(
+                text = label, 
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
+            ) 
+        },
         modifier = modifier.fillMaxWidth(),
         enabled = enabled,
         visualTransformation = if (isPassword && !passwordVisible.value) PasswordVisualTransformation() else VisualTransformation.None,
         keyboardOptions = keyboardOptions,
-
+        leadingIcon = leadingIcon,
         trailingIcon = {
             if (isPassword) {
                 val icon = if (passwordVisible.value) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff
                 IconButton(onClick = { passwordVisible.value = !passwordVisible.value }) {
-                    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
                 }
             } else {
                 trailingIcon?.invoke()
@@ -363,17 +383,21 @@ fun AsliTextField(
         },
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.12f else 0.10f),
             focusedLabelColor = MaterialTheme.colorScheme.primary,
-            unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
             cursorColor = MaterialTheme.colorScheme.primary,
+            focusedContainerColor = if (isDark) Color(0xFF1E293B) else MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = if (isDark) Color(0xFF1E293B) else MaterialTheme.colorScheme.surface,
             selectionColors = TextSelectionColors(
                 handleColor = MaterialTheme.colorScheme.primary,
                 backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
             )
         ),
-        textStyle = MaterialTheme.typography.bodyLarge,
-        shape = RoundedCornerShape(14.dp),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+        shape = RoundedCornerShape(16.dp),
         singleLine = true
     )
 }

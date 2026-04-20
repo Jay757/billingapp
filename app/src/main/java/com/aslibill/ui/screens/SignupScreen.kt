@@ -2,32 +2,33 @@ package com.aslibill.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.dp
-import androidx.compose.animation.*
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.aslibill.ui.components.AsliTextField
-import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.DarkCard
-import com.aslibill.ui.theme.AsliColors
 import com.aslibill.ui.theme.Brand
 import com.aslibill.ui.theme.AppTypography
 import com.aslibill.ui.theme.AppSpacing
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.luminance
 
 @Composable
 fun SignupScreen(
@@ -39,130 +40,214 @@ fun SignupScreen(
     ScreenSurface {
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp.dp
-        val isTablet = screenWidth >= 600.dp
-        
+        val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+
+        val bgGradient = if (isDark) {
+            Brush.verticalGradient(
+                colors = listOf(
+                    Color(0xFF0F172A),
+                    Color(0xFF020617)
+                )
+            )
+        } else {
+            Brush.verticalGradient(
+                colors = listOf(
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                    MaterialTheme.colorScheme.background
+                )
+            )
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            AsliColors.PrimaryBlue.copy(alpha = 0.05f),
-                            AsliColors.Bg
-                        )
-                    )
-                )
+                .background(bgGradient)
         ) {
-            // Background Decorative Circles - Scaled by screen size
-            Box(
-                modifier = Modifier
-                    .size(screenWidth * 0.8f)
-                    .offset(x = (-screenWidth * 0.3f), y = (-screenWidth * 0.3f))
-                    .background(AsliColors.PrimaryBlue.copy(alpha = 0.03f), CircleShape)
-            )
-            
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(contentPadding)
-                    .padding(horizontal = (if (isTablet) screenWidth * 0.1f else AppSpacing.xl).coerceAtLeast(AppSpacing.xl))
                     .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = Brand.AppName,
-                    color = AsliColors.PrimaryBlue,
-                    style = if (isTablet) AppTypography.h1.copy(fontSize = 40.sp) else AppTypography.h1
-                )
-                
-                Spacer(modifier = Modifier.height(AppSpacing.sm))
-                
-                Text(
-                    text = "Smart Billing for your business",
-                    color = AsliColors.TextSecondary,
-                    style = AppTypography.bodyMedium,
-                    textAlign = TextAlign.Center
-                )
+                Spacer(modifier = Modifier.height(64.dp))
 
-                Spacer(modifier = Modifier.height(if (isTablet) 64.dp else 48.dp))
+                // Brand Header Section
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Verified,
+                            contentDescription = null,
+                            tint = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(42.dp)
+                        )
+                        Text(
+                            text = Brand.AppName,
+                            color = if (isDark) Color.White else MaterialTheme.colorScheme.onBackground,
+                            style = AppTypography.h1.copy(fontSize = 36.sp, fontWeight = FontWeight.Black)
+                        )
+                    }
+                    Text(
+                        text = "Smart Billing for your business",
+                        color = (if (isDark) Color.White else MaterialTheme.colorScheme.onBackground).copy(alpha = 0.5f),
+                        style = AppTypography.bodySmall
+                    )
+                }
 
+                Spacer(modifier = Modifier.height(48.dp))
+
+                // Welcome Header
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Create Account",
+                        color = if (isDark) Color.White else MaterialTheme.colorScheme.onBackground,
+                        style = AppTypography.h1.copy(fontWeight = FontWeight.Bold, fontSize = 28.sp)
+                    )
+                    Text(
+                        text = "Join thousands of businesses today",
+                        color = (if (isDark) Color.White else MaterialTheme.colorScheme.onBackground).copy(alpha = 0.6f),
+                        style = AppTypography.bodyMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Form Card
                 DarkCard(
-                    modifier = Modifier.widthIn(max = 500.dp).fillMaxWidth(),
-                    alpha = 0.9f
+                    modifier = Modifier
+                        .widthIn(max = 480.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = AppSpacing.xl),
+                    alpha = if (isDark) 0.4f else 0.9f
                 ) {
                     Column(
-                        modifier = Modifier.padding(AppSpacing.xl),
+                        modifier = Modifier.padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = "Create Account",
-                            color = AsliColors.TextPrimary,
-                            style = AppTypography.h2
-                        )
-                        
-                        Text(
-                            text = "Join thousands of businesses today",
-                            color = AsliColors.TextSecondary,
-                            style = AppTypography.bodySmall
-                        )
-
-                        Spacer(modifier = Modifier.height(AppSpacing.xl))
-
                         AsliTextField(
                             value = vm.name,
                             onValueChange = { vm.name = it },
                             label = "Full Name",
-                            modifier = Modifier.fillMaxWidth()
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Person,
+                                    contentDescription = null,
+                                    tint = (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.6f)
+                                )
+                            }
                         )
-
-                        Spacer(modifier = Modifier.height(16.dp))
 
                         AsliTextField(
                             value = vm.phone,
                             onValueChange = { vm.phone = it },
                             label = "Phone Number",
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                            leadingIcon = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(start = 12.dp, end = 4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.PhoneAndroid,
+                                        contentDescription = null,
+                                        tint = (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.6f)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "+91", 
+                                        color = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface, 
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .width(1.dp)
+                                            .height(20.dp)
+                                            .background((if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.2f))
+                                    )
+                                }
+                            }
                         )
-
-                        Spacer(modifier = Modifier.height(16.dp))
 
                         AsliTextField(
                             value = vm.password,
                             onValueChange = { vm.password = it },
                             label = "Password",
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Lock,
+                                    contentDescription = null,
+                                    tint = (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.6f)
+                                )
+                            }
                         )
 
                         if (vm.error != null) {
-                            Text(
-                                text = vm.error!!,
-                                color = AsliColors.AlertOrange,
-                                style = AppTypography.bodySmall,
-                                modifier = Modifier.padding(top = AppSpacing.md)
-                            )
+                            Surface(
+                                color = MaterialTheme.colorScheme.errorContainer,
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = vm.error!!,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    style = AppTypography.bodySmall,
+                                    modifier = Modifier.padding(AppSpacing.md),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
 
-                        Spacer(modifier = Modifier.height(AppSpacing.xl))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        OrangeButton(
-                            text = if (vm.isLoading) "CREATING ACCOUNT..." else "GET STARTED",
+                        Button(
                             onClick = { vm.onSignup(onSignupSuccess) },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(54.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isDark) Color(0xFF3B82F6) else MaterialTheme.colorScheme.primary,
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text(
+                                text = if (vm.isLoading) "CREATING ACCOUNT..." else "GET STARTED",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black, fontSize = 16.sp, letterSpacing = 1.sp)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                TextButton(onClick = onGoToLogin) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Already have an account? ",
+                            color = (if (isDark) Color.White else MaterialTheme.colorScheme.onBackground).copy(alpha = 0.6f),
+                            style = AppTypography.bodyMedium
+                        )
+                        Text(
+                            text = "Login",
+                            color = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary,
+                            style = AppTypography.bodyBold
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                TextButton(onClick = onGoToLogin) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Already have an account? ", color = AsliColors.TextSecondary, style = AppTypography.bodyMedium)
-                        Text("Login", color = AsliColors.PrimaryBlue, style = AppTypography.bodyBold)
-                    }
-                }
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }

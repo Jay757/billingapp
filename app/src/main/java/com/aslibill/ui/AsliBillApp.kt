@@ -87,7 +87,7 @@ fun NovaBillApp() {
   Scaffold { padding ->
     NavHost(
       navController = navController,
-      startDestination = if (userSession != null) Routes.Home else Routes.Login,
+      startDestination = if (userSession != null) Routes.Home else Routes.Welcome,
       modifier = Modifier
     ) {
       composable(Routes.Home) {
@@ -273,6 +273,20 @@ fun NovaBillApp() {
         val vm: BuyPrintersViewModel = viewModel()
         BuyPrintersScreen(contentPadding = padding, vm = vm)
       }
+      composable(Routes.Welcome) {
+        com.aslibill.ui.screens.WelcomeScreen(
+          onGetStarted = { 
+            navController.navigate(Routes.Login) {
+              popUpTo(Routes.Welcome) { inclusive = true }
+            }
+          },
+          onGoToLogin = { 
+            navController.navigate(Routes.Login) {
+              popUpTo(Routes.Welcome) { inclusive = true }
+            }
+          }
+        )
+      }
     }
   }
 }
@@ -319,5 +333,6 @@ object Routes {
   const val BuyPrinters = "buyPrinters"
   const val Login = "login"
   const val Signup = "signup"
+  const val Welcome = "welcome"
 }
 

@@ -17,7 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountBalance
 import androidx.compose.material.icons.outlined.AttachMoney
 import androidx.compose.material.icons.outlined.Payments
-import androidx.compose.material.icons.outlined.ReceiptLong
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -96,7 +96,7 @@ fun SalesSummaryScreen(
         StatsCard(
           label = "TOTAL BILLS",
           value = summary.totalBills.toString(),
-          icon = Icons.Outlined.ReceiptLong,
+          icon = Icons.AutoMirrored.Outlined.ReceiptLong,
           color = AsliColors.PrimaryBlue,
           modifier = Modifier.weight(1f)
         )

@@ -28,7 +28,8 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
             if (success) {
                 onSuccess()
             } else {
-                error = "Invalid credentials"
+                val reason = authRepository.lastError.value
+                error = reason ?: "Invalid credentials"
             }
         }
     }
