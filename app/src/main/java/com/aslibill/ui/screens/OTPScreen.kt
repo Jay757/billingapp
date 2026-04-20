@@ -2,6 +2,8 @@ package com.aslibill.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -19,8 +21,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aslibill.ui.components.ScreenSurface
@@ -30,10 +37,10 @@ import com.aslibill.ui.theme.AppTypography
 import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.Brand
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun OTPScreen(
@@ -47,6 +54,7 @@ fun OTPScreen(
         val configuration = LocalConfiguration.current
         val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
         val focusRequester = remember { FocusRequester() }
+        val keyboardController = LocalSoftwareKeyboardController.current
 
         val bgGradient = if (isDark) {
             Brush.verticalGradient(
@@ -137,12 +145,25 @@ fun OTPScreen(
                     ) {
                         
                         // Premium Digit-based OTP Input
-                        Box(contentAlignment = Alignment.Center) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null
+                                ) {
+                                    focusRequester.requestFocus()
+                                    keyboardController?.show()
+                                }
+                        ) {
                             // Invisible TextField to capture input
                             BasicTextField(
                                 value = vm.otpCode,
                                 onValueChange = { if (it.length <= 6) vm.otpCode = it },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                cursorBrush = SolidColor(Color.Transparent),
+                                textStyle = TextStyle(color = Color.Transparent, fontSize = 0.sp),
                                 modifier = Modifier
                                     .focusRequester(focusRequester)
                                     .size(1.dp)
@@ -181,9 +202,18 @@ fun OTPScreen(
                                             text = char,
                                             style = MaterialTheme.typography.headlineSmall.copy(
                                                 fontWeight = FontWeight.Black,
-                                                fontSize = 24.sp
+                                                fontSize = 28.sp,
+                                                textAlign = TextAlign.Center,
+                                                platformStyle = PlatformTextStyle(
+                                                    includeFontPadding = false
+                                                ),
+                                                lineHeightStyle = LineHeightStyle(
+                                                    alignment = LineHeightStyle.Alignment.Center,
+                                                    trim = LineHeightStyle.Trim.None
+                                                )
                                             ),
-                                            color = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface
+                                            color = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.fillMaxSize().wrapContentHeight(align = Alignment.CenterVertically)
                                         )
                                     }
                                 }
