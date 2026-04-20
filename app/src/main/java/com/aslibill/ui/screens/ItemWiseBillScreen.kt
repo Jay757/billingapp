@@ -49,8 +49,8 @@ import com.aslibill.ui.components.GrayButton
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.GlassButton
-import com.aslibill.ui.components.PremiumSegmentedControl
 import com.aslibill.ui.components.AsliTextField
+import com.aslibill.ui.components.AsliTable
 import com.aslibill.ui.components.BillingTotalCard
 import com.aslibill.ui.theme.AsliColors
 import com.aslibill.ui.theme.AppTypography
@@ -61,6 +61,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import java.text.SimpleDateFormat
@@ -124,77 +125,31 @@ fun ItemWiseBillScreen(
         }
       }
 
-      DarkCard(modifier = Modifier.fillMaxWidth().weight(1f), alpha = 1f) {
-        Column(modifier = Modifier.fillMaxSize()) {
-          // Integrated Header
-          Row(
-            modifier = Modifier
-              .fillMaxWidth()
-              .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-              .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md),
-            horizontalArrangement = Arrangement.Start
-          ) {
-            Text("ITEM", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1.4f))
-            Text("QTY", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.5f))
-            Text("RATE", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f))
-            Text("TOTAL", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
-            Spacer(modifier = Modifier.width(52.dp)) // Match row icon button + padding
-          }
-
-          
-          if (cart.isEmpty()) {
-            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-              Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Outlined.ShoppingCart, contentDescription = null, tint = AsliColors.TextSecondary.copy(alpha = 0.4f), modifier = Modifier.size(64.dp))
-                Text("Cart is empty", color = AsliColors.TextSecondary, style = AppTypography.bodyMedium)
-              }
-            }
-          } else {
-            Column(
-              modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
-              verticalArrangement = Arrangement.spacedBy(0.dp)
-            ) {
-              cart.forEachIndexed { index, line ->
-                Row(
-                  modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showQtyFor = line }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                  horizontalArrangement = Arrangement.Start,
-                  verticalAlignment = Alignment.CenterVertically
-                ) {
-                  Text(line.name, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1.4f))
-                  Text(line.qty.toInt().toString(), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(0.5f))
-                  Text("₹${line.rate.toInt()}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.7f))
-                  Text("₹${line.total.toInt()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
-                  Box(modifier = Modifier.width(52.dp), contentAlignment = Alignment.Center) {
-                    IconButton(onClick = { vm.setQty(line.productId, 0.0) }, modifier = Modifier.size(36.dp)) {
-                      Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red, modifier = Modifier.size(20.dp))
-                    }
-                  }
-                }
-
-              if (index < cart.size - 1) {
-                HorizontalDivider(
-                  modifier = Modifier.padding(horizontal = 16.dp),
-                  thickness = 0.5.dp,
-                  color = AsliColors.TextSecondary.copy(alpha = 0.1f)
-                )
-              }
-            }
-          }
+      AsliTable(
+        headers = listOf("SR", "DETAILS", "QTY", "RATE", "TOTAL"),
+        columnWeights = listOf(0.3f, 1.5f, 0.5f, 0.6f, 1.0f),
+        isEmpty = cart.isEmpty(),
+        emptyIcon = Icons.Outlined.ShoppingCart,
+        emptyText = "Cart is empty",
+        modifier = Modifier.fillMaxWidth().weight(1f)
+      ) {
+        val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+        cart.forEachIndexed { index, line ->
+          CartRowItem(
+            sr = index + 1,
+            line = line,
+            isDark = isDark,
+            onClick = { showQtyFor = line },
+            onRemove = { vm.setQty(line.productId, 0.0) }
+          )
+          if (!isDark) HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color.Gray.copy(alpha = 0.2f))
         }
       }
-    }
 
       BillingTotalCard(
         totalItems = cart.sumOf { it.qty }.toInt(),
         grandTotal = subtotal
       )
-
 
       Row(
         modifier = Modifier.fillMaxWidth(), 
@@ -230,7 +185,7 @@ fun ItemWiseBillScreen(
         columns = GridCells.Adaptive(minSize = 160.dp),
         modifier = Modifier
           .fillMaxWidth()
-          .weight(0.7f), // Flexible height based on weight
+          .weight(0.7f),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
       ) {
@@ -253,7 +208,6 @@ fun ItemWiseBillScreen(
               }
             }
           }
-
         }
       }
     }
@@ -368,6 +322,39 @@ fun ItemWiseBillScreen(
       )
     }
   }
+}
+
+@Composable
+private fun CartRowItem(
+    sr: Int,
+    line: CartLine,
+    isDark: Boolean,
+    onClick: () -> Unit,
+    onRemove: () -> Unit
+) {
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(if (isDark) Color(0xFF1E293B).copy(alpha = 0.3f) else Color.Transparent)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(sr.toString(), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.3f))
+        Text(line.name, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black), modifier = Modifier.weight(1.5f))
+        Text(line.qty.toInt().toString(), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.5f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        Text("₹${line.rate.toInt()}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.6f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        
+        Row(modifier = Modifier.weight(1.0f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+            Text("₹${line.total.toInt()}", color = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black))
+            Spacer(Modifier.width(4.dp))
+            IconButton(onClick = onRemove, modifier = Modifier.size(28.dp)) {
+                Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red.copy(alpha = 0.8f), modifier = Modifier.size(16.dp))
+            }
+        }
+    }
 }
 
 @Composable

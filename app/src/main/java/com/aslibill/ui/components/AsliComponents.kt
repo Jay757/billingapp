@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.animation.core.*
 import androidx.compose.animation.*
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.draw.shadow
 import androidx.compose.runtime.getValue
@@ -44,6 +45,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.outlined.ShoppingCart
 
 @Composable
 fun ScreenSurface(content: @Composable () -> Unit) {
@@ -535,6 +539,7 @@ fun openDatePicker(context: Context, a: Any?, b: Any?, c: Any?, onDateSelected: 
 fun CircularKey(
     text: String = "",
     label: String? = null, // Compatibility
+    icon: ImageVector? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isAction: Boolean = false,
@@ -553,15 +558,27 @@ fun CircularKey(
         }
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = displayText,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = if (isAction || containerColor != null) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
-            )
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (isAction || containerColor != null) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                )
+            } else {
+                Text(
+                    text = displayText,
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = if (isAction || containerColor != null) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                )
+            }
         }
     }
 }
@@ -596,6 +613,100 @@ fun PremiumSegmentedControl(
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.labelLarge
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun AsliTable(
+    headers: List<String>,
+    columnWeights: List<Float>,
+    isEmpty: Boolean,
+    emptyIcon: ImageVector = Icons.Outlined.ShoppingCart,
+    emptyText: String = "Cart is empty",
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val bgColor = if (isDark) Color(0xFF0F172A) else Color(0xFFF8FAFC)
+    val headerBg = if (isDark) Color(0xFF1E293B) else Color(0xFFEFF6FF)
+    val bodyBg = if (isDark) Color(0xFF111827) else Color.White
+    val headerText = if (isDark) Color(0xFF93C5FD) else Color(0xFF2563EB)
+    val emptyIconTint = if (isDark) Color(0xFF1E293B) else Color(0xFFCBD5E1)
+    val emptyTextColor = if (isDark) Color(0xFF334155) else Color(0xFF64748B)
+
+    Surface(
+        modifier = modifier.shadow(
+            elevation = if (isDark) 8.dp else 4.dp,
+            shape = RoundedCornerShape(24.dp),
+            spotColor = Color.Black.copy(alpha = if (isDark) 0.5f else 0.1f)
+        ),
+        color = bgColor,
+        shape = RoundedCornerShape(24.dp),
+        border = if (!isDark) BorderStroke(1.dp, Color(0xFFE2E8F0)) else null
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(headerBg)
+                    .padding(horizontal = 16.dp, vertical = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                headers.forEachIndexed { index, title ->
+                    Text(
+                        text = title.uppercase(),
+                        modifier = Modifier.weight(columnWeights.getOrElse(index) { 1f }),
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Black,
+                            color = headerText,
+                            letterSpacing = 1.2.sp
+                        ),
+                        textAlign = if (index == headers.lastIndex) TextAlign.End else TextAlign.Start
+                    )
+                }
+            }
+
+            // Body
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(bodyBg)
+            ) {
+                if (isEmpty) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = emptyIcon,
+                            contentDescription = null,
+                            modifier = Modifier.size(100.dp),
+                            tint = emptyIconTint
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = emptyText,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = emptyTextColor,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = (-0.2).sp
+                        )
+                    }
+                } else {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 4.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(1.dp)
+                    ) {
+                        content()
+                    }
+                }
             }
         }
     }

@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,11 +47,13 @@ import com.aslibill.ui.components.GrayButton
 import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.BillingTotalCard
+import com.aslibill.ui.components.AsliTable
 import com.aslibill.ui.theme.AsliColors
 import com.aslibill.ui.theme.AppTypography
 import com.aslibill.ui.theme.AppSpacing
 import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.graphics.luminance
 
 @Composable
 fun QuickBillScreen(
@@ -97,61 +101,36 @@ fun QuickBillScreen(
         }
       }
 
-
-      // Modern Table Header
-      Row(
-        modifier = Modifier
-          .fillMaxWidth()
-          .clip(RoundedCornerShape(12.dp))
-          .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-          .padding(horizontal = 12.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+      AsliTable(
+        headers = listOf("ITEM", "QTY", "RATE", "TOTAL"),
+        columnWeights = listOf(1.4f, 0.6f, 0.7f, 1.0f),
+        isEmpty = lines.isEmpty(),
+        modifier = Modifier.fillMaxWidth().weight(1f)
       ) {
-        Text("SR", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.4f))
-        Text("DETAILS", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1.2f))
-        Text("QTY", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.6f))
-        Text("RATE", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.6f))
-        Text("TOTAL", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
-        Spacer(modifier = Modifier.width(44.dp)) // Increased to match row icon button + padding
-      }
-
-
-      DarkCard(modifier = Modifier.fillMaxWidth().weight(1f)) {
-        if (lines.isEmpty()) {
-          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
-              Icon(Icons.AutoMirrored.Outlined.ReceiptLong, contentDescription = null, tint = AsliColors.TextSecondary, modifier = Modifier.size(48.dp))
-              Text("No entry added yet", color = AsliColors.TextSecondary, style = MaterialTheme.typography.bodyMedium)
-            }
-          }
-        } else {
-          Column(
+        lines.forEachIndexed { idx, l ->
+          val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+          val rowBg = if (isDark) Color(0xFF1E293B).copy(alpha = 0.3f) else Color.Transparent
+          Row(
             modifier = Modifier
-              .padding(AppSpacing.md)
-              .verticalScroll(androidx.compose.foundation.rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+              .fillMaxWidth()
+              .background(rowBg)
+              .padding(horizontal = 16.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
           ) {
-            lines.forEachIndexed { idx, l ->
-                Row(
-                  modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
-                    .padding(horizontal = 12.dp, vertical = 14.dp),
-                  horizontalArrangement = Arrangement.SpaceBetween,
-                  verticalAlignment = Alignment.CenterVertically
-                ) {
-                  Text(l.sr.toString(), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.4f))
-                  Text(l.details, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(1.2f))
-                  Text(l.qty.toInt().toString(), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(0.6f))
-                  Text("₹${l.rate.toInt()}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.6f))
-                  Text("₹${l.total.toInt()}", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.7f), textAlign = androidx.compose.ui.text.style.TextAlign.End)
-                  IconButton(onClick = { vm.removeItem(idx) }, modifier = Modifier.size(36.dp)) {
-                    Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red, modifier = Modifier.size(20.dp))
-                  }
-                }
-
+            Text(l.details, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black), modifier = Modifier.weight(1.4f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            Text(l.qty.toInt().toString(), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+            Text("₹${l.rate.toInt()}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.7f), textAlign = TextAlign.Center)
+            
+            Row(modifier = Modifier.weight(1.0f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+              Text("₹${l.total.toInt()}", color = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black))
+              Spacer(Modifier.width(4.dp))
+              IconButton(onClick = { vm.removeItem(idx) }, modifier = Modifier.size(28.dp)) {
+                Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red.copy(alpha = 0.8f), modifier = Modifier.size(16.dp))
+              }
             }
           }
+          if (!isDark) androidx.compose.material3.HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color.Gray.copy(alpha = 0.2f))
         }
       }
 
@@ -201,7 +180,7 @@ fun QuickBillScreen(
           }
         }
         IconButton(
-          onClick = { /* TODO */ },
+          onClick = onGoReport,
           modifier = Modifier.background(AsliColors.Card2, RoundedCornerShape(10.dp)).padding(4.dp)
         ) {
           Icon(Icons.AutoMirrored.Outlined.ReceiptLong, contentDescription = "Receipt", tint = AsliColors.PrimaryBlue)
@@ -255,19 +234,8 @@ fun QuickBillScreen(
           Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
             Box(modifier = Modifier.weight(1f)) { CircularKey("0", onClick = { vm.pressDigit("0") }, modifier = Modifier.fillMaxWidth()) }
             Box(modifier = Modifier.weight(1f)) { CircularKey(".", onClick = { vm.pressDigit(".") }, modifier = Modifier.fillMaxWidth()) }
-            Box(modifier = Modifier.weight(1f)) {
-              Surface(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .aspectRatio(1f)
-                  .clickable { vm.backspace() },
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
-              ) {
-                Box(contentAlignment = Alignment.Center) {
-                  Icon(Icons.AutoMirrored.Outlined.Backspace, contentDescription = "Backspace", tint = MaterialTheme.colorScheme.onSurface)
-                }
-              }
+            Box(modifier = Modifier.weight(1f)) { 
+              CircularKey(icon = Icons.AutoMirrored.Outlined.Backspace, onClick = { vm.backspace() }, modifier = Modifier.fillMaxWidth())
             }
           }
         }
