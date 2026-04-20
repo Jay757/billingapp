@@ -259,10 +259,10 @@ fun QuickBillScreen(
               Surface(
                 modifier = Modifier
                   .fillMaxWidth()
-                  .aspectRatio(1.2f)
+                  .aspectRatio(1f)
                   .clickable { vm.backspace() },
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
               ) {
                 Box(contentAlignment = Alignment.Center) {
                   Icon(Icons.AutoMirrored.Outlined.Backspace, contentDescription = "Backspace", tint = MaterialTheme.colorScheme.onSurface)
@@ -322,7 +322,7 @@ fun QuickBillScreen(
 
 @Composable
 private fun KeypadRow(keys: List<String>, onKey: (String) -> Unit) {
-  Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+  Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
     keys.forEach { k ->
       Box(modifier = Modifier.weight(1f)) {
         CircularKey(label = k, onClick = { onKey(k) }, modifier = Modifier.fillMaxWidth())

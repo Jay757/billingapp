@@ -1,10 +1,8 @@
 package com.aslibill.ui.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
@@ -13,9 +11,7 @@ import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,6 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -83,30 +82,60 @@ fun HomeScreen(
     ) {
       Spacer(modifier = Modifier.height(12.dp))
       
-      // Header Section
-      BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val imageSize = if (maxWidth > 600.dp) 140.dp else 100.dp
-        Column(modifier = Modifier.padding(top = AppSpacing.md).fillMaxWidth(0.7f)) {
+      // Full Background Header
+      Box(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(top = AppSpacing.sm)
+          .height(180.dp)
+          .clip(RoundedCornerShape(28.dp))
+      ) {
+        // Illustration as Full Background Cover
+        Image(
+          painter = painterResource(id = R.drawable.header),
+          contentDescription = null,
+          contentScale = ContentScale.Crop,
+          modifier = Modifier.fillMaxSize()
+        )
+        
+        // Soft Scrim for Readability (Now limited to text area)
+        Box(
+          modifier = Modifier
+            .fillMaxWidth(0.7f)
+            .fillMaxHeight()
+            .background(
+              Brush.horizontalGradient(
+                colors = listOf(
+                  MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
+                  MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                  Color.Transparent
+                )
+              )
+            )
+        )
+        
+        // Greeting Text on Top
+        Column(
+          modifier = Modifier
+            .fillMaxHeight()
+            .padding(AppSpacing.lg),
+          verticalArrangement = Arrangement.Center
+        ) {
           Text(
             text = "Hello, ${userName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}!",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+            style = MaterialTheme.typography.headlineMedium.copy(
+              fontWeight = FontWeight.Black,
+              fontSize = 30.sp
+            ),
             color = MaterialTheme.colorScheme.onBackground
           )
           Text(
             text = userPhone,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+            fontWeight = FontWeight.SemiBold
           )
         }
-        Image(
-          painter = painterResource(id = R.drawable.billing_icon),
-          contentDescription = null,
-          contentScale = ContentScale.Fit,
-          modifier = Modifier
-            .size(imageSize)
-            .align(Alignment.TopEnd)
-            .offset(x = AppSpacing.sm, y = (-AppSpacing.sm))
-        )
       }
 
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -402,7 +403,7 @@ fun BillingTotalCard(
 ) {
     DarkCard(modifier = modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = AppSpacing.lg),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = AppSpacing.lg),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -410,7 +411,7 @@ fun BillingTotalCard(
                 Text(
                     "Total Items", 
                     color = MaterialTheme.colorScheme.onSurfaceVariant, 
-                    style = MaterialTheme.typography.labelSmall
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
                 )
                 Text(
                     totalItems.toString(), 
@@ -422,7 +423,7 @@ fun BillingTotalCard(
                 Text(
                     "Grand Total", 
                     color = MaterialTheme.colorScheme.onSurfaceVariant, 
-                    style = MaterialTheme.typography.labelSmall
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
                 )
                 Text(
                     "₹ ${grandTotal.toInt()}", 
@@ -487,7 +488,7 @@ fun DateBox(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -542,16 +543,24 @@ fun CircularKey(
     val displayText = label ?: text
     Surface(
         modifier = modifier
-            .aspectRatio(1.2f)
+            .aspectRatio(1f)
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        color = containerColor ?: if (isAction) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        shape = CircleShape,
+        color = containerColor ?: if (isAction) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+        }
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
                 text = displayText,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = if (isAction || containerColor != null) Color.White else MaterialTheme.colorScheme.onSurface
+                color = if (isAction || containerColor != null) {
+                    MaterialTheme.colorScheme.onPrimary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
             )
         }
     }

@@ -45,10 +45,10 @@ fun LoginScreen(
             ) {
                 val heroHeight = if (maxWidth > 600.dp) 320.dp else 240.dp
                 Image(
-                    painter = painterResource(id = R.drawable.billing_icon),
+                    painter = painterResource(id = R.drawable.header),
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth().height(heroHeight),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Fit
                 )
             }
 
