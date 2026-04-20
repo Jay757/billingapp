@@ -72,8 +72,12 @@ import com.aslibill.ui.screens.LoginViewModelFactory
 import com.aslibill.ui.screens.SignupScreen
 import com.aslibill.ui.screens.SignupViewModel
 import com.aslibill.ui.screens.SignupViewModelFactory
+import com.aslibill.ui.screens.OTPScreen
+import com.aslibill.ui.screens.OTPViewModel
+import com.aslibill.ui.screens.OTPViewModelFactory
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.launch
 
 @Composable
@@ -145,12 +149,44 @@ fun NovaBillApp() {
         val vm: SignupViewModel = viewModel(factory = SignupViewModelFactory(app.container.authRepository))
         SignupScreen(
           vm = vm,
-          onSignupSuccess = {
-            navController.navigate(Routes.Home) {
-              popUpTo(Routes.Signup) { inclusive = true }
-            }
+          onSignupSuccess = { code: String? ->
+            navController.navigate(Routes.OTP + "/${vm.phone}?code=$code")
           },
           onGoToLogin = { navController.navigate(Routes.Login) },
+          contentPadding = padding
+        )
+      }
+      composable(
+          route = Routes.OTP + "/{phone}?code={code}",
+          arguments = listOf(
+              androidx.navigation.navArgument("phone") { type = androidx.navigation.NavType.StringType },
+              androidx.navigation.navArgument("code") { 
+                  type = androidx.navigation.NavType.StringType
+                  nullable = true
+                  defaultValue = null
+              }
+          )
+      ) { backStackEntry ->
+        val phone = backStackEntry.arguments?.getString("phone") ?: ""
+        val initialCode = backStackEntry.arguments?.getString("code")
+        val vm: OTPViewModel = viewModel(factory = OTPViewModelFactory(app.container.authRepository))
+        
+        // Initialize with code from signup if present
+        LaunchedEffect(initialCode) {
+            if (initialCode != null) {
+                vm.generatedOtp = initialCode
+            }
+        }
+
+        OTPScreen(
+          vm = vm,
+          phone = phone,
+          onVerifySuccess = {
+            navController.navigate(Routes.Home) {
+              popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            }
+          },
+          onBack = { navController.popBackStack() },
           contentPadding = padding
         )
       }
@@ -333,6 +369,7 @@ object Routes {
   const val BuyPrinters = "buyPrinters"
   const val Login = "login"
   const val Signup = "signup"
+  const val OTP = "otp"
   const val Welcome = "welcome"
 }
 

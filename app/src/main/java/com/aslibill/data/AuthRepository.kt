@@ -55,12 +55,18 @@ class AuthRepository(context: Context) {
             true
         } catch (t: Throwable) {
             Log.e(tag, "Login failed. baseUrl=${BuildConfig.API_BASE_URL}, phone=$phone", t)
-            _lastError.value = t.message ?: "Login failed"
+            
+            val errorMsg = extractErrorMessage(t.message)
+            if (errorMsg.contains("403") || errorMsg.contains("not verified")) {
+                _lastError.value = "NEEDS_VERIFICATION"
+            } else {
+                _lastError.value = errorMsg
+            }
             false
         }
     }
 
-    suspend fun signup(name: String, phone: String, password: String): Boolean {
+    suspend fun signup(name: String, phone: String, password: String): String? {
         return try {
             val req = JSONObject()
               .put("name", name)
@@ -68,14 +74,63 @@ class AuthRepository(context: Context) {
               .put("password", password)
 
             val resp = client.postJson("/auth/signup", token = null, body = req)
+            _lastError.value = null
+            resp.optString("code", null)
+        } catch (t: Throwable) {
+            Log.e(tag, "Signup failed. phone=$phone", t)
+            _lastError.value = extractErrorMessage(t.message)
+            null
+        }
+    }
+
+    suspend fun verifyOtp(phone: String, code: String): Boolean {
+        return try {
+            val req = JSONObject()
+              .put("phone", phone)
+              .put("code", code)
+
+            val resp = client.postJson("/auth/verify-otp", token = null, body = req)
             val token = resp.getString("token")
+            val userObj = resp.getJSONObject("user")
+            val name = userObj.getString("name")
+
             saveSession(name = name, phone = phone, token = token)
             _lastError.value = null
             true
         } catch (t: Throwable) {
-            Log.e(tag, "Signup failed. baseUrl=${BuildConfig.API_BASE_URL}, phone=$phone", t)
-            _lastError.value = t.message ?: "Signup failed"
+            Log.e(tag, "OTP verification failed. phone=$phone", t)
+            _lastError.value = extractErrorMessage(t.message)
             false
+        }
+    }
+
+    suspend fun resendOtp(phone: String): String? {
+        return try {
+            val req = JSONObject().put("phone", phone)
+            val resp = client.postJson("/auth/resend-otp", token = null, body = req)
+            _lastError.value = null
+            resp.optString("code", null)
+        } catch (t: Throwable) {
+            Log.e(tag, "Resend OTP failed. phone=$phone", t)
+            _lastError.value = extractErrorMessage(t.message)
+            null
+        }
+    }
+
+    private fun extractErrorMessage(rawMessage: String?): String {
+        if (rawMessage == null) return "Unknown error"
+        return try {
+            // ApiHttpClient message format: "HTTP 500: {"error": "..."}"
+            val jsonStart = rawMessage.indexOf("{")
+            if (jsonStart != -1) {
+                val jsonPart = rawMessage.substring(jsonStart)
+                val obj = JSONObject(jsonPart)
+                obj.optString("error", rawMessage)
+            } else {
+                rawMessage
+            }
+        } catch (_: Exception) {
+            rawMessage
         }
     }
 

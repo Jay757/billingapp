@@ -33,7 +33,7 @@ import androidx.compose.ui.graphics.luminance
 @Composable
 fun SignupScreen(
     vm: SignupViewModel,
-    onSignupSuccess: () -> Unit,
+    onSignupSuccess: (String?) -> Unit,
     onGoToLogin: () -> Unit,
     contentPadding: PaddingValues
 ) {

@@ -18,7 +18,7 @@ class SignupViewModel(private val authRepository: AuthRepository) : ViewModel() 
     var isLoading by mutableStateOf(false)
     var error by mutableStateOf<String?>(null)
 
-    fun onSignup(onSuccess: () -> Unit) {
+    fun onSignup(onSuccess: (String?) -> Unit) {
         Log.i(tag, "Signup tapped. nameLen=${name.length}, phoneLen=${phone.length}, passLen=${password.length}")
         if (name.isBlank() || phone.isBlank() || password.isBlank()) {
             error = "Please fill all fields"
@@ -28,11 +28,11 @@ class SignupViewModel(private val authRepository: AuthRepository) : ViewModel() 
         isLoading = true
         error = null
         viewModelScope.launch {
-            val success = authRepository.signup(name, phone, password)
+            val code = authRepository.signup(name, phone, password)
             isLoading = false
-            if (success) {
-                Log.i(tag, "Signup success")
-                onSuccess()
+            if (code != null || authRepository.lastError.value == null) {
+                Log.i(tag, "Signup success with code: $code")
+                onSuccess(code)
             } else {
                 val reason = authRepository.lastError.value
                 error = reason ?: "Signup failed"
