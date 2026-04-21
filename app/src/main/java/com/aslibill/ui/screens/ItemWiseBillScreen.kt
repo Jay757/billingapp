@@ -332,23 +332,27 @@ private fun CartRowItem(
     onClick: () -> Unit,
     onRemove: () -> Unit
 ) {
-    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+    val primary = MaterialTheme.colorScheme.primary
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (isDark) Color(0xFF1E293B).copy(alpha = 0.3f) else Color.Transparent)
+            .background(if (isDark) surfaceVariant.copy(alpha = 0.3f) else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 14.dp),
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(sr.toString(), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.3f))
-        Text(line.name, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black), modifier = Modifier.weight(1.5f))
-        Text(line.qty.toInt().toString(), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.5f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-        Text("₹${line.rate.toInt()}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.6f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        Text(sr.toString(), color = onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.3f))
+        Text(line.name, color = onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black), modifier = Modifier.weight(1.5f))
+        Text(line.qty.toInt().toString(), color = onSurface, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.5f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        Text("₹${line.rate.toInt()}", color = onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.6f), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         
         Row(modifier = Modifier.weight(1.0f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
-            Text("₹${line.total.toInt()}", color = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black))
+            Text("₹${line.total.toInt()}", color = primary, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black))
             Spacer(Modifier.width(4.dp))
             IconButton(onClick = onRemove, modifier = Modifier.size(28.dp)) {
                 Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red.copy(alpha = 0.8f), modifier = Modifier.size(16.dp))

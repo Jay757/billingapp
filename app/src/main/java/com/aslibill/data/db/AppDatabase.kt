@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import kotlinx.coroutines.withContext
 
 @Database(
   entities = [
@@ -15,7 +16,7 @@ import androidx.room.RoomDatabase
     StaffEntity::class,
     CashTransactionEntity::class
   ],
-  version = 5,
+  version = 6,
   exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -42,5 +43,9 @@ abstract class AppDatabase : RoomDatabase() {
           .also { INSTANCE = it }
       }
     }
+  }
+
+  suspend fun clearPersonalData() {
+    // No-op: user requested to keep database data after logout
   }
 }

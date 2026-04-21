@@ -95,7 +95,7 @@ fun NovaBillApp() {
       modifier = Modifier
     ) {
       composable(Routes.Home) {
-        val homeVm: HomeViewModel = viewModel(factory = HomeViewModelFactory(app.container.billDao))
+        val homeVm: HomeViewModel = viewModel(factory = HomeViewModelFactory(app.container.billingRepository))
         HomeScreen(
           onQuickBill = { navController.navigate(Routes.QuickBill) },
           onItemWiseBill = { navController.navigate(Routes.ItemWiseBill) },
@@ -118,11 +118,10 @@ fun NovaBillApp() {
           onDeleteAccount = { navController.navigate(Routes.DeleteAccount) },
           onLogOut = {
             scope.launch {
-                app.container.authRepository.logout()
-                // Security/safety: disconnect any active printer session on logout.
-                app.container.bluetoothPrinterManager.disconnect()
+                app.container.performLogout()
                 navController.navigate(Routes.Login) {
-                    popUpTo(Routes.Home) { inclusive = true }
+                    popUpTo(0) { inclusive = true }
+                    launchSingleTop = true
                 }
             }
           },

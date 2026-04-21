@@ -19,14 +19,41 @@ class AppContainer(context: Context) {
   val customerRepository = CustomerRepository(db.customerDao(), authRepository)
   val staffRepository = StaffRepository(db.staffDao(), authRepository)
   val cashRepository = CashRepository(db.cashDao(), authRepository)
-  val analyticsRepository = AnalyticsRepository(db.billAnalyticsDao())
-  val settingsRepository = SettingsRepository(context)
+  val analyticsRepository = AnalyticsRepository(db.billAnalyticsDao(), authRepository)
+  val settingsRepository = SettingsRepository(context, authRepository)
   val billDao: BillDao = db.billDao()
 
   init {
-    appScope.launch(Dispatchers.IO) {
-      runCatching { inventoryRepository.ensureSeedData() }
+    appScope.launch {
+      authRepository.userSession.collect { session ->
+        if (session != null) {
+          appScope.launch(Dispatchers.IO) {
+            runCatching { 
+              inventoryRepository.syncFromRemote()
+              staffRepository.syncFromRemote()
+              customerRepository.syncFromRemote()
+              billingRepository.syncFromRemote()
+              cashRepository.syncFromRemote()
+              settingsRepository.syncFromRemote()
+
+              val btConfig = bluetoothPrinterConfigRepository.loadRemoteConfig()
+              bluetoothPrinterConfigRepository.saveLocalConfig(btConfig)
+            }
+          }
+        }
+      }
     }
+  }
+
+  suspend fun performLogout() {
+    // 1. Database is kept locally as requested by user
+    // db.clearPersonalData() 
+    
+    // 2. Clear all preferences (auth, print, printer)
+    authRepository.logout()
+
+    // 3. Disconnect hardware
+    bluetoothPrinterManager.disconnect()
   }
 
   // Keep Bluetooth manager alive across navigation so an active printer connection persists.

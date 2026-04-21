@@ -131,5 +131,25 @@ class ApiHttpClient(
       conn.disconnect()
     }
   }
+
+  suspend fun getJsonArray(path: String, token: String?): org.json.JSONArray = withContext(Dispatchers.IO) {
+    val url = URL(buildUrl(path))
+    val conn = (url.openConnection() as HttpURLConnection).apply {
+      requestMethod = "GET"
+      connectTimeout = connectTimeoutMs
+      readTimeout = readTimeoutMs
+      setRequestProperty("Accept", "application/json")
+      if (!token.isNullOrBlank()) setRequestProperty("Authorization", "Bearer $token")
+    }
+
+    try {
+      val body = readBody(conn)
+      ensureSuccess(conn, body)
+      if (body.isBlank()) return@withContext org.json.JSONArray()
+      return@withContext org.json.JSONArray(body)
+    } finally {
+      conn.disconnect()
+    }
+  }
 }
 

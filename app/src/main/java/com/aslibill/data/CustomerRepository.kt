@@ -13,9 +13,16 @@ class CustomerRepository(
 ) {
   private val client = ApiHttpClient(BuildConfig.API_BASE_URL)
 
-  fun observeAll(): Flow<List<CustomerEntity>> = dao.observeAll()
+  private suspend fun getUserId(): Int = authRepository.userSession.value?.id ?: throw IllegalStateException("Not logged in")
+
+  fun observeAll(): Flow<List<CustomerEntity>> {
+    val session = authRepository.userSession.value ?: return kotlinx.coroutines.flow.flowOf(emptyList())
+    return dao.observeAll(session.id)
+  }
+
   suspend fun add(entity: CustomerEntity): Long {
-    val id = dao.insert(entity)
+    val uid = getUserId()
+    val id = dao.insert(entity.copy(userId = uid))
     runCatching {
       val token = authRepository.currentToken() ?: return@runCatching
       val body = JSONObject()
@@ -28,7 +35,8 @@ class CustomerRepository(
   }
 
   suspend fun update(entity: CustomerEntity) {
-    dao.update(entity)
+    val uid = getUserId()
+    dao.update(entity.copy(userId = uid))
     runCatching {
       val token = authRepository.currentToken() ?: return@runCatching
       val body = JSONObject()
@@ -44,6 +52,24 @@ class CustomerRepository(
     runCatching {
       val token = authRepository.currentToken() ?: return@runCatching
       client.delete("/customers/${entity.id}", token)
+    }
+  }
+
+  suspend fun syncFromRemote() {
+    val uid = getUserId()
+    val token = authRepository.currentToken() ?: return
+    runCatching {
+      val resp = client.getJsonArray("/customers", token)
+      for (i in 0 until resp.length()) {
+        val obj = resp.getJSONObject(i)
+        dao.insert(CustomerEntity(
+          id = obj.getLong("id"),
+          userId = uid,
+          name = obj.getString("name"),
+          mobile = obj.getString("mobile"),
+          address = obj.optString("address", null)
+        ))
+      }
     }
   }
 }

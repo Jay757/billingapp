@@ -7,10 +7,11 @@ import androidx.room.PrimaryKey
 
 @Entity(
   tableName = "categories",
-  indices = [Index(value = ["name"], unique = true)]
+  indices = [Index(value = ["userId", "name"], unique = true)]
 )
 data class CategoryEntity(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val userId: Int = 0,
   val name: String
 )
 
@@ -24,10 +25,11 @@ data class CategoryEntity(
       onDelete = ForeignKey.RESTRICT
     )
   ],
-  indices = [Index("categoryId"), Index(value = ["name"], unique = false)]
+  indices = [Index("userId"), Index("categoryId"), Index(value = ["userId", "name"], unique = false)]
 )
 data class ProductEntity(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val userId: Int = 0,
   val categoryId: Long,
   val name: String,
   val price: Double,
@@ -35,17 +37,19 @@ data class ProductEntity(
   val isActive: Boolean = true
 )
 
-@Entity(tableName = "customers", indices = [Index(value = ["mobile"], unique = true)])
+@Entity(tableName = "customers", indices = [Index(value = ["userId", "mobile"], unique = true)])
 data class CustomerEntity(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val userId: Int = 0,
   val name: String,
   val mobile: String,
   val address: String? = null
 )
 
-@Entity(tableName = "bills", indices = [Index("createdAtEpochMs"), Index("customerId")])
+@Entity(tableName = "bills", indices = [Index("userId"), Index("createdAtEpochMs"), Index("customerId")])
 data class BillEntity(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val userId: Int = 0,
   val createdAtEpochMs: Long,
   val cashierName: String? = null,
   val customerId: Long? = null,
@@ -65,10 +69,11 @@ data class BillEntity(
       onDelete = ForeignKey.CASCADE
     )
   ],
-  indices = [Index("billId"), Index("productId")]
+  indices = [Index("userId"), Index("billId"), Index("productId")]
 )
 data class BillItemEntity(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val userId: Int = 0,
   val billId: Long,
   val productId: Long? = null,
   val productNameSnapshot: String,
@@ -78,18 +83,20 @@ data class BillItemEntity(
 )
 
 
-@Entity(tableName = "staff")
+@Entity(tableName = "staff", indices = [Index("userId")])
 data class StaffEntity(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val userId: Int = 0,
   val name: String,
   val role: String,
   val mobile: String,
   val isActive: Boolean = true
 )
 
-@Entity(tableName = "cash_transactions")
+@Entity(tableName = "cash_transactions", indices = [Index("userId")])
 data class CashTransactionEntity(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val userId: Int = 0,
   val type: String, // OPEN | IN | OUT | CLOSE
   val amount: Double,
   val note: String? = null,

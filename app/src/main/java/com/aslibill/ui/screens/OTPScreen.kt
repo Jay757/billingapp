@@ -56,21 +56,12 @@ fun OTPScreen(
         val focusRequester = remember { FocusRequester() }
         val keyboardController = LocalSoftwareKeyboardController.current
 
-        val bgGradient = if (isDark) {
-            Brush.verticalGradient(
-                colors = listOf(
-                    Color(0xFF0F172A),
-                    Color(0xFF020617)
-                )
+        val bgGradient = Brush.verticalGradient(
+            colors = listOf(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                MaterialTheme.colorScheme.background
             )
-        } else {
-            Brush.verticalGradient(
-                colors = listOf(
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
-                    MaterialTheme.colorScheme.background
-                )
-            )
-        }
+        )
 
         LaunchedEffect(Unit) {
             focusRequester.requestFocus()
@@ -99,7 +90,7 @@ fun OTPScreen(
                         modifier = Modifier
                             .size(80.dp)
                             .background(
-                                color = if (isDark) Color(0xFF1E293B) else Color(0xFFDBEAFE),
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                                 shape = RoundedCornerShape(24.dp)
                             ),
                         contentAlignment = Alignment.Center
@@ -107,20 +98,20 @@ fun OTPScreen(
                         Icon(
                             imageVector = Icons.Filled.Shield,
                             contentDescription = null,
-                            tint = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(40.dp)
                         )
                     }
                     
                     Text(
                         text = "Verify Phone",
-                        color = if (isDark) Color.White else MaterialTheme.colorScheme.onBackground,
+                        color = MaterialTheme.colorScheme.onBackground,
                         style = AppTypography.h1.copy(fontWeight = FontWeight.Bold, fontSize = 28.sp)
                     )
                     
                     Text(
                         text = "Enter the 6-digit code sent to\n+91 $phone",
-                        color = (if (isDark) Color.White else MaterialTheme.colorScheme.onBackground).copy(alpha = 0.6f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                         style = AppTypography.bodyMedium,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 32.dp),
@@ -184,15 +175,15 @@ fun OTPScreen(
                                             .weight(1f)
                                             .aspectRatio(0.85f)
                                             .background(
-                                                color = if (isDark) Color(0xFF1E293B) else Color(0xFFF1F5F9),
+                                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                                                 shape = RoundedCornerShape(12.dp)
                                             )
                                             .border(
                                                 width = if (isFocused) 2.dp else 1.dp,
                                                 color = if (isFocused) {
-                                                    if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary
+                                                    MaterialTheme.colorScheme.primary
                                                 } else {
-                                                    (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.1f)
+                                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
                                                 },
                                                 shape = RoundedCornerShape(12.dp)
                                             ),
@@ -212,7 +203,7 @@ fun OTPScreen(
                                                     trim = LineHeightStyle.Trim.None
                                                 )
                                             ),
-                                            color = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface,
+                                            color = MaterialTheme.colorScheme.onSurface,
                                             modifier = Modifier.fillMaxSize().wrapContentHeight(align = Alignment.CenterVertically)
                                         )
                                     }
@@ -255,12 +246,12 @@ fun OTPScreen(
                                     Icon(
                                         imageVector = Icons.Outlined.Timer,
                                         contentDescription = null,
-                                        tint = (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.4f),
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Text(
                                         text = "Resend in ${vm.resendTimer}s",
-                                        color = (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.4f),
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                                         style = AppTypography.bodySmall
                                     )
                                 }
@@ -273,9 +264,9 @@ fun OTPScreen(
                                 Text(
                                     text = "Didn't receive code? Resend",
                                     color = if (vm.canResend) {
-                                        if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary
+                                        MaterialTheme.colorScheme.primary
                                     } else {
-                                        (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.3f)
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                                     },
                                     style = AppTypography.bodyBold.copy(fontSize = 14.sp)
                                 )
@@ -289,7 +280,7 @@ fun OTPScreen(
                 // Test OTP Hint (Premium Style)
                 if (vm.generatedOtp != null) {
                     Surface(
-                        color = (if (isDark) Color(0xFF1E293B) else Color(0xFFF1F5F9)).copy(alpha = 0.5f),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.padding(horizontal = AppSpacing.xl)
                     ) {
@@ -301,13 +292,13 @@ fun OTPScreen(
                             Icon(
                                 imageVector = Icons.Filled.Shield,
                                 contentDescription = null,
-                                tint = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
                                 text = "Test OTP: ${vm.generatedOtp}",
                                 style = AppTypography.bodyBold.copy(fontSize = 14.sp),
-                                color = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }

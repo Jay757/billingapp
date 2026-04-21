@@ -120,7 +120,7 @@ fun SalesSummaryScreen(
           label = "ONLINE",
           value = "₹${summary.onlineTotal.toInt()}",
           icon = Icons.Outlined.AccountBalance,
-          color = Color(0xFF8B5CF6), // Purple for online
+          color = MaterialTheme.colorScheme.secondary, // Purple/Secondary for online
           modifier = Modifier.weight(1f)
         )
       }

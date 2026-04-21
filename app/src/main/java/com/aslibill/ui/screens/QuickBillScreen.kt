@@ -107,9 +107,14 @@ fun QuickBillScreen(
         isEmpty = lines.isEmpty(),
         modifier = Modifier.fillMaxWidth().weight(1f)
       ) {
+        val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+        val onSurface = MaterialTheme.colorScheme.onSurface
+        val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+        val primary = MaterialTheme.colorScheme.primary
+        val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+        
         lines.forEachIndexed { idx, l ->
-          val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-          val rowBg = if (isDark) Color(0xFF1E293B).copy(alpha = 0.3f) else Color.Transparent
+          val rowBg = if (isDark) surfaceVariant.copy(alpha = 0.3f) else Color.Transparent
           Row(
             modifier = Modifier
               .fillMaxWidth()
@@ -118,19 +123,19 @@ fun QuickBillScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
           ) {
-            Text(l.details, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black), modifier = Modifier.weight(1.4f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-            Text(l.qty.toInt().toString(), color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-            Text("₹${l.rate.toInt()}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.7f), textAlign = TextAlign.Center)
+            Text(l.details, color = onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black), modifier = Modifier.weight(1.4f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+            Text(l.qty.toInt().toString(), color = onSurface, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold), modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+            Text("₹${l.rate.toInt()}", color = onSurfaceVariant, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(0.7f), textAlign = TextAlign.Center)
             
             Row(modifier = Modifier.weight(1.0f), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
-              Text("₹${l.total.toInt()}", color = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black))
+              Text("₹${l.total.toInt()}", color = primary, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black))
               Spacer(Modifier.width(4.dp))
               IconButton(onClick = { vm.removeItem(idx) }, modifier = Modifier.size(28.dp)) {
                 Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red.copy(alpha = 0.8f), modifier = Modifier.size(16.dp))
               }
             }
           }
-          if (!isDark) androidx.compose.material3.HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color.Gray.copy(alpha = 0.2f))
+          if (!isDark) androidx.compose.material3.HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = onSurface.copy(alpha = 0.1f))
         }
       }
 

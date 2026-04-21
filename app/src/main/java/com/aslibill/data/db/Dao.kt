@@ -21,13 +21,13 @@ data class ProductWithCategory(
 
 @Dao
 interface CategoryDao {
-  @Query("SELECT * FROM categories ORDER BY name ASC")
-  fun observeAll(): Flow<List<CategoryEntity>>
+  @Query("SELECT * FROM categories WHERE userId = :userId ORDER BY name ASC")
+  fun observeAll(userId: Int): Flow<List<CategoryEntity>>
 
-  @Query("SELECT COUNT(*) FROM categories")
-  suspend fun count(): Long
+  @Query("SELECT COUNT(*) FROM categories WHERE userId = :userId")
+  suspend fun count(userId: Int): Long
 
-  @Insert(onConflict = OnConflictStrategy.ABORT)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(category: CategoryEntity): Long
 
   @Update
@@ -39,27 +39,27 @@ interface CategoryDao {
 
 @Dao
 interface ProductDao {
-  @Query("SELECT * FROM products WHERE isActive = 1 ORDER BY name ASC")
-  fun observeActive(): Flow<List<ProductEntity>>
+  @Query("SELECT * FROM products WHERE userId = :userId AND isActive = 1 ORDER BY name ASC")
+  fun observeActive(userId: Int): Flow<List<ProductEntity>>
 
   @Query(
     """
       SELECT p.id, p.categoryId, c.name as categoryName, p.name, p.price, p.stock, p.isActive
       FROM products p
       JOIN categories c ON c.id = p.categoryId
-      WHERE p.isActive = 1
+      WHERE p.userId = :userId AND p.isActive = 1
       ORDER BY c.name ASC, p.name ASC
     """
   )
-  fun observeActiveWithCategory(): Flow<List<ProductWithCategory>>
+  fun observeActiveWithCategory(userId: Int): Flow<List<ProductWithCategory>>
 
-  @Query("SELECT * FROM products WHERE categoryId = :categoryId AND isActive = 1 ORDER BY name ASC")
-  fun observeByCategory(categoryId: Long): Flow<List<ProductEntity>>
+  @Query("SELECT * FROM products WHERE userId = :userId AND categoryId = :categoryId AND isActive = 1 ORDER BY name ASC")
+  fun observeByCategory(userId: Int, categoryId: Long): Flow<List<ProductEntity>>
 
-  @Query("SELECT COUNT(*) FROM products")
-  suspend fun count(): Long
+  @Query("SELECT COUNT(*) FROM products WHERE userId = :userId")
+  suspend fun count(userId: Int): Long
 
-  @Insert(onConflict = OnConflictStrategy.ABORT)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(product: ProductEntity): Long
 
   @Update
@@ -68,8 +68,8 @@ interface ProductDao {
   @Delete
   suspend fun delete(product: ProductEntity)
 
-  @Query("Update products SET stock = stock - :qty WHERE id = :productId")
-  suspend fun decrementStock(productId: Long, qty: Double)
+  @Query("Update products SET stock = stock - :qty WHERE userId = :userId AND id = :productId")
+  suspend fun decrementStock(userId: Int, productId: Long, qty: Double)
 }
 
 data class BillWithItemsRow(
@@ -110,10 +110,11 @@ interface BillDao {
         b.paymentMethod,
         (SELECT COUNT(*) FROM bill_items bi WHERE bi.billId = b.id) as itemCount
       FROM bills b
+      WHERE b.userId = :userId
       ORDER BY b.createdAtEpochMs DESC
     """
   )
-  fun observeBills(): Flow<List<BillWithItemsRow>>
+  fun observeBills(userId: Int): Flow<List<BillWithItemsRow>>
 
   @Query(
     """
@@ -127,29 +128,29 @@ interface BillDao {
         b.paymentMethod,
         (SELECT COUNT(*) FROM bill_items bi WHERE bi.billId = b.id) as itemCount
       FROM bills b
-      WHERE b.createdAtEpochMs BETWEEN :fromEpochMs AND :toEpochMs
+      WHERE b.userId = :userId AND b.createdAtEpochMs BETWEEN :fromEpochMs AND :toEpochMs
       ORDER BY b.createdAtEpochMs DESC
     """
   )
-  fun observeBillsBetween(fromEpochMs: Long, toEpochMs: Long): Flow<List<BillWithItemsRow>>
+  fun observeBillsBetween(userId: Int, fromEpochMs: Long, toEpochMs: Long): Flow<List<BillWithItemsRow>>
 
-  @Query("SELECT * FROM bill_items WHERE billId = :billId ORDER BY id ASC")
-  suspend fun getBillItems(billId: Long): List<BillItemEntity>
+  @Query("SELECT * FROM bill_items WHERE userId = :userId AND billId = :billId ORDER BY id ASC")
+  suspend fun getBillItems(userId: Int, billId: Long): List<BillItemEntity>
 
-  @Query("DELETE FROM bills WHERE id = :billId")
-  suspend fun deleteBillById(billId: Long)
+  @Query("DELETE FROM bills WHERE userId = :userId AND id = :billId")
+  suspend fun deleteBillById(userId: Int, billId: Long)
 
-  @Query("DELETE FROM bills")
-  suspend fun deleteAllBills()
+  @Query("DELETE FROM bills WHERE userId = :userId")
+  suspend fun deleteAllBills(userId: Int)
 }
 
 
 @Dao
 interface CustomerDao {
-  @Query("SELECT * FROM customers ORDER BY name ASC")
-  fun observeAll(): Flow<List<CustomerEntity>>
+  @Query("SELECT * FROM customers WHERE userId = :userId ORDER BY name ASC")
+  fun observeAll(userId: Int): Flow<List<CustomerEntity>>
 
-  @Insert(onConflict = OnConflictStrategy.ABORT)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(customer: CustomerEntity): Long
 
   @Update
@@ -161,10 +162,10 @@ interface CustomerDao {
 
 @Dao
 interface StaffDao {
-  @Query("SELECT * FROM staff ORDER BY name ASC")
-  fun observeAll(): Flow<List<StaffEntity>>
+  @Query("SELECT * FROM staff WHERE userId = :userId ORDER BY name ASC")
+  fun observeAll(userId: Int): Flow<List<StaffEntity>>
 
-  @Insert(onConflict = OnConflictStrategy.ABORT)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insert(staff: StaffEntity): Long
 
   @Update
@@ -190,14 +191,14 @@ data class DayReportRow(
 
 @Dao
 interface CashDao {
-  @Query("SELECT * FROM cash_transactions ORDER BY createdAtEpochMs DESC")
-  fun observeAll(): Flow<List<CashTransactionEntity>>
+  @Query("SELECT * FROM cash_transactions WHERE userId = :userId ORDER BY createdAtEpochMs DESC")
+  fun observeAll(userId: Int): Flow<List<CashTransactionEntity>>
 
   @Insert
   suspend fun insert(tx: CashTransactionEntity)
 
-  @Query("DELETE FROM cash_transactions")
-  suspend fun deleteAll()
+  @Query("DELETE FROM cash_transactions WHERE userId = :userId")
+  suspend fun deleteAll(userId: Int)
 }
 
 @Dao
@@ -208,11 +209,11 @@ interface BillAnalyticsDao {
            SUM(bi.lineTotal) as totalRevenue
     FROM bill_items bi
     JOIN bills b ON b.id = bi.billId
-    WHERE b.createdAtEpochMs BETWEEN :fromEpochMs AND :toEpochMs
+    WHERE b.userId = :userId AND b.createdAtEpochMs BETWEEN :fromEpochMs AND :toEpochMs
     GROUP BY bi.productNameSnapshot
     ORDER BY totalRevenue DESC
   """)
-  fun observeItemSales(fromEpochMs: Long, toEpochMs: Long): Flow<List<ItemSalesRow>>
+  fun observeItemSales(userId: Int, fromEpochMs: Long, toEpochMs: Long): Flow<List<ItemSalesRow>>
 
   @Query("""
     SELECT
@@ -222,11 +223,11 @@ interface BillAnalyticsDao {
       SUM(CASE WHEN b.paymentMethod != 'CASH' AND b.paymentMethod != 'NONE' THEN b.total ELSE 0 END) as onlineTotal,
       SUM(b.total) as grandTotal
     FROM bills b
-    WHERE b.createdAtEpochMs BETWEEN :fromEpochMs AND :toEpochMs
+    WHERE b.userId = :userId AND b.createdAtEpochMs BETWEEN :fromEpochMs AND :toEpochMs
     GROUP BY dateLabel
     ORDER BY b.createdAtEpochMs DESC
   """)
-  fun observeDayReport(fromEpochMs: Long, toEpochMs: Long): Flow<List<DayReportRow>>
+  fun observeDayReport(userId: Int, fromEpochMs: Long, toEpochMs: Long): Flow<List<DayReportRow>>
 
   @Query("""
     SELECT
@@ -237,11 +238,11 @@ interface BillAnalyticsDao {
       COUNT(b.id) as billCount
     FROM bills b
     JOIN customers c ON c.id = b.customerId
-    WHERE b.paymentMethod = 'CREDIT'
+    WHERE b.userId = :userId AND b.paymentMethod = 'CREDIT'
     GROUP BY b.customerId
     ORDER BY totalCredit DESC
   """)
-  fun observeCreditSummary(): Flow<List<CreditSummaryRow>>
+  fun observeCreditSummary(userId: Int): Flow<List<CreditSummaryRow>>
 }
 
 data class CreditSummaryRow(

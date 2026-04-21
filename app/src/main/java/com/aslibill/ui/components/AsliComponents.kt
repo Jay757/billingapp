@@ -383,14 +383,14 @@ fun AsliTextField(
         },
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = if (isDark) 0.12f else 0.10f),
+            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
             focusedLabelColor = MaterialTheme.colorScheme.primary,
             unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
             focusedTextColor = MaterialTheme.colorScheme.onSurface,
             unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
             cursorColor = MaterialTheme.colorScheme.primary,
-            focusedContainerColor = if (isDark) Color(0xFF1E293B) else MaterialTheme.colorScheme.surface,
-            unfocusedContainerColor = if (isDark) Color(0xFF1E293B) else MaterialTheme.colorScheme.surface,
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
             selectionColors = TextSelectionColors(
                 handleColor = MaterialTheme.colorScheme.primary,
                 backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
@@ -653,12 +653,12 @@ fun AsliTable(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    val bgColor = if (isDark) Color(0xFF0F172A) else Color(0xFFF8FAFC)
-    val headerBg = if (isDark) Color(0xFF1E293B) else Color(0xFFEFF6FF)
-    val bodyBg = if (isDark) Color(0xFF111827) else Color.White
-    val headerText = if (isDark) Color(0xFF93C5FD) else Color(0xFF2563EB)
-    val emptyIconTint = if (isDark) Color(0xFF1E293B) else Color(0xFFCBD5E1)
-    val emptyTextColor = if (isDark) Color(0xFF334155) else Color(0xFF64748B)
+    val bgColor = MaterialTheme.colorScheme.background
+    val headerBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+    val bodyBg = MaterialTheme.colorScheme.surface
+    val headerText = MaterialTheme.colorScheme.primary
+    val emptyIconTint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+    val emptyTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
 
     Surface(
         modifier = modifier.shadow(
@@ -668,7 +668,7 @@ fun AsliTable(
         ),
         color = bgColor,
         shape = RoundedCornerShape(24.dp),
-        border = if (!isDark) BorderStroke(1.dp, Color(0xFFE2E8F0)) else null
+        border = if (!isDark) BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)) else null
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Header

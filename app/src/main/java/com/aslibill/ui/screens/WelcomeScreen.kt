@@ -33,9 +33,9 @@ fun WelcomeScreen(
     val primaryColor = MaterialTheme.colorScheme.primary
     
     // Theme-adjusted colors
-    val bgGradientStart = if (isDark) primaryColor else Color(0xFFE0F2FE) // Light Blue 50
-    val bgGradientEnd = if (isDark) Color(0xFF020617) else Color.White
-    val textColor = if (isDark) Color.White else Color(0xFF0F172A) // Slate 900
+    val bgGradientStart = if (isDark) primaryColor else MaterialTheme.colorScheme.surfaceVariant
+    val bgGradientEnd = MaterialTheme.colorScheme.background
+    val textColor = MaterialTheme.colorScheme.onBackground
     val buttonBg = if (isDark) Color.White else primaryColor
     val buttonText = if (isDark) primaryColor else Color.White
     
@@ -126,7 +126,7 @@ fun WelcomeScreen(
 
 @Composable
 fun DecorativeBackground(isDark: Boolean) {
-    val shapeColor = if (isDark) Color.White else Color.Black
+    val shapeColor = MaterialTheme.colorScheme.onBackground
     Canvas(modifier = Modifier.fillMaxSize()) {
         val width = size.width
         val height = size.height
@@ -173,6 +173,9 @@ fun PremiumLogo(isDark: Boolean) {
         Brush.linearGradient(listOf(Color.Black.copy(alpha = 0.05f), Color.Black.copy(alpha = 0.02f)))
     }
     
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val primary = MaterialTheme.colorScheme.primary
+    
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -187,13 +190,21 @@ fun PremiumLogo(isDark: Boolean) {
             val strokeWidth = 14.dp.toPx()
             val silverGradient = if (isDark) {
                 Brush.linearGradient(
-                    colors = listOf(Color(0xFFE2E8F0), Color(0xFFCBD5E1), Color(0xFF94A3B8)),
+                    colors = listOf(
+                        onSurface.copy(alpha = 0.1f),
+                        onSurface.copy(alpha = 0.2f),
+                        onSurface.copy(alpha = 0.4f)
+                    ),
                     start = Offset.Zero,
                     end = Offset(w, h)
                 )
             } else {
                 Brush.linearGradient(
-                    colors = listOf(Color(0xFF1E293B), Color(0xFF334155), Color(0xFF475569)),
+                    colors = listOf(
+                        primary.copy(alpha = 0.8f),
+                        primary,
+                        primary.copy(alpha = 0.9f)
+                    ),
                     start = Offset.Zero,
                     end = Offset(w, h)
                 )

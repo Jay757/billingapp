@@ -19,16 +19,22 @@ class BillingRepository(
 ) {
   private val client = ApiHttpClient(BuildConfig.API_BASE_URL)
 
+  private suspend fun getUserId(): Int = authRepository.userSession.value?.id ?: throw IllegalStateException("Not logged in")
+
   suspend fun saveBill(
     bill: BillEntity,
     items: List<BillItemEntity>
   ): Long {
-    val id = billDao.insertBillWithItems(bill, items)
+    val uid = getUserId()
+    val id = billDao.insertBillWithItems(
+        bill.copy(userId = uid),
+        items.map { it.copy(userId = uid) }
+    )
     
     // Decrement local stock for each product in the bill
     items.forEach { item ->
       item.productId?.let { pid ->
-        productDao.decrementStock(pid, item.qty)
+        productDao.decrementStock(uid, pid, item.qty)
       }
     }
 
@@ -67,12 +73,19 @@ class BillingRepository(
     return id
   }
 
-  fun observeBillsBetween(fromEpochMs: Long, toEpochMs: Long): Flow<List<BillWithItemsRow>> =
-    billDao.observeBillsBetween(fromEpochMs, toEpochMs)
+  fun observeBillsBetween(fromEpochMs: Long, toEpochMs: Long): Flow<List<BillWithItemsRow>> {
+    val session = authRepository.userSession.value ?: return kotlinx.coroutines.flow.flowOf(emptyList())
+    return billDao.observeBillsBetween(session.id, fromEpochMs, toEpochMs)
+  }
 
-  suspend fun getBillItems(billId: Long): List<BillItemEntity> = billDao.getBillItems(billId)
+  suspend fun getBillItems(billId: Long): List<BillItemEntity> {
+    val uid = getUserId()
+    return billDao.getBillItems(uid, billId)
+  }
+
   suspend fun deleteBill(billId: Long) {
-    billDao.deleteBillById(billId)
+    val uid = getUserId()
+    billDao.deleteBillById(uid, billId)
     runCatching {
       val token = authRepository.currentToken() ?: return@runCatching
       client.delete("/bills/$billId", token)
@@ -80,10 +93,59 @@ class BillingRepository(
   }
 
   suspend fun deleteAllBills() {
-    billDao.deleteAllBills()
+    val uid = getUserId()
+    billDao.deleteAllBills(uid)
     runCatching {
       val token = authRepository.currentToken() ?: return@runCatching
       client.delete("/bills", token)
+    }
+  }
+
+  suspend fun syncFromRemote() {
+    val uid = getUserId()
+    val token = authRepository.currentToken() ?: return
+    
+    runCatching {
+      val now = System.currentTimeMillis()
+      val thirtyDaysAgo = now - (30L * 24 * 60 * 60 * 1000)
+      
+      val url = "/bills?fromEpochMs=$thirtyDaysAgo&toEpochMs=$now"
+      val billsResp = client.getJsonArray(url, token)
+      
+      for (i in 0 until billsResp.length()) {
+        val bObj = billsResp.getJSONObject(i)
+        val billId = bObj.getLong("billId")
+        
+        // Fetch items for this bill
+        val itemsResp = client.getJsonArray("/bills/$billId/items", token)
+        val itemsList = mutableListOf<BillItemEntity>()
+        for (j in 0 until itemsResp.length()) {
+          val itObj = itemsResp.getJSONObject(j)
+          itemsList.add(BillItemEntity(
+            id = itObj.getLong("id"),
+            userId = uid,
+            billId = billId,
+            productId = itObj.optLong("productId", -1L).takeIf { it != -1L },
+            productNameSnapshot = itObj.getString("productNameSnapshot"),
+            qty = itObj.getDouble("qty"),
+            rate = itObj.getDouble("rate"),
+            lineTotal = itObj.getDouble("lineTotal")
+          ))
+        }
+        
+        // Insert bill and items
+        val billEntity = BillEntity(
+          id = billId,
+          userId = uid,
+          createdAtEpochMs = bObj.getLong("createdAtEpochMs"),
+          cashierName = bObj.optString("cashierName", null),
+          subtotal = bObj.getDouble("subtotal"),
+          tax = bObj.getDouble("tax"),
+          total = bObj.getDouble("total"),
+          paymentMethod = bObj.getString("paymentMethod")
+        )
+        billDao.insertBillWithItems(billEntity, itemsList)
+      }
     }
   }
 }

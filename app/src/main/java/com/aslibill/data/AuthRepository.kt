@@ -10,11 +10,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONObject
 
 data class UserSession(
+    val id: Int,
     val name: String,
     val phone: String
 )
 
-class AuthRepository(context: Context) {
+class AuthRepository(private val context: Context) {
     private val tag = "AuthRepository"
     private val prefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
     
@@ -29,11 +30,12 @@ class AuthRepository(context: Context) {
     private val client = ApiHttpClient(BuildConfig.API_BASE_URL)
 
     init {
+        val id = prefs.getInt("user_id", -1)
         val name = prefs.getString("user_name", null)
         val phone = prefs.getString("user_phone", null)
         val token = prefs.getString("token", null)
-        if (name != null && phone != null) {
-            _userSession.value = UserSession(name, phone)
+        if (id != -1 && name != null && phone != null) {
+            _userSession.value = UserSession(id, name, phone)
             // Token is optional to allow offline/dev flow.
             _token.value = token
         }
@@ -48,9 +50,10 @@ class AuthRepository(context: Context) {
             val resp = client.postJson("/auth/login", token = null, body = req)
             val token = resp.getString("token")
             val userObj = resp.getJSONObject("user")
+            val userId = userObj.getInt("id")
             val name = userObj.getString("name")
 
-            saveSession(name = name, phone = phone, token = token)
+            saveSession(id = userId, name = name, phone = phone, token = token)
             _lastError.value = null
             true
         } catch (t: Throwable) {
@@ -75,7 +78,7 @@ class AuthRepository(context: Context) {
 
             val resp = client.postJson("/auth/signup", token = null, body = req)
             _lastError.value = null
-            resp.optString("code", null)
+            resp.optString("code", null as String?)
         } catch (t: Throwable) {
             Log.e(tag, "Signup failed. phone=$phone", t)
             _lastError.value = extractErrorMessage(t.message)
@@ -92,9 +95,10 @@ class AuthRepository(context: Context) {
             val resp = client.postJson("/auth/verify-otp", token = null, body = req)
             val token = resp.getString("token")
             val userObj = resp.getJSONObject("user")
+            val userId = userObj.getInt("id")
             val name = userObj.getString("name")
 
-            saveSession(name = name, phone = phone, token = token)
+            saveSession(id = userId, name = name, phone = phone, token = token)
             _lastError.value = null
             true
         } catch (t: Throwable) {
@@ -109,7 +113,7 @@ class AuthRepository(context: Context) {
             val req = JSONObject().put("phone", phone)
             val resp = client.postJson("/auth/resend-otp", token = null, body = req)
             _lastError.value = null
-            resp.optString("code", null)
+            resp.optString("code", null as String?)
         } catch (t: Throwable) {
             Log.e(tag, "Resend OTP failed. phone=$phone", t)
             _lastError.value = extractErrorMessage(t.message)
@@ -136,19 +140,24 @@ class AuthRepository(context: Context) {
 
     fun currentToken(): String? = _token.value
 
-    private fun saveSession(name: String, phone: String, token: String) {
+    private fun saveSession(id: Int, name: String, phone: String, token: String) {
         prefs.edit().apply {
+            putInt("user_id", id)
             putString("user_name", name)
             putString("user_phone", phone)
             putString("token", token)
             apply()
         }
-        _userSession.value = UserSession(name, phone)
+        _userSession.value = UserSession(id, name, phone)
         _token.value = token
     }
 
     suspend fun logout() {
-        prefs.edit().clear().apply()
+        // Clear all relevant user preferences
+        listOf("auth_prefs", "print_settings", "bluetooth_printer").forEach { name ->
+            context.getSharedPreferences(name, Context.MODE_PRIVATE).edit().clear().apply()
+        }
+        
         _userSession.value = null
         _token.value = null
     }

@@ -22,7 +22,7 @@ class InventoryViewModel(
     repo.observeProductsWithCategory().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
   init {
-    viewModelScope.launch { repo.ensureSeedData() }
+    // API sync is handled at the app container level on login
   }
 
   fun addCategory(name: String) = viewModelScope.launch { repo.addCategory(name) }

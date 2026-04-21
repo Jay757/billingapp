@@ -40,21 +40,12 @@ fun LoginScreen(
         val configuration = LocalConfiguration.current
         val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
 
-        val bgGradient = if (isDark) {
-            Brush.verticalGradient(
-                colors = listOf(
-                    Color(0xFF0F172A),
-                    Color(0xFF020617)
-                )
+        val bgGradient = Brush.verticalGradient(
+            colors = listOf(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                MaterialTheme.colorScheme.background
             )
-        } else {
-            Brush.verticalGradient(
-                colors = listOf(
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
-                    MaterialTheme.colorScheme.background
-                )
-            )
-        }
+        )
 
         Box(
             modifier = Modifier
@@ -82,18 +73,18 @@ fun LoginScreen(
                         Icon(
                             imageVector = Icons.Filled.Verified,
                             contentDescription = null,
-                            tint = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(42.dp)
                         )
                         Text(
                             text = Brand.AppName,
-                            color = if (isDark) Color.White else MaterialTheme.colorScheme.onBackground,
+                            color = MaterialTheme.colorScheme.onBackground,
                             style = AppTypography.h1.copy(fontSize = 36.sp, fontWeight = FontWeight.Black)
                         )
                     }
                     Text(
                         text = "Smart Billing for your business",
-                        color = (if (isDark) Color.White else MaterialTheme.colorScheme.onBackground).copy(alpha = 0.5f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                         style = AppTypography.bodySmall
                     )
                 }
@@ -107,12 +98,12 @@ fun LoginScreen(
                 ) {
                     Text(
                         text = "Welcome Back",
-                        color = if (isDark) Color.White else MaterialTheme.colorScheme.onBackground,
+                        color = MaterialTheme.colorScheme.onBackground,
                         style = AppTypography.h1.copy(fontWeight = FontWeight.Bold, fontSize = 28.sp)
                     )
                     Text(
                         text = "Sign in to continue",
-                        color = (if (isDark) Color.White else MaterialTheme.colorScheme.onBackground).copy(alpha = 0.6f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                         style = AppTypography.bodyMedium
                     )
                 }
@@ -141,7 +132,7 @@ fun LoginScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.PhoneAndroid,
                                     contentDescription = null,
-                                    tint = (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.6f)
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
                             }
                         )
@@ -155,7 +146,7 @@ fun LoginScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.Lock,
                                     contentDescription = null,
-                                    tint = (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.6f)
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
                             }
                         )
@@ -185,8 +176,8 @@ fun LoginScreen(
                                 .height(54.dp),
                             shape = RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isDark) Color(0xFF3B82F6) else MaterialTheme.colorScheme.primary,
-                                contentColor = Color.White
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         ) {
                             Text(
@@ -203,12 +194,12 @@ fun LoginScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "Don't have an account? ",
-                            color = (if (isDark) Color.White else MaterialTheme.colorScheme.onBackground).copy(alpha = 0.6f),
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                             style = AppTypography.bodyMedium
                         )
                         Text(
                             text = "Sign Up",
-                            color = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.primary,
                             style = AppTypography.bodyBold
                         )
                     }

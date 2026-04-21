@@ -3,14 +3,14 @@ package com.aslibill.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.aslibill.data.db.BillDao
+import com.aslibill.data.BillingRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.util.Calendar
 
-class HomeViewModel(billDao: BillDao) : ViewModel() {
+class HomeViewModel(billingRepository: BillingRepository) : ViewModel() {
 
     private val startOfDay: Long
     private val endOfDay: Long
@@ -25,7 +25,7 @@ class HomeViewModel(billDao: BillDao) : ViewModel() {
         endOfDay = startOfDay + 24L * 60 * 60 * 1_000 - 1
     }
 
-    private val todayFlow = billDao.observeBillsBetween(startOfDay, endOfDay)
+    private val todayFlow = billingRepository.observeBillsBetween(startOfDay, endOfDay)
 
     val todaySalesTotal: StateFlow<Double> = todayFlow
         .map { bills -> bills.sumOf { it.total } }
@@ -36,11 +36,11 @@ class HomeViewModel(billDao: BillDao) : ViewModel() {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 }
 
-class HomeViewModelFactory(private val billDao: BillDao) : ViewModelProvider.Factory {
+class HomeViewModelFactory(private val billingRepository: BillingRepository) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
-            return HomeViewModel(billDao) as T
+            return HomeViewModel(billingRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: $modelClass")
     }

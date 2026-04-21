@@ -42,21 +42,12 @@ fun SignupScreen(
         val screenWidth = configuration.screenWidthDp.dp
         val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
 
-        val bgGradient = if (isDark) {
-            Brush.verticalGradient(
-                colors = listOf(
-                    Color(0xFF0F172A),
-                    Color(0xFF020617)
-                )
+        val bgGradient = Brush.verticalGradient(
+            colors = listOf(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                MaterialTheme.colorScheme.background
             )
-        } else {
-            Brush.verticalGradient(
-                colors = listOf(
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
-                    MaterialTheme.colorScheme.background
-                )
-            )
-        }
+        )
 
         Box(
             modifier = Modifier
@@ -84,18 +75,18 @@ fun SignupScreen(
                         Icon(
                             imageVector = Icons.Filled.Verified,
                             contentDescription = null,
-                            tint = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(42.dp)
                         )
                         Text(
                             text = Brand.AppName,
-                            color = if (isDark) Color.White else MaterialTheme.colorScheme.onBackground,
+                            color = MaterialTheme.colorScheme.onBackground,
                             style = AppTypography.h1.copy(fontSize = 36.sp, fontWeight = FontWeight.Black)
                         )
                     }
                     Text(
                         text = "Smart Billing for your business",
-                        color = (if (isDark) Color.White else MaterialTheme.colorScheme.onBackground).copy(alpha = 0.5f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                         style = AppTypography.bodySmall
                     )
                 }
@@ -109,12 +100,12 @@ fun SignupScreen(
                 ) {
                     Text(
                         text = "Create Account",
-                        color = if (isDark) Color.White else MaterialTheme.colorScheme.onBackground,
+                        color = MaterialTheme.colorScheme.onBackground,
                         style = AppTypography.h1.copy(fontWeight = FontWeight.Bold, fontSize = 28.sp)
                     )
                     Text(
                         text = "Join thousands of businesses today",
-                        color = (if (isDark) Color.White else MaterialTheme.colorScheme.onBackground).copy(alpha = 0.6f),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                         style = AppTypography.bodyMedium
                     )
                 }
@@ -142,7 +133,7 @@ fun SignupScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.Person,
                                     contentDescription = null,
-                                    tint = (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.6f)
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
                             }
                         )
@@ -160,12 +151,12 @@ fun SignupScreen(
                                     Icon(
                                         imageVector = Icons.Outlined.PhoneAndroid,
                                         contentDescription = null,
-                                        tint = (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.6f)
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = "+91", 
-                                        color = if (isDark) Color.White else MaterialTheme.colorScheme.onSurface, 
+                                        color = MaterialTheme.colorScheme.onSurface, 
                                         fontWeight = FontWeight.Bold
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
@@ -173,7 +164,7 @@ fun SignupScreen(
                                         modifier = Modifier
                                             .width(1.dp)
                                             .height(20.dp)
-                                            .background((if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.2f))
+                                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
                                     )
                                 }
                             }
@@ -188,7 +179,7 @@ fun SignupScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.Lock,
                                     contentDescription = null,
-                                    tint = (if (isDark) Color.White else MaterialTheme.colorScheme.onSurface).copy(alpha = 0.6f)
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
                             }
                         )
@@ -218,8 +209,8 @@ fun SignupScreen(
                                 .height(54.dp),
                             shape = RoundedCornerShape(16.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isDark) Color(0xFF3B82F6) else MaterialTheme.colorScheme.primary,
-                                contentColor = Color.White
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         ) {
                             Text(
@@ -236,12 +227,12 @@ fun SignupScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "Already have an account? ",
-                            color = (if (isDark) Color.White else MaterialTheme.colorScheme.onBackground).copy(alpha = 0.6f),
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                             style = AppTypography.bodyMedium
                         )
                         Text(
                             text = "Login",
-                            color = if (isDark) Color(0xFF60A5FA) else MaterialTheme.colorScheme.primary,
+                            color = MaterialTheme.colorScheme.primary,
                             style = AppTypography.bodyBold
                         )
                     }
