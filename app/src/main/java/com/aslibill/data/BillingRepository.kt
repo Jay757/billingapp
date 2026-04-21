@@ -138,7 +138,7 @@ class BillingRepository(
           id = billId,
           userId = uid,
           createdAtEpochMs = bObj.getLong("createdAtEpochMs"),
-          cashierName = bObj.optString("cashierName", null),
+          cashierName = bObj.optString("cashierName").takeIf { !bObj.isNull("cashierName") },
           subtotal = bObj.getDouble("subtotal"),
           tax = bObj.getDouble("tax"),
           total = bObj.getDouble("total"),

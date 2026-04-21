@@ -79,9 +79,9 @@ class SettingsRepository(
             val config = StoreConfig(
                 storeName = obj.getString("storeName"),
                 addressLines = listOf(obj.getString("address1"), obj.getString("address2")),
-                phone = obj.optString("phone", null),
-                gstNumber = obj.optString("gstNumber", null),
-                thankYouMessage = obj.optString("thankYouMessage", null),
+                phone = obj.optString("phone").takeIf { !obj.isNull("phone") },
+                gstNumber = obj.optString("gstNumber").takeIf { !obj.isNull("gstNumber") },
+                thankYouMessage = obj.optString("thankYouMessage").takeIf { !obj.isNull("thankYouMessage") },
                 paperWidthChars = obj.getInt("paperWidthChars")
             )
             saveSettings(config)

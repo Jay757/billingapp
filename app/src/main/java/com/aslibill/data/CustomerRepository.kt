@@ -67,7 +67,7 @@ class CustomerRepository(
           userId = uid,
           name = obj.getString("name"),
           mobile = obj.getString("mobile"),
-          address = obj.optString("address", null)
+          address = obj.optString("address").takeIf { !obj.isNull("address") }
         ))
       }
     }

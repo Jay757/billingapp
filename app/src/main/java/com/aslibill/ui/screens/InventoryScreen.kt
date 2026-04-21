@@ -333,6 +333,9 @@ private fun CategoryDialog(
   AlertDialog(
     onDismissRequest = onDismiss,
     title = { Text(if (initial == null) "Add Category" else "Edit Category", style = MaterialTheme.typography.titleLarge) },
+    containerColor = MaterialTheme.colorScheme.surface,
+    titleContentColor = MaterialTheme.colorScheme.onSurface,
+    textContentColor = MaterialTheme.colorScheme.onSurface,
     text = {
       com.aslibill.ui.components.AsliTextField(
         value = name,
@@ -345,12 +348,16 @@ private fun CategoryDialog(
         onClick = { onSave(initial?.id, name) },
         enabled = name.trim().isNotEmpty()
       ) {
-        Text("SAVE", color = if (name.trim().isNotEmpty()) MaterialTheme.colorScheme.primary else Color.Gray, fontWeight = FontWeight.Bold)
+        Text(
+          "SAVE",
+          color = if (name.trim().isNotEmpty()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+          fontWeight = FontWeight.Bold
+        )
       }
     },
     dismissButton = {
       TextButton(onClick = onDismiss) {
-        Text("CANCEL")
+        Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
       }
     }
   )
@@ -378,6 +385,9 @@ private fun ProductDialog(
   AlertDialog(
     onDismissRequest = onDismiss,
     title = { Text(if (initial == null) "Add Product" else "Edit Product", style = MaterialTheme.typography.titleLarge) },
+    containerColor = MaterialTheme.colorScheme.surface,
+    titleContentColor = MaterialTheme.colorScheme.onSurface,
+    textContentColor = MaterialTheme.colorScheme.onSurface,
     text = {
       Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         // Dropdown for Category
@@ -434,6 +444,7 @@ private fun ProductDialog(
     },
     confirmButton = {
       val price = priceText.toDoubleOrNull()
+      val isValid = categoryId != 0L && name.trim().isNotEmpty() && priceText.toDoubleOrNull() != null && stockText.toDoubleOrNull() != null
       TextButton(
         onClick = {
           onSave(
@@ -446,14 +457,18 @@ private fun ProductDialog(
             )
           )
         },
-        enabled = categoryId != 0L && name.trim().isNotEmpty() && priceText.toDoubleOrNull() != null && stockText.toDoubleOrNull() != null
+        enabled = isValid
       ) {
-        Text("SAVE", color = if (categoryId != 0L && name.trim().isNotEmpty() && priceText.toDoubleOrNull() != null && stockText.toDoubleOrNull() != null) MaterialTheme.colorScheme.primary else Color.Gray, fontWeight = FontWeight.Bold)
+        Text(
+          "SAVE",
+          color = if (isValid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+          fontWeight = FontWeight.Bold
+        )
       }
     },
     dismissButton = {
       TextButton(onClick = onDismiss) {
-        Text("CANCEL")
+        Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
       }
     }
   )

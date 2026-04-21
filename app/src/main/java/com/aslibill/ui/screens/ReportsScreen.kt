@@ -249,12 +249,27 @@ fun ReportsScreen(
     if (showDeleteAll) {
       AlertDialog(
         onDismissRequest = { showDeleteAll = false },
-        title = { Text("Delete All Bills") },
-        text = { Text("This will delete all bills permanently.") },
-        confirmButton = {
-          TextButton(onClick = { vm.deleteAll(); showDeleteAll = false }) { Text("DELETE") }
+        title = { Text("Delete All Bills", style = MaterialTheme.typography.titleLarge) },
+        text = {
+          Text(
+            "This will permanently delete all bills and cannot be undone.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium
+          )
         },
-        dismissButton = { TextButton(onClick = { showDeleteAll = false }) { Text("CANCEL") } }
+        containerColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.error,
+        textContentColor = MaterialTheme.colorScheme.onSurface,
+        confirmButton = {
+          TextButton(onClick = { vm.deleteAll(); showDeleteAll = false }) {
+            Text("DELETE ALL", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+          }
+        },
+        dismissButton = {
+          TextButton(onClick = { showDeleteAll = false }) {
+            Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+          }
+        }
       )
     }
 
@@ -262,28 +277,41 @@ fun ReportsScreen(
       val row = showItemsFor!!
       AlertDialog(
         onDismissRequest = { showItemsFor = null },
-        title = { Text("Invoice : ${row.billId}") },
+        title = { Text("Invoice #${row.billId}", style = MaterialTheme.typography.titleLarge) },
+        containerColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurface,
         text = {
           Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (!loadErr.isNullOrBlank()) Text(loadErr!!, color = AsliColors.Red)
+            if (!loadErr.isNullOrBlank()) {
+              Text(loadErr!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+            }
             if (items.isEmpty() && loadErr.isNullOrBlank()) {
-              Text("Loading...", color = AsliColors.TextSecondary)
+              Text("Loading...", color = MaterialTheme.colorScheme.onSurfaceVariant)
             } else {
               DarkCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                   items.forEach {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                      Text(it.productNameSnapshot, color = AsliColors.TextPrimary)
-                      Text("${it.qty.toInt()} x ₹${it.rate.toInt()} = ₹${it.lineTotal.toInt()}", color = AsliColors.TextSecondary)
+                      Text(it.productNameSnapshot, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)
+                      Text("${it.qty.toInt()} x ₹${it.rate.toInt()} = ₹${it.lineTotal.toInt()}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                     }
                   }
                 }
               }
-              Text("Total: ₹ ${row.total.toInt()}", color = AsliColors.Orange)
+              Text(
+                "Total: ₹ ${row.total.toInt()}",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+              )
             }
           }
         },
-        confirmButton = { TextButton(onClick = { showItemsFor = null }) { Text("CLOSE") } }
+        confirmButton = {
+          TextButton(onClick = { showItemsFor = null }) {
+            Text("CLOSE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+          }
+        }
       )
     }
   }

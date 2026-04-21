@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -119,7 +118,15 @@ fun ItemWiseBillScreen(
             )
           }
 
-          Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(
+              onClick = { showSearch = true },
+              modifier = Modifier
+                .size(40.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(20.dp))
+            ) {
+              Icon(Icons.Outlined.Search, contentDescription = "Search", tint = MaterialTheme.colorScheme.primary)
+            }
             OrangeButton(if (isWide) "Quick Billing" else "Quick", onClick = { onGoQuickBill?.invoke() })
           }
         }
@@ -155,8 +162,7 @@ fun ItemWiseBillScreen(
         modifier = Modifier.fillMaxWidth(), 
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
       ) {
-        GlassButton("Clear", onClick = vm::clearCart, modifier = Modifier.weight(1f))
-        GlassButton("Search", onClick = { showSearch = true }, modifier = Modifier.weight(1f))
+        OrangeButton("Clear", onClick = vm::clearCart, modifier = Modifier.weight(1f))
         OrangeButton("Save", onClick = { isSaveAndPrint = false; showSave = true }, modifier = Modifier.weight(1f))
         OrangeButton("Save & Print", onClick = { isSaveAndPrint = true; showSave = true }, modifier = Modifier.weight(1.3f))
       }
@@ -217,13 +223,13 @@ fun ItemWiseBillScreen(
       var qtyText by remember(line) { mutableStateOf(line.qty.toInt().toString()) }
       AlertDialog(
         onDismissRequest = { showQtyFor = null },
-        title = { Text("Qty - ${line.name}") },
+        title = { Text("Qty - ${line.name}", style = MaterialTheme.typography.titleLarge) },
         text = {
-          OutlinedTextField(
+          AsliTextField(
             value = qtyText,
             onValueChange = { qtyText = it },
-            label = { Text("Quantity") },
-            singleLine = true
+            label = "Quantity",
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
           )
         },
         confirmButton = {
@@ -233,16 +239,23 @@ fun ItemWiseBillScreen(
               vm.setQty(line.productId, q)
               showQtyFor = null
             }
-          ) { Text("OK") }
+          ) { Text("OK", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold) }
         },
-        dismissButton = { TextButton(onClick = { showQtyFor = null }) { Text("CANCEL") } }
+        dismissButton = {
+          TextButton(onClick = { showQtyFor = null }) {
+            Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+          }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurface
       )
     }
 
     if (showSearch) {
       AlertDialog(
         onDismissRequest = { showSearch = false },
-        title = { Text("Search Product") },
+        title = { Text("Search Product", style = MaterialTheme.typography.titleLarge) },
         text = {
           Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             AsliTextField(
@@ -260,15 +273,22 @@ fun ItemWiseBillScreen(
                       .padding(vertical = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                   ) {
-                    Text(p.name, color = AsliColors.TextPrimary)
-                    Text("₹${p.price.toInt()}", color = AsliColors.Orange)
+                    Text(p.name, color = MaterialTheme.colorScheme.onSurface)
+                    Text("₹${p.price.toInt()}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                   }
                 }
               }
             }
           }
         },
-        confirmButton = { TextButton(onClick = { showSearch = false; vm.setSearchQuery("") }) { Text("DONE") } }
+        confirmButton = {
+          TextButton(onClick = { showSearch = false; vm.setSearchQuery("") }) {
+            Text("DONE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+          }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurface
       )
     }
 
@@ -376,6 +396,9 @@ private fun SaveBillDialog(
   AlertDialog(
     onDismissRequest = onDismiss,
     title = { Text("Save Bill", style = MaterialTheme.typography.titleLarge) },
+    containerColor = MaterialTheme.colorScheme.surface,
+    titleContentColor = MaterialTheme.colorScheme.onSurface,
+    textContentColor = MaterialTheme.colorScheme.onSurface,
     text = {
       Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         AsliTextField(value = "", onValueChange = {}, label = "Select Customer...", enabled = false)
@@ -437,15 +460,19 @@ private fun SaveBillDialog(
         }
       }
     },
-    confirmButton = { 
-      TextButton(onClick = onSave, enabled = subtotal > 0) { 
-        Text("SAVE", color = if (subtotal > 0) MaterialTheme.colorScheme.primary else Color.Gray, fontWeight = FontWeight.Bold) 
-      } 
+    confirmButton = {
+      TextButton(onClick = onSave, enabled = subtotal > 0) {
+        Text(
+          "SAVE",
+          color = if (subtotal > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+          fontWeight = FontWeight.Bold
+        )
+      }
     },
-    dismissButton = { 
-      TextButton(onClick = onDismiss) { 
-        Text("CANCEL") 
-      } 
+    dismissButton = {
+      TextButton(onClick = onDismiss) {
+        Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+      }
     }
   )
 }

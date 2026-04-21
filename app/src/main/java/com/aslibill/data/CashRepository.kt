@@ -55,7 +55,7 @@ class CashRepository(
           userId = uid,
           type = obj.getString("type"),
           amount = obj.getDouble("amount"),
-          note = obj.optString("note", null),
+          note = obj.optString("note").takeIf { !obj.isNull("note") },
           createdAtEpochMs = obj.getLong("createdAtEpochMs")
         ))
       }

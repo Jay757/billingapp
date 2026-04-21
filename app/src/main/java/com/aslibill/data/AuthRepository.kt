@@ -78,7 +78,7 @@ class AuthRepository(private val context: Context) {
 
             val resp = client.postJson("/auth/signup", token = null, body = req)
             _lastError.value = null
-            resp.optString("code", null as String?)
+            resp.optString("code").takeIf { !resp.isNull("code") }
         } catch (t: Throwable) {
             Log.e(tag, "Signup failed. phone=$phone", t)
             _lastError.value = extractErrorMessage(t.message)
@@ -113,7 +113,7 @@ class AuthRepository(private val context: Context) {
             val req = JSONObject().put("phone", phone)
             val resp = client.postJson("/auth/resend-otp", token = null, body = req)
             _lastError.value = null
-            resp.optString("code", null as String?)
+            resp.optString("code").takeIf { !resp.isNull("code") }
         } catch (t: Throwable) {
             Log.e(tag, "Resend OTP failed. phone=$phone", t)
             _lastError.value = extractErrorMessage(t.message)

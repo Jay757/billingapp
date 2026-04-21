@@ -127,7 +127,10 @@ fun CashManagementScreen(
 
       AlertDialog(
         onDismissRequest = { showAddDialog = null },
-        title = { Text("Cash $type", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.titleLarge) },
+        title = { Text("Cash $type", style = MaterialTheme.typography.titleLarge) },
+        containerColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurface,
         text = {
           Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             com.aslibill.ui.components.AsliTextField(
@@ -153,7 +156,9 @@ fun CashManagementScreen(
           }) { Text("SAVE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold) }
         },
         dismissButton = {
-          TextButton(onClick = { showAddDialog = null }) { Text("CANCEL") }
+          TextButton(onClick = { showAddDialog = null }) {
+            Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+          }
         }
       )
 

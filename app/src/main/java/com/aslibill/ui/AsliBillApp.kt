@@ -73,11 +73,13 @@ import com.aslibill.ui.screens.SignupScreen
 import com.aslibill.ui.screens.SignupViewModel
 import com.aslibill.ui.screens.SignupViewModelFactory
 import com.aslibill.ui.screens.OTPScreen
+import com.aslibill.ui.screens.OTPSuccessScreen
 import com.aslibill.ui.screens.OTPViewModel
 import com.aslibill.ui.screens.OTPViewModelFactory
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import kotlinx.coroutines.launch
 
 @Composable
@@ -88,10 +90,27 @@ fun NovaBillApp() {
   val userSession = app.container.authRepository.userSession.collectAsState(initial = null).value
   val scope = rememberCoroutineScope()
 
+  // Stabilize start destination to prevent NavHost resets when session state changes mid-flow
+  val startDestination = remember {
+    if (app.container.authRepository.userSession.value != null) Routes.Home else Routes.Welcome
+  }
+
+  // Monitor for Logout and redirect to Welcome
+  LaunchedEffect(userSession) {
+    if (userSession == null) {
+      val currentRoute = navController.currentDestination?.route
+      if (currentRoute != Routes.Login && currentRoute != Routes.Signup && currentRoute != Routes.Welcome) {
+        navController.navigate(Routes.Welcome) {
+          popUpTo(0) { inclusive = true }
+        }
+      }
+    }
+  }
+
   Scaffold { padding ->
     NavHost(
       navController = navController,
-      startDestination = if (userSession != null) Routes.Home else Routes.Welcome,
+      startDestination = startDestination,
       modifier = Modifier
     ) {
       composable(Routes.Home) {
@@ -181,11 +200,23 @@ fun NovaBillApp() {
           vm = vm,
           phone = phone,
           onVerifySuccess = {
-            navController.navigate(Routes.Home) {
-              popUpTo(navController.graph.startDestinationId) { inclusive = true }
+            navController.navigate(Routes.OTPSuccess) {
+              // Pop up to current screen to clear it, but dont reset the whole graph
+              popUpTo(backStackEntry.destination.id) { inclusive = true }
             }
           },
           onBack = { navController.popBackStack() },
+          contentPadding = padding
+        )
+      }
+      composable(Routes.OTPSuccess) {
+        OTPSuccessScreen(
+          onContinue = {
+            navController.navigate(Routes.Home) {
+              popUpTo(0) { inclusive = true }
+              launchSingleTop = true
+            }
+          },
           contentPadding = padding
         )
       }
@@ -369,6 +400,7 @@ object Routes {
   const val Login = "login"
   const val Signup = "signup"
   const val OTP = "otp"
+  const val OTPSuccess = "otp-success"
   const val Welcome = "welcome"
 }
 

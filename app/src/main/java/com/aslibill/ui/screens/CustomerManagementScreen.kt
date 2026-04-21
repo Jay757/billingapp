@@ -195,7 +195,10 @@ private fun CustomerDialog(
 
   AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text(title, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.titleLarge) },
+    title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+    containerColor = MaterialTheme.colorScheme.surface,
+    titleContentColor = MaterialTheme.colorScheme.onSurface,
+    textContentColor = MaterialTheme.colorScheme.onSurface,
     text = {
       Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         com.aslibill.ui.components.AsliTextField(value = name, onValueChange = { name = it }, label = "Name")
@@ -208,7 +211,11 @@ private fun CustomerDialog(
         if (name.isNotBlank() && mobile.isNotBlank()) onConfirm(name, mobile, address)
       }) { Text("SAVE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold) }
     },
-    dismissButton = { TextButton(onClick = onDismiss) { Text("CANCEL") } }
+    dismissButton = {
+      TextButton(onClick = onDismiss) {
+        Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+      }
+    }
   )
 }
 

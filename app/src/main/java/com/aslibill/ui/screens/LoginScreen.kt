@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.aslibill.ui.components.AsliTextField
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.DarkCard
+import com.aslibill.ui.components.OrangeButton
 import com.aslibill.ui.theme.Brand
 import com.aslibill.ui.theme.AppTypography
 import com.aslibill.ui.theme.AppSpacing
@@ -169,22 +170,11 @@ fun LoginScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        Button(
+                        OrangeButton(
+                            text = if (vm.isLoading) "LOGGING IN..." else "LOGIN",
                             onClick = { vm.onLogin(onLoginSuccess) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(54.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        ) {
-                            Text(
-                                text = if (vm.isLoading) "LOGGING IN..." else "LOGIN",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black, fontSize = 16.sp, letterSpacing = 1.sp)
-                            )
-                        }
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
 
