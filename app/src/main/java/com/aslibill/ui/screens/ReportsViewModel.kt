@@ -37,11 +37,15 @@ class ReportsViewModel(
       .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0.0)
 
   fun setFrom(epochMs: Long) {
-    _filters.value = _filters.value.copy(fromEpochMs = epochMs)
+    val cal = Calendar.getInstance().apply { timeInMillis = epochMs }
+    cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
+    _filters.value = _filters.value.copy(fromEpochMs = cal.timeInMillis)
   }
 
   fun setTo(epochMs: Long) {
-    _filters.value = _filters.value.copy(toEpochMs = epochMs)
+    val cal = Calendar.getInstance().apply { timeInMillis = epochMs }
+    cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59); cal.set(Calendar.MILLISECOND, 999)
+    _filters.value = _filters.value.copy(toEpochMs = cal.timeInMillis)
   }
 
   fun deleteBill(billId: Long) = viewModelScope.launch { billing.deleteBill(billId) }
@@ -60,11 +64,9 @@ class ReportsViewModel(
 
 private fun defaultTodayRange(): ReportFilters {
   val cal = Calendar.getInstance()
+  cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59); cal.set(Calendar.MILLISECOND, 999)
   val end = cal.timeInMillis
-  cal.set(Calendar.HOUR_OF_DAY, 0)
-  cal.set(Calendar.MINUTE, 0)
-  cal.set(Calendar.SECOND, 0)
-  cal.set(Calendar.MILLISECOND, 0)
+  cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
   val start = cal.timeInMillis
   return ReportFilters(fromEpochMs = start, toEpochMs = end)
 }

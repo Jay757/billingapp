@@ -31,8 +31,17 @@ class ItemWiseSalesReportViewModel(private val repo: AnalyticsRepository) : View
     repo.observeItemSales(f.fromEpochMs, f.toEpochMs)
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  fun setFrom(epochMs: Long) { filters.value = filters.value.copy(fromEpochMs = epochMs) }
-  fun setTo(epochMs: Long) { filters.value = filters.value.copy(toEpochMs = epochMs) }
+  fun setFrom(epochMs: Long) {
+    val cal = Calendar.getInstance().apply { timeInMillis = epochMs }
+    cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
+    filters.value = filters.value.copy(fromEpochMs = cal.timeInMillis)
+  }
+
+  fun setTo(epochMs: Long) {
+    val cal = Calendar.getInstance().apply { timeInMillis = epochMs }
+    cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59); cal.set(Calendar.MILLISECOND, 999)
+    filters.value = filters.value.copy(toEpochMs = cal.timeInMillis)
+  }
 }
 
 class ItemWiseSalesReportViewModelFactory(private val repo: AnalyticsRepository) : ViewModelProvider.Factory {
