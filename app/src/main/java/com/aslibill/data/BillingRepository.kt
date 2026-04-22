@@ -6,6 +6,7 @@ import com.aslibill.data.db.BillItemEntity
 import com.aslibill.data.db.BillWithItemsRow
 import com.aslibill.data.db.BillEntity
 import com.aslibill.network.ApiHttpClient
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -32,13 +33,6 @@ class BillingRepository(
         bill.copy(userId = uid),
         items.map { it.copy(userId = uid) }
     )
-    
-    // Decrement local stock for each product in the bill
-    items.forEach { item ->
-      item.productId?.let { pid ->
-        productDao.decrementStock(uid, pid, item.qty)
-      }
-    }
 
     runCatching {
       val token = authRepository.currentToken() ?: return@runCatching
@@ -76,6 +70,7 @@ class BillingRepository(
   }
 
   // Reactive: re-subscribes automatically when session becomes available after cold start
+  @OptIn(ExperimentalCoroutinesApi::class)
   fun observeBillsBetween(fromEpochMs: Long, toEpochMs: Long): Flow<List<BillWithItemsRow>> {
     return authRepository.userSession.flatMapLatest { session ->
       if (session == null) flowOf(emptyList())

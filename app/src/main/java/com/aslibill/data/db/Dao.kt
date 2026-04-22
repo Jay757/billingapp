@@ -15,7 +15,6 @@ data class ProductWithCategory(
   val categoryName: String,
   val name: String,
   val price: Double,
-  val stock: Double,
   val isActive: Boolean
 )
 
@@ -44,7 +43,7 @@ interface ProductDao {
 
   @Query(
     """
-      SELECT p.id, p.categoryId, c.name as categoryName, p.name, p.price, p.stock, p.isActive
+      SELECT p.id, p.categoryId, c.name as categoryName, p.name, p.price, p.isActive
       FROM products p
       JOIN categories c ON c.id = p.categoryId
       WHERE p.userId = :userId AND p.isActive = 1
@@ -68,8 +67,6 @@ interface ProductDao {
   @Delete
   suspend fun delete(product: ProductEntity)
 
-  @Query("Update products SET stock = stock - :qty WHERE userId = :userId AND id = :productId")
-  suspend fun decrementStock(userId: Int, productId: Long, qty: Double)
 }
 
 data class BillWithItemsRow(

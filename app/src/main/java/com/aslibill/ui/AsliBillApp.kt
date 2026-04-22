@@ -95,7 +95,7 @@ fun NovaBillApp() {
   val navController = rememberNavController()
   val context = LocalContext.current
   val app = context.applicationContext as NovaBillApplication
-  val userSession = app.container.authRepository.userSession.collectAsState(initial = null).value
+  val userSession = app.container.authRepository.userSession.collectAsState(initial = app.container.authRepository.userSession.value).value
   val scope = rememberCoroutineScope()
 
   // Stabilize start destination to prevent NavHost resets when session state changes mid-flow

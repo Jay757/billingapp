@@ -327,9 +327,11 @@ private fun BillCard(
 ) {
   val paymentColor = when (row.paymentMethod.uppercase(Locale.getDefault())) {
     "CASH" -> AsliColors.PrimaryBlue
-    "UP" -> AsliColors.SuccessGreen
+    "ONLINE" -> AsliColors.SuccessGreen
     "UPI" -> AsliColors.SuccessGreen
-    else -> AsliColors.AlertOrange
+    "UP" -> AsliColors.SuccessGreen
+    "CREDIT" -> AsliColors.AlertOrange
+    else -> AsliColors.TextSecondary
   }
 
   DarkCard(

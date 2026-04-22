@@ -33,7 +33,6 @@ data class ProductEntity(
   val categoryId: Long,
   val name: String,
   val price: Double,
-  val stock: Double = 0.0,
   val isActive: Boolean = true
 )
 

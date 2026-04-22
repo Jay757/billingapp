@@ -121,7 +121,7 @@ fun InventoryScreen(
                   style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
               )
               Text(
-                  "Manage your stock and prices", 
+                  "Manage your product prices", 
                   color = MaterialTheme.colorScheme.onSurfaceVariant, 
                   style = MaterialTheme.typography.bodyMedium
               )
@@ -229,11 +229,6 @@ fun InventoryScreen(
                                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
                               )
                           }
-                          Text(
-                            "Stock: ${p.stock.toInt()}",
-                            color = if (p.stock <= 5) AsliColors.Red else MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
-                          )
                         }
                         Text(
                           p.categoryName.uppercase(),
@@ -250,8 +245,7 @@ fun InventoryScreen(
                               id = p.id,
                               categoryId = p.categoryId,
                               name = p.name,
-                              price = p.price,
-                              stock = p.stock
+                              price = p.price
                             )
                             showAdd = true
                           },
@@ -320,7 +314,7 @@ fun InventoryScreen(
                 editProduct = null
             },
             onUpdate = { draft ->
-              vm.updateProduct(draft.id!!, draft.categoryId, draft.name, draft.price, draft.stock, isActive = true)
+              vm.updateProduct(draft.id!!, draft.categoryId, draft.name, draft.price, isActive = true)
               showAdd = false
               editProduct = null
             }
@@ -337,8 +331,7 @@ private data class ProductDraft(
   val id: Long? = null,
   val categoryId: Long,
   val name: String,
-  val price: Double,
-  val stock: Double = 0.0
+  val price: Double
 )
 
 @Composable

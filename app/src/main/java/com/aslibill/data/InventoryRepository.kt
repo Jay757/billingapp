@@ -64,38 +64,36 @@ class InventoryRepository(
     }
   }
 
-  suspend fun addProduct(categoryId: Long, name: String, price: Double, stock: Double = 0.0) {
+  suspend fun addProduct(categoryId: Long, name: String, price: Double) {
     val uid = getUserId()
     val trimmed = name.trim()
-    val tempId = productDao.insert(ProductEntity(userId = uid, categoryId = categoryId, name = trimmed, price = price, stock = stock))
+    val tempId = productDao.insert(ProductEntity(userId = uid, categoryId = categoryId, name = trimmed, price = price))
     runCatching {
       val token = authRepository.currentToken() ?: return@runCatching
       val body = JSONObject()
         .put("categoryId", categoryId)
         .put("name", trimmed)
         .put("price", price)
-        .put("stock", stock)
         .put("isActive", true)
       val resp = client.postJson("/inventory/products", token, body)
       val serverId = resp.getLong("id")
       if (tempId != serverId) {
-        productDao.delete(ProductEntity(id = tempId, userId = uid, categoryId = categoryId, name = trimmed, price = price, stock = stock))
-        productDao.insert(ProductEntity(id = serverId, userId = uid, categoryId = categoryId, name = trimmed, price = price, stock = stock, isActive = true))
+        productDao.delete(ProductEntity(id = tempId, userId = uid, categoryId = categoryId, name = trimmed, price = price))
+        productDao.insert(ProductEntity(id = serverId, userId = uid, categoryId = categoryId, name = trimmed, price = price, isActive = true))
       }
     }
   }
 
-  suspend fun updateProduct(id: Long, categoryId: Long, name: String, price: Double, stock: Double, isActive: Boolean) {
+  suspend fun updateProduct(id: Long, categoryId: Long, name: String, price: Double, isActive: Boolean) {
     val uid = getUserId()
     val trimmed = name.trim()
-    productDao.update(ProductEntity(id = id, userId = uid, categoryId = categoryId, name = trimmed, price = price, stock = stock, isActive = isActive))
+    productDao.update(ProductEntity(id = id, userId = uid, categoryId = categoryId, name = trimmed, price = price, isActive = isActive))
     runCatching {
       val token = authRepository.currentToken() ?: return@runCatching
       val body = JSONObject()
         .put("categoryId", categoryId)
         .put("name", trimmed)
         .put("price", price)
-        .put("stock", stock)
         .put("isActive", isActive)
       client.putJson("/inventory/products/$id", token, body)
     }
@@ -109,10 +107,7 @@ class InventoryRepository(
     }
   }
 
-  suspend fun decrementStock(productId: Long, qty: Double) {
-    val uid = getUserId()
-    productDao.decrementStock(uid, productId, qty)
-  }
+
 
   suspend fun syncFromRemote() {
     val uid = getUserId()
@@ -136,9 +131,8 @@ class InventoryRepository(
         val catId = obj.getLong("categoryId")
         val name = obj.getString("name")
         val price = obj.getDouble("price")
-        val stock = obj.getDouble("stock")
         val isActive = obj.getBoolean("isActive")
-        productDao.insert(ProductEntity(id = id, userId = uid, categoryId = catId, name = name, price = price, stock = stock, isActive = isActive))
+        productDao.insert(ProductEntity(id = id, userId = uid, categoryId = catId, name = name, price = price, isActive = isActive))
       }
     }
   }

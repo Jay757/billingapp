@@ -186,8 +186,8 @@ class AuthRepository(
             putString("user_name", name)
             putString("user_phone", phone)
             putString("token", token)
-            apply()
-        }
+        }.commit()
+        
         _userSession.value = UserSession(id, name, phone)
         _token.value = token
     }
@@ -195,7 +195,7 @@ class AuthRepository(
     suspend fun logout() {
         // Clear all relevant user preferences
         listOf("auth_prefs", "print_settings", "bluetooth_printer").forEach { name ->
-            context.getSharedPreferences(name, Context.MODE_PRIVATE).edit().clear().apply()
+            context.getSharedPreferences(name, Context.MODE_PRIVATE).edit().clear().commit()
         }
         
         _userSession.value = null
