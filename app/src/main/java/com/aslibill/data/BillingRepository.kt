@@ -7,6 +7,8 @@ import com.aslibill.data.db.BillWithItemsRow
 import com.aslibill.data.db.BillEntity
 import com.aslibill.network.ApiHttpClient
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -73,9 +75,12 @@ class BillingRepository(
     return id
   }
 
+  // Reactive: re-subscribes automatically when session becomes available after cold start
   fun observeBillsBetween(fromEpochMs: Long, toEpochMs: Long): Flow<List<BillWithItemsRow>> {
-    val session = authRepository.userSession.value ?: return kotlinx.coroutines.flow.flowOf(emptyList())
-    return billDao.observeBillsBetween(session.id, fromEpochMs, toEpochMs)
+    return authRepository.userSession.flatMapLatest { session ->
+      if (session == null) flowOf(emptyList())
+      else billDao.observeBillsBetween(session.id, fromEpochMs, toEpochMs)
+    }
   }
 
   suspend fun getBillItems(billId: Long): List<BillItemEntity> {
@@ -97,7 +102,8 @@ class BillingRepository(
     billDao.deleteAllBills(uid)
     runCatching {
       val token = authRepository.currentToken() ?: return@runCatching
-      client.delete("/bills", token)
+      // ?confirm=true required by backend to prevent accidental full wipe
+      client.delete("/bills?confirm=true", token)
     }
   }
 
@@ -109,6 +115,7 @@ class BillingRepository(
       val now = System.currentTimeMillis()
       val thirtyDaysAgo = now - (30L * 24 * 60 * 60 * 1000)
       
+      // Single request — items embedded inline, eliminating N+1 round trips
       val url = "/bills?fromEpochMs=$thirtyDaysAgo&toEpochMs=$now"
       val billsResp = client.getJsonArray(url, token)
       
@@ -116,11 +123,23 @@ class BillingRepository(
         val bObj = billsResp.getJSONObject(i)
         val billId = bObj.getLong("billId")
         
-        // Fetch items for this bill
-        val itemsResp = client.getJsonArray("/bills/$billId/items", token)
+        val billEntity = BillEntity(
+          id = billId,
+          userId = uid,
+          createdAtEpochMs = bObj.getLong("createdAtEpochMs"),
+          cashierName = bObj.optString("cashierName").takeIf { !bObj.isNull("cashierName") },
+          customerId = bObj.optLong("customerId", -1L).takeIf { it != -1L },
+          subtotal = bObj.getDouble("subtotal"),
+          tax = bObj.getDouble("tax"),
+          total = bObj.getDouble("total"),
+          paymentMethod = bObj.getString("paymentMethod")
+        )
+
+        // Items are now embedded in the bill response — no per-bill HTTP request
+        val itemsArray = bObj.optJSONArray("items") ?: JSONArray()
         val itemsList = mutableListOf<BillItemEntity>()
-        for (j in 0 until itemsResp.length()) {
-          val itObj = itemsResp.getJSONObject(j)
+        for (j in 0 until itemsArray.length()) {
+          val itObj = itemsArray.getJSONObject(j)
           itemsList.add(BillItemEntity(
             id = itObj.getLong("id"),
             userId = uid,
@@ -133,17 +152,7 @@ class BillingRepository(
           ))
         }
         
-        // Insert bill and items
-        val billEntity = BillEntity(
-          id = billId,
-          userId = uid,
-          createdAtEpochMs = bObj.getLong("createdAtEpochMs"),
-          cashierName = bObj.optString("cashierName").takeIf { !bObj.isNull("cashierName") },
-          subtotal = bObj.getDouble("subtotal"),
-          tax = bObj.getDouble("tax"),
-          total = bObj.getDouble("total"),
-          paymentMethod = bObj.getString("paymentMethod")
-        )
+        // REPLACE strategy in DAO handles re-syncs without constraint crashes
         billDao.insertBillWithItems(billEntity, itemsList)
       }
     }

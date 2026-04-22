@@ -4,9 +4,13 @@ import android.content.Context
 import android.util.Log
 import com.aslibill.BuildConfig
 import com.aslibill.network.ApiHttpClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 data class UserSession(
@@ -35,10 +39,14 @@ class AuthRepository(
         val name = prefs.getString("user_name", null)
         val phone = prefs.getString("user_phone", null)
         val token = prefs.getString("token", null)
-        if (id != -1 && name != null && phone != null) {
+        if (id != -1 && name != null && phone != null && token != null) {
             _userSession.value = UserSession(id, name, phone)
-            // Token is optional to allow offline/dev flow.
             _token.value = token
+            // Proactively refresh the token on app start so it never silently expires
+            // during a session. Runs on a background scope tied to the process lifetime.
+            CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+                refreshTokenIfNeeded()
+            }
         }
     }
 
@@ -140,6 +148,37 @@ class AuthRepository(
     }
 
     fun currentToken(): String? = _token.value
+
+    /**
+     * Silently refreshes the stored JWT using POST /auth/refresh.
+     * Called on app start to ensure the token is always fresh.
+     * If the server rejects the token (expired/invalid), the local session
+     * is cleared so the user is redirected to login instead of seeing
+     * a broken home screen with empty data and silent 401 errors.
+     */
+    suspend fun refreshTokenIfNeeded() {
+        val currentTok = _token.value ?: return
+        try {
+            val resp = client.postJson("/auth/refresh", token = currentTok, body = JSONObject())
+            val newToken = resp.getString("token")
+            val userObj = resp.getJSONObject("user")
+            val userId = userObj.getInt("id")
+            val name = userObj.getString("name")
+            val phone = userObj.getString("phone")
+            saveSession(id = userId, name = name, phone = phone, token = newToken)
+            Log.d(tag, "Token refreshed silently on app start")
+        } catch (t: Throwable) {
+            val msg = t.message ?: ""
+            // 401 means token is expired/invalid — clear session so user is sent to login
+            if (msg.contains("401") || msg.contains("Unauthorized") || msg.contains("Invalid token")) {
+                Log.w(tag, "Stored token rejected by server (expired). Clearing session.")
+                logout()
+            } else {
+                // Network error (offline) — keep the local session alive
+                Log.w(tag, "Token refresh skipped (network unavailable): ${t.message}")
+            }
+        }
+    }
 
     private fun saveSession(id: Int, name: String, phone: String, token: String) {
         prefs.edit().apply {

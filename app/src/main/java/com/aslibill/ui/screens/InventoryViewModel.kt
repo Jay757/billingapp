@@ -32,6 +32,12 @@ class InventoryViewModel(
   fun addProduct(categoryId: Long, name: String, price: Double, stock: Double) =
     viewModelScope.launch { repo.addProduct(categoryId, name, price, stock) }
 
+  fun addProducts(categoryId: Long, items: List<Pair<String, Double>>) = viewModelScope.launch {
+    items.forEach { (name, price) ->
+      repo.addProduct(categoryId, name, price, 0.0)
+    }
+  }
+
   fun updateProduct(id: Long, categoryId: Long, name: String, price: Double, stock: Double, isActive: Boolean) =
     viewModelScope.launch { repo.updateProduct(id, categoryId, name, price, stock, isActive) }
 

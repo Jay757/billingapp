@@ -52,6 +52,19 @@ import com.aslibill.data.db.CategoryEntity
 import com.aslibill.data.db.ProductEntity
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.Stroke
 import com.aslibill.ui.components.Chip
 import com.aslibill.ui.components.DarkCard
 import com.aslibill.ui.components.GrayButton
@@ -62,6 +75,10 @@ import com.aslibill.ui.theme.AsliColors
 import com.aslibill.ui.theme.AppTypography
 import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.components.GlassButton
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Outline
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -297,12 +314,13 @@ fun InventoryScreen(
             categories = categories,
             initial = editProduct,
             onDismiss = { showAdd = false; editProduct = null },
-            onSave = { draft ->
-              if (draft.id == null) {
-                vm.addProduct(draft.categoryId, draft.name, draft.price, draft.stock)
-              } else {
-                vm.updateProduct(draft.id, draft.categoryId, draft.name, draft.price, draft.stock, isActive = true)
-              }
+            onSave = { categoryId, items ->
+                vm.addProducts(categoryId, items)
+                showAdd = false
+                editProduct = null
+            },
+            onUpdate = { draft ->
+              vm.updateProduct(draft.id!!, draft.categoryId, draft.name, draft.price, draft.stock, isActive = true)
               showAdd = false
               editProduct = null
             }
@@ -363,6 +381,11 @@ private fun CategoryDialog(
   )
 }
 
+private data class ProductItemDraft(
+    val id: Long? = null,
+    val name: String = "",
+    val price: String = ""
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -370,48 +393,73 @@ private fun ProductDialog(
   categories: List<CategoryEntity>,
   initial: ProductDraft?,
   onDismiss: () -> Unit,
-  onSave: (ProductDraft) -> Unit
+  onSave: (Long, List<Pair<String, Double>>) -> Unit,
+  onUpdate: (ProductDraft) -> Unit
 ) {
   var categoryId by remember(initial, categories) {
     mutableStateOf(initial?.categoryId ?: categories.firstOrNull()?.id ?: 0L)
   }
-  var name by remember(initial) { mutableStateOf(initial?.name.orEmpty()) }
-  var priceText by remember(initial) { mutableStateOf(if (initial == null) "" else initial.price.toString()) }
-  var stockText by remember(initial) { mutableStateOf(if (initial == null) "" else initial.stock.toString()) }
+  
+  // Use a state list for multiple products
+  val productItems = remember { 
+    mutableStateListOf<ProductItemDraft>().apply {
+        if (initial != null) {
+            add(ProductItemDraft(id = initial.id, name = initial.name, price = initial.price.toString()))
+        } else {
+            add(ProductItemDraft())
+        }
+    }
+  }
 
   var expanded by remember { mutableStateOf(false) }
   val selectedCategory = categories.find { it.id == categoryId }
 
   AlertDialog(
     onDismissRequest = onDismiss,
-    title = { Text(if (initial == null) "Add Product" else "Edit Product", style = MaterialTheme.typography.titleLarge) },
-    containerColor = MaterialTheme.colorScheme.surface,
-    titleContentColor = MaterialTheme.colorScheme.onSurface,
-    textContentColor = MaterialTheme.colorScheme.onSurface,
+    title = { 
+        Text(
+            if (initial == null) "Add Product" else "Edit Product", 
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black)
+        ) 
+    },
+    containerColor = Color(0xFF1A1C1E), // Match dark theme in image
+    titleContentColor = Color.White,
+    textContentColor = Color.White,
     text = {
-      Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+      Column(
+          modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+          verticalArrangement = Arrangement.spacedBy(16.dp)
+      ) {
         // Dropdown for Category
+        Text("Category", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
         ExposedDropdownMenuBox(
           expanded = expanded,
           onExpandedChange = { expanded = !expanded },
           modifier = Modifier.fillMaxWidth()
         ) {
-          com.aslibill.ui.components.AsliTextField(
+          OutlinedTextField(
             value = selectedCategory?.name ?: "Select Category",
             onValueChange = {},
-            label = "Category",
-            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+            readOnly = true,
+            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = OutlinedTextFieldDefaults.colors(
+                unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedTextColor = Color.White,
+                focusedTextColor = Color.White
+            ),
+            shape = RoundedCornerShape(12.dp)
           )
           
           ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+            modifier = Modifier.background(Color(0xFF2A2D31))
           ) {
             categories.forEach { cat ->
               DropdownMenuItem(
-                text = { Text(cat.name, color = MaterialTheme.colorScheme.onSurface) },
+                text = { Text(cat.name, color = Color.White) },
                 onClick = {
                   categoryId = cat.id
                   expanded = false
@@ -421,57 +469,128 @@ private fun ProductDialog(
           }
         }
 
-        com.aslibill.ui.components.AsliTextField(
-          value = name,
-          onValueChange = { name = it },
-          label = "Product Name"
-        )
-        
-        com.aslibill.ui.components.AsliTextField(
-          value = priceText,
-          onValueChange = { priceText = it },
-          label = "Price",
-          keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
-        )
-        
-        com.aslibill.ui.components.AsliTextField(
-          value = stockText,
-          onValueChange = { stockText = it },
-          label = "Initial Stock",
-          keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
-        )
+        Text("Products", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+
+        productItems.forEachIndexed { index, item ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = item.name,
+                    onValueChange = { productItems[index] = item.copy(name = it) },
+                    label = { Text("Product Name", fontSize = 12.sp) },
+                    modifier = Modifier.weight(2f),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                        unfocusedTextColor = Color.White,
+                        focusedTextColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = item.price,
+                    onValueChange = { productItems[index] = item.copy(price = it) },
+                    label = { Text("Price", fontSize = 12.sp) },
+                    modifier = Modifier.weight(1f),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                        unfocusedTextColor = Color.White,
+                        focusedTextColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+                    singleLine = true
+                )
+                
+                if (initial == null && productItems.size > 1) {
+                    IconButton(onClick = { productItems.removeAt(index) }) {
+                        Icon(Icons.Outlined.Delete, contentDescription = "Remove", tint = AsliColors.Red)
+                    }
+                } else if (initial == null && index == 0) {
+                     // Empty space to align
+                     Spacer(Modifier.width(40.dp))
+                } else if (initial != null) {
+                    // No delete for edit in this view
+                    Spacer(Modifier.width(40.dp))
+                } else {
+                     IconButton(onClick = { productItems.removeAt(index) }) {
+                        Icon(Icons.Outlined.Delete, contentDescription = "Remove", tint = AsliColors.Red)
+                    }
+                }
+            }
+        }
+
+        if (initial == null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .dashedBorder(Color.Gray.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                    .clickable { productItems.add(ProductItemDraft()) },
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.Add, contentDescription = null, tint = AsliColors.PrimaryBlue, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Add Product", color = AsliColors.PrimaryBlue, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
       }
     },
     confirmButton = {
-      val price = priceText.toDoubleOrNull()
-      val isValid = categoryId != 0L && name.trim().isNotEmpty() && priceText.toDoubleOrNull() != null && stockText.toDoubleOrNull() != null
+      val isValid = categoryId != 0L && productItems.all { it.name.isNotBlank() && it.price.toDoubleOrNull() != null }
       TextButton(
         onClick = {
-          onSave(
-            ProductDraft(
-              id = initial?.id,
-              categoryId = categoryId,
-              name = name,
-              price = price ?: 0.0,
-              stock = stockText.toDoubleOrNull() ?: 0.0
-            )
-          )
+            if (initial != null) {
+                val item = productItems.first()
+                onUpdate(initial.copy(
+                    name = item.name,
+                    price = item.price.toDoubleOrNull() ?: 0.0
+                ))
+            } else {
+                val items = productItems.map { it.name to (it.price.toDoubleOrNull() ?: 0.0) }
+                onSave(categoryId, items)
+            }
         },
         enabled = isValid
       ) {
         Text(
           "SAVE",
-          color = if (isValid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+          color = if (isValid) AsliColors.PrimaryBlue else Color.Gray,
           fontWeight = FontWeight.Bold
         )
       }
     },
     dismissButton = {
       TextButton(onClick = onDismiss) {
-        Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("CANCEL", color = Color.Gray)
       }
     }
   )
 }
 
-
+// Helper for dashed border
+fun Modifier.dashedBorder(color: Color, shape: Shape): Modifier = this.drawBehind {
+    val stroke = Stroke(width = 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f))
+    val outline = shape.createOutline(size, layoutDirection, this)
+    when (outline) {
+        is Outline.Rectangle -> {
+            drawRect(color = color, style = stroke)
+        }
+        is Outline.Rounded -> {
+            drawRoundRect(
+                color = color, 
+                cornerRadius = CornerRadius(outline.roundRect.topLeftCornerRadius.x),
+                style = stroke
+            )
+        }
+        is Outline.Generic -> {
+            drawPath(path = outline.path, color = color, style = stroke)
+        }
+    }
+}

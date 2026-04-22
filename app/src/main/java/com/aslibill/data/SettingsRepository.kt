@@ -12,7 +12,8 @@ import kotlinx.coroutines.*
 class SettingsRepository(
     context: Context,
     private val authRepository: AuthRepository,
-    private val client: com.aslibill.network.ApiHttpClient
+    private val client: com.aslibill.network.ApiHttpClient,
+    private val appScope: kotlinx.coroutines.CoroutineScope
 ) {
     private val prefs = context.getSharedPreferences("print_settings", Context.MODE_PRIVATE)
 
@@ -56,7 +57,8 @@ class SettingsRepository(
         _settings.value = config
 
         // Sync to remote
-        CoroutineScope(Dispatchers.IO).launch {
+        // Use the shared appScope — avoids leaking an unmanaged CoroutineScope on every save
+        appScope.launch(Dispatchers.IO) {
             runCatching {
                 val token = authRepository.currentToken() ?: return@runCatching
                 val body = org.json.JSONObject()

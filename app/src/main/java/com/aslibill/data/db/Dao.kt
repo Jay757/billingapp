@@ -85,10 +85,10 @@ data class BillWithItemsRow(
 
 @Dao
 interface BillDao {
-  @Insert
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insertBill(bill: BillEntity): Long
 
-  @Insert
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun insertItems(items: List<BillItemEntity>)
 
   @Transaction
@@ -108,7 +108,7 @@ interface BillDao {
         b.tax,
         b.total,
         b.paymentMethod,
-        (SELECT COUNT(*) FROM bill_items bi WHERE bi.billId = b.id) as itemCount
+        (SELECT COUNT(*) FROM bill_items bi WHERE bi.billId = b.id AND bi.userId = b.userId) as itemCount
       FROM bills b
       WHERE b.userId = :userId
       ORDER BY b.createdAtEpochMs DESC
@@ -126,7 +126,7 @@ interface BillDao {
         b.tax,
         b.total,
         b.paymentMethod,
-        (SELECT COUNT(*) FROM bill_items bi WHERE bi.billId = b.id) as itemCount
+        (SELECT COUNT(*) FROM bill_items bi WHERE bi.billId = b.id AND bi.userId = b.userId) as itemCount
       FROM bills b
       WHERE b.userId = :userId AND b.createdAtEpochMs BETWEEN :fromEpochMs AND :toEpochMs
       ORDER BY b.createdAtEpochMs DESC

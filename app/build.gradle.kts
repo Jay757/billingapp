@@ -56,6 +56,9 @@ android {
   }
 
   packaging {
+    jniLibs {
+      keepDebugSymbols += "**/libandroidx.graphics.path.so"
+    }
     resources {
       excludes += "/META-INF/AL2.0"
       excludes += "/META-INF/LGPL2.1"
