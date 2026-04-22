@@ -12,10 +12,10 @@ data class BluetoothPrinterConfig(
 
 class BluetoothPrinterConfigRepository(
   context: Context,
-  private val authRepository: AuthRepository
+  private val authRepository: AuthRepository,
+  private val client: ApiHttpClient
 ) {
   private val prefs = context.getSharedPreferences("bluetooth_printer", Context.MODE_PRIVATE)
-  private val client = ApiHttpClient(BuildConfig.API_BASE_URL)
 
   fun loadLocalConfig(): BluetoothPrinterConfig {
     val address = prefs.getString("device_address", null)
@@ -67,4 +67,3 @@ class BluetoothPrinterConfigRepository(
     }
   }
 }
-

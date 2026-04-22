@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.Flow
 
 class AnalyticsRepository(
     private val dao: BillAnalyticsDao,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val client: com.aslibill.network.ApiHttpClient
 ) {
   fun observeItemSales(from: Long, to: Long): Flow<List<ItemSalesRow>> {
     val uid = authRepository.userSession.value?.id ?: return kotlinx.coroutines.flow.flowOf(emptyList())

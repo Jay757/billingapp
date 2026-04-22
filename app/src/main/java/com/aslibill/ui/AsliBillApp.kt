@@ -4,7 +4,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -95,6 +103,8 @@ fun NovaBillApp() {
     if (app.container.authRepository.userSession.value != null) Routes.Home else Routes.Welcome
   }
 
+  val isOnline = app.container.networkStatusRepository.isOnline.collectAsState().value
+
   // Monitor for Logout and redirect to Welcome
   LaunchedEffect(userSession) {
     if (userSession == null) {
@@ -107,7 +117,25 @@ fun NovaBillApp() {
     }
   }
 
-  Scaffold { padding ->
+  Scaffold(
+    topBar = {
+        if (!isOnline) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Red.copy(alpha = 0.8f))
+                    .padding(vertical = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Backend Offline - Reconnecting...",
+                    color = Color.White,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+    }
+  ) { padding ->
     NavHost(
       navController = navController,
       startDestination = startDestination,
@@ -360,15 +388,15 @@ fun NovaBillApp() {
 @Composable
 fun PlaceholderScreen(title: String, contentPadding: androidx.compose.foundation.layout.PaddingValues) {
   com.aslibill.ui.components.ScreenSurface {
-    androidx.compose.foundation.layout.Box(
-      modifier = androidx.compose.ui.Modifier
+    Box(
+      modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding),
-      contentAlignment = androidx.compose.ui.Alignment.Center
+      contentAlignment = Alignment.Center
     ) {
-      androidx.compose.material3.Text(
+      Text(
         text = "$title Feature Coming Soon",
-        style = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
+        style = MaterialTheme.typography.headlineMedium,
         color = com.aslibill.ui.theme.AsliColors.TextPrimary
       )
     }
@@ -403,4 +431,3 @@ object Routes {
   const val OTPSuccess = "otp-success"
   const val Welcome = "welcome"
 }
-

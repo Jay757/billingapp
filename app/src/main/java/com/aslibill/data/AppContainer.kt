@@ -1,29 +1,41 @@
 package com.aslibill.data
 
 import android.content.Context
+import com.aslibill.BuildConfig
 import com.aslibill.bluetooth.BluetoothPrinterManager
 import com.aslibill.data.db.AppDatabase
 import com.aslibill.data.db.BillDao
+import com.aslibill.network.ApiHttpClient
+import com.aslibill.network.BackendHealthMonitor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 class AppContainer(context: Context) {
-  private val appScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+  val appScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+  val networkStatusRepository = NetworkStatusRepository()
+  val apiClient = ApiHttpClient(BuildConfig.API_BASE_URL, networkStatusRepository)
+  
   private val db = AppDatabase.get(context)
-  val authRepository = AuthRepository(context)
-  val inventoryRepository = InventoryRepository(db.categoryDao(), db.productDao(), authRepository)
-  val billingRepository = BillingRepository(db.billDao(), db.productDao(), authRepository)
-  val customerRepository = CustomerRepository(db.customerDao(), authRepository)
-  val staffRepository = StaffRepository(db.staffDao(), authRepository)
-  val cashRepository = CashRepository(db.cashDao(), authRepository)
-  val analyticsRepository = AnalyticsRepository(db.billAnalyticsDao(), authRepository)
-  val settingsRepository = SettingsRepository(context, authRepository)
+  
+  // Inject apiClient into repositories that need it
+  val authRepository = AuthRepository(context, apiClient)
+  val inventoryRepository = InventoryRepository(db.categoryDao(), db.productDao(), authRepository, apiClient)
+  val billingRepository = BillingRepository(db.billDao(), db.productDao(), authRepository, apiClient)
+  val customerRepository = CustomerRepository(db.customerDao(), authRepository, apiClient)
+  val staffRepository = StaffRepository(db.staffDao(), authRepository, apiClient)
+  val cashRepository = CashRepository(db.cashDao(), authRepository, apiClient)
+  val analyticsRepository = AnalyticsRepository(db.billAnalyticsDao(), authRepository, apiClient)
+  val settingsRepository = SettingsRepository(context, authRepository, apiClient)
   val billDao: BillDao = db.billDao()
 
+  private val healthMonitor = BackendHealthMonitor(apiClient, networkStatusRepository, appScope)
+
   init {
+    healthMonitor.start(intervalMs = 86_400_000) // 24 hours interval
+
     appScope.launch {
       authRepository.userSession.collect { session ->
         if (session != null) {
@@ -46,18 +58,10 @@ class AppContainer(context: Context) {
   }
 
   suspend fun performLogout() {
-    // 1. Database is kept locally as requested by user
-    // db.clearPersonalData() 
-    
-    // 2. Clear all preferences (auth, print, printer)
     authRepository.logout()
-
-    // 3. Disconnect hardware
     bluetoothPrinterManager.disconnect()
   }
 
-  // Keep Bluetooth manager alive across navigation so an active printer connection persists.
   val bluetoothPrinterManager = BluetoothPrinterManager(context, appScope)
-
-  val bluetoothPrinterConfigRepository = BluetoothPrinterConfigRepository(context, authRepository)
+  val bluetoothPrinterConfigRepository = BluetoothPrinterConfigRepository(context, authRepository, apiClient)
 }

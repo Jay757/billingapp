@@ -15,7 +15,10 @@ data class UserSession(
     val phone: String
 )
 
-class AuthRepository(private val context: Context) {
+class AuthRepository(
+    private val context: Context,
+    private val client: ApiHttpClient
+) {
     private val tag = "AuthRepository"
     private val prefs = context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE)
     
@@ -26,8 +29,6 @@ class AuthRepository(private val context: Context) {
     val token: StateFlow<String?> = _token.asStateFlow()
     private val _lastError = MutableStateFlow<String?>(null)
     val lastError: StateFlow<String?> = _lastError.asStateFlow()
-
-    private val client = ApiHttpClient(BuildConfig.API_BASE_URL)
 
     init {
         val id = prefs.getInt("user_id", -1)

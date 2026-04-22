@@ -11,10 +11,10 @@ import kotlinx.coroutines.*
 
 class SettingsRepository(
     context: Context,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val client: com.aslibill.network.ApiHttpClient
 ) {
     private val prefs = context.getSharedPreferences("print_settings", Context.MODE_PRIVATE)
-    private val client = com.aslibill.network.ApiHttpClient(com.aslibill.BuildConfig.API_BASE_URL)
 
     private val _settings = MutableStateFlow(loadSettings())
     val settings: StateFlow<StoreConfig> = _settings.asStateFlow()

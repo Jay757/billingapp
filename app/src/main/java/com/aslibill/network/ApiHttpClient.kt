@@ -10,6 +10,7 @@ import java.net.URL
 
 class ApiHttpClient(
   private val baseUrl: String,
+  private val statusRepo: com.aslibill.data.NetworkStatusRepository? = null,
   private val connectTimeoutMs: Int = 15_000,
   private val readTimeoutMs: Int = 20_000
 ) {
@@ -45,8 +46,12 @@ class ApiHttpClient(
     try {
       val body = readBody(conn)
       ensureSuccess(conn, body)
+      statusRepo?.updateStatus(true)
       if (body.isBlank()) return@withContext JSONObject()
       return@withContext JSONObject(body)
+    } catch (e: Exception) {
+      statusRepo?.updateStatus(false, e.message)
+      throw e
     } finally {
       conn.disconnect()
     }
@@ -75,8 +80,12 @@ class ApiHttpClient(
     try {
       val respBody = readBody(conn)
       ensureSuccess(conn, respBody)
+      statusRepo?.updateStatus(true)
       if (respBody.isBlank()) return@withContext JSONObject()
       return@withContext JSONObject(respBody)
+    } catch (e: Exception) {
+      statusRepo?.updateStatus(false, e.message)
+      throw e
     } finally {
       conn.disconnect()
     }
@@ -105,8 +114,12 @@ class ApiHttpClient(
     try {
       val respBody = readBody(conn)
       ensureSuccess(conn, respBody)
+      statusRepo?.updateStatus(true)
       if (respBody.isBlank()) return@withContext JSONObject()
       return@withContext JSONObject(respBody)
+    } catch (e: Exception) {
+      statusRepo?.updateStatus(false, e.message)
+      throw e
     } finally {
       conn.disconnect()
     }
@@ -125,8 +138,30 @@ class ApiHttpClient(
     try {
       val body = readBody(conn)
       ensureSuccess(conn, body)
+      statusRepo?.updateStatus(true)
       if (body.isBlank()) return@withContext JSONObject()
       return@withContext JSONObject(body)
+    } catch (e: Exception) {
+      statusRepo?.updateStatus(false, e.message)
+      throw e
+    } finally {
+      conn.disconnect()
+    }
+  }
+
+  suspend fun checkHealth(): Boolean = withContext(Dispatchers.IO) {
+    val url = URL(buildUrl("/health"))
+    val conn = (url.openConnection() as HttpURLConnection).apply {
+      requestMethod = "GET"
+      connectTimeout = 2000 // Fast timeout for health check
+      readTimeout = 2000
+    }
+
+    return@withContext try {
+      val code = conn.responseCode
+      code in 200..299
+    } catch (e: Exception) {
+      false
     } finally {
       conn.disconnect()
     }
@@ -145,11 +180,14 @@ class ApiHttpClient(
     try {
       val body = readBody(conn)
       ensureSuccess(conn, body)
+      statusRepo?.updateStatus(true)
       if (body.isBlank()) return@withContext org.json.JSONArray()
       return@withContext org.json.JSONArray(body)
+    } catch (e: Exception) {
+      statusRepo?.updateStatus(false, e.message)
+      throw e
     } finally {
       conn.disconnect()
     }
   }
 }
-

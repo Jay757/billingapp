@@ -13,9 +13,9 @@ import org.json.JSONObject
 class InventoryRepository(
   private val categoryDao: CategoryDao,
   private val productDao: ProductDao,
-  private val authRepository: AuthRepository
+  private val authRepository: AuthRepository,
+  private val client: ApiHttpClient
 ) {
-  private val client = ApiHttpClient(BuildConfig.API_BASE_URL)
 
   private suspend fun getUserId(): Int = authRepository.userSession.value?.id ?: throw IllegalStateException("Not logged in")
 
