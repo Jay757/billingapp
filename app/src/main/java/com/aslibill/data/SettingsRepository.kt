@@ -19,13 +19,14 @@ class SettingsRepository(
 
     private val _settings = MutableStateFlow(StoreConfig(
         storeName = "Loading...",
-        addressLines = listOf("", ""),
+        address = "",
         phone = null,
         gstNumber = null,
         thankYouMessage = null,
         paperWidthChars = 32
     ))
     val settings: StateFlow<StoreConfig> = _settings.asStateFlow()
+    val userSession = authRepository.userSession
     
     private val _uiPreferences = MutableStateFlow(loadUiPreferences())
     val uiPreferences: StateFlow<UiPreferences> = _uiPreferences.asStateFlow()
@@ -39,8 +40,7 @@ class SettingsRepository(
                 val token = authRepository.currentToken() ?: return@runCatching
                 val body = org.json.JSONObject()
                     .put("storeName", config.storeName)
-                    .put("address1", config.addressLines.getOrNull(0) ?: "")
-                    .put("address2", config.addressLines.getOrNull(1) ?: "")
+                    .put("address", config.address)
                     .put("phone", config.phone)
                     .put("gstNumber", config.gstNumber)
                     .put("thankYouMessage", config.thankYouMessage)
@@ -56,7 +56,7 @@ class SettingsRepository(
             val obj = client.getJson("/settings/print", token)
             val config = StoreConfig(
                 storeName = obj.getString("storeName"),
-                addressLines = listOf(obj.getString("address1"), obj.getString("address2")),
+                address = obj.getString("address"),
                 phone = obj.optString("phone").takeIf { !obj.isNull("phone") },
                 gstNumber = obj.optString("gstNumber").takeIf { !obj.isNull("gstNumber") },
                 thankYouMessage = obj.optString("thankYouMessage").takeIf { !obj.isNull("thankYouMessage") },

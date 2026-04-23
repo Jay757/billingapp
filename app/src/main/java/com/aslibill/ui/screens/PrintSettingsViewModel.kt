@@ -7,6 +7,7 @@ import com.aslibill.printing.StoreConfig
 import com.aslibill.ui.theme.ThemeMode
 import com.aslibill.ui.theme.UiPreferences
 import kotlinx.coroutines.flow.StateFlow
+import com.aslibill.data.UserSession
 import kotlinx.coroutines.launch
 
 class PrintSettingsViewModel(
@@ -15,11 +16,11 @@ class PrintSettingsViewModel(
 
     val settings: StateFlow<StoreConfig> = settingsRepository.settings
     val uiPreferences: StateFlow<UiPreferences> = settingsRepository.uiPreferences
+    val userSession: StateFlow<UserSession?> = settingsRepository.userSession
 
     fun saveSettings(
         storeName: String,
-        address1: String,
-        address2: String,
+        address: String,
         phone: String,
         gst: String,
         thankYou: String,
@@ -27,7 +28,7 @@ class PrintSettingsViewModel(
     ) {
         val config = StoreConfig(
             storeName = storeName,
-            addressLines = listOf(address1, address2),
+            address = address,
             phone = if (phone.isBlank()) null else phone,
             gstNumber = if (gst.isBlank()) null else gst,
             thankYouMessage = if (thankYou.isBlank()) null else thankYou,

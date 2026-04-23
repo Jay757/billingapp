@@ -508,39 +508,41 @@ private fun ProductDialog(
           productItems.forEachIndexed { index, item ->
             Row(
               modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.spacedBy(12.dp),
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
               verticalAlignment = Alignment.CenterVertically
             ) {
               com.aslibill.ui.components.AsliTextField(
                 value = item.name,
                 onValueChange = { productItems[index] = item.copy(name = it) },
                 label = "Product Name",
-                modifier = Modifier.weight(1.8f)
+                modifier = Modifier.weight(2f).height(56.dp)
               )
               
               com.aslibill.ui.components.AsliTextField(
                 value = item.price,
                 onValueChange = { productItems[index] = item.copy(price = it) },
                 label = "Price",
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1.3f).height(56.dp),
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number)
               )
 
               if (initial == null && productItems.size > 1) {
                 IconButton(
                   onClick = { productItems.removeAt(index) },
-                  modifier = Modifier.size(40.dp)
+                  modifier = Modifier.width(28.dp)
                 ) {
                   Icon(
                     imageVector = Icons.Outlined.Delete,
                     contentDescription = "Remove",
-                    tint = AsliColors.Red.copy(alpha = 0.7f)
+                    tint = AsliColors.Red,
+                    modifier = Modifier.size(20.dp)
                   )
                 }
-              } else if (initial != null || (initial == null && index == 0)) {
-                // Spacer for alignment if no delete button
-                Spacer(Modifier.width(4.dp))
+              } else if (initial == null && index == 0) {
+                 Spacer(Modifier.width(28.dp))
               }
+
+
             }
           }
         }
@@ -607,16 +609,17 @@ private fun ProductDialog(
             },
             enabled = isValid,
             colors = ButtonDefaults.buttonColors(
-              containerColor = AsliColors.PrimaryBlue,
-              disabledContainerColor = AsliColors.PrimaryBlue.copy(alpha = 0.1f)
+              containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+              disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
             ),
             shape = RoundedCornerShape(14.dp),
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+            contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp)
           ) {
             Text(
               "SAVE",
-              color = if (isValid) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-              fontWeight = FontWeight.Black
+              color = if (isValid) AsliColors.PrimaryBlue else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+              fontWeight = FontWeight.Black,
+              style = MaterialTheme.typography.labelLarge
             )
           }
         }

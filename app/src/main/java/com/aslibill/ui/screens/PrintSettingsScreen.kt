@@ -38,13 +38,19 @@ fun PrintSettingsScreen(
 ) {
     val settings by vm.settings.collectAsState()
     val uiPreferences by vm.uiPreferences.collectAsState()
+    val userSession by vm.userSession.collectAsState()
 
     var storeName by remember(settings) { mutableStateOf(settings.storeName) }
-    var address1 by remember(settings) { mutableStateOf(settings.addressLines.getOrNull(0) ?: "") }
-    var address2 by remember(settings) { mutableStateOf(settings.addressLines.getOrNull(1) ?: "") }
-    var phone by remember(settings) { mutableStateOf(settings.phone ?: "") }
-    var gst by remember(settings) { mutableStateOf(settings.gstNumber ?: "") }
-    var thankYou by remember(settings) { mutableStateOf(settings.thankYouMessage ?: "") }
+    var address by remember(settings) { mutableStateOf(settings.address.takeIf { it != "null" } ?: "") }
+    var phone by remember(settings, userSession) { 
+        val p = settings.phone?.takeIf { it != "null" && it.isNotBlank() }
+        mutableStateOf(p ?: userSession?.phone ?: "") 
+    }
+    var gst by remember(settings) { 
+        val g = settings.gstNumber?.takeIf { it != "null" && it.isNotBlank() }
+        mutableStateOf(g ?: "0") 
+    }
+    var thankYou by remember(settings) { mutableStateOf(settings.thankYouMessage?.takeIf { it != "null" } ?: "") }
     var paperWidth by remember(settings) { mutableStateOf(settings.paperWidthChars) }
     var themeMode by remember(uiPreferences) { mutableStateOf(uiPreferences.mode) }
 
@@ -74,15 +80,9 @@ fun PrintSettingsScreen(
             )
 
             AsliTextField(
-                value = address1,
-                onValueChange = { address1 = it },
-                label = "Address Line 1"
-            )
-
-            AsliTextField(
-                value = address2,
-                onValueChange = { address2 = it },
-                label = "Address Line 2"
+                value = address,
+                onValueChange = { address = it },
+                label = "Address"
             )
 
             AsliTextField(
@@ -126,8 +126,7 @@ fun PrintSettingsScreen(
                 onClick = {
                     vm.saveSettings(
                         storeName = storeName,
-                        address1 = address1,
-                        address2 = address2,
+                        address = address,
                         phone = phone,
                         gst = gst,
                         thankYou = thankYou,

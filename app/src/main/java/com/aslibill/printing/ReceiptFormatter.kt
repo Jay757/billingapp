@@ -8,7 +8,7 @@ import java.util.Locale
 
 data class StoreConfig(
   val storeName: String = "NOVABILL",
-  val addressLines: List<String> = listOf("Address line 1", "Address line 2"),
+  val address: String = "Address line 1",
   val gstNumber: String? = null,
   val phone: String? = null,
   val thankYouMessage: String? = "THANK YOU",
@@ -96,7 +96,7 @@ fun buildReceiptText(
     appendLine(center(config.storeName))
     append(BOLD_OFF)
     
-    config.addressLines.forEach { appendLine(center(it)) }
+    appendLine(center(config.address))
     config.phone?.let { appendLine(center("Ph: $it")) }
     config.gstNumber?.let { appendLine(center("GST: $it")) }
     appendLine(sep())
