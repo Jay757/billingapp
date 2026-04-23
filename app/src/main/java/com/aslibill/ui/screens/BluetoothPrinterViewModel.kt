@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import androidx.lifecycle.viewModelScope
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
 class BluetoothPrinterViewModel(
     app: Application,
     private val settingsRepository: SettingsRepository,
@@ -23,6 +26,9 @@ class BluetoothPrinterViewModel(
 ) : AndroidViewModel(app) {
   val devices: StateFlow<List<BtDeviceUi>> = manager.devices
   val state: StateFlow<BtConnectionState> = manager.state
+
+  private val _isLoading = MutableStateFlow(false)
+  val isLoading = _isLoading.asStateFlow()
 
   private var lastPersistedAddress: String? = null
 
@@ -73,9 +79,14 @@ class BluetoothPrinterViewModel(
 
   fun testPrint(onDone: (Boolean, String?) -> Unit) {
     viewModelScope.launch {
-      val config = settingsRepository.settings.value
-      val res = manager.testPrint(title = config.storeName)
-      onDone(res.isSuccess, res.exceptionOrNull()?.message)
+      _isLoading.value = true
+      try {
+        val config = settingsRepository.settings.value
+        val res = manager.testPrint(title = config.storeName)
+        onDone(res.isSuccess, res.exceptionOrNull()?.message)
+      } finally {
+        _isLoading.value = false
+      }
     }
   }
 
@@ -85,9 +96,14 @@ class BluetoothPrinterViewModel(
     onDone: (Boolean, String?) -> Unit
   ) {
     viewModelScope.launch {
-      val config = settingsRepository.settings.value
-      val res = manager.printBill(bill, items, config)
-      onDone(res.isSuccess, res.exceptionOrNull()?.message)
+      _isLoading.value = true
+      try {
+        val config = settingsRepository.settings.value
+        val res = manager.printBill(bill, items, config)
+        onDone(res.isSuccess, res.exceptionOrNull()?.message)
+      } finally {
+        _isLoading.value = false
+      }
     }
   }
 

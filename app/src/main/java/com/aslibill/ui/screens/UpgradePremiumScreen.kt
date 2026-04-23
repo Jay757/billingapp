@@ -35,129 +35,137 @@ fun UpgradePremiumScreen(
 ) {
     val features by vm.features.collectAsState()
 
+    val isLoading by vm.isLoading.collectAsState()
+    
     ScreenSurface {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
-                        )
-                    )
-                )
-
-        ) {
-            // Header with Premium Icon
+        Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = AppSpacing.xl),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Surface(
-                    modifier = Modifier
-                        .size(if (LocalConfiguration.current.screenWidthDp > 600) 120.dp else 100.dp)
-                        .clip(CircleShape),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                ) {
-
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.WorkspacePremium,
-                            contentDescription = "Premium",
-                            tint = AsliColors.AlertOrange,
-                            modifier = Modifier.size(if (LocalConfiguration.current.screenWidthDp > 600) 64.dp else 56.dp)
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.colorScheme.background,
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                            )
                         )
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(AppSpacing.lg))
-                
-                Text(
-                    text = "UPGRADE TO PREMIUM",
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                
-                Text(
-                    text = "Take your business to the next level",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = AppSpacing.xs)
-                )
+                    )
 
-            }
-
-            // Features List
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = AppSpacing.xl),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
             ) {
-                items(features) { feature ->
-                    PremiumFeatureRow(feature)
-                }
-            }
-
-            // Bottom CTA
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-            ) {
-
+                // Header with Premium Icon
                 Column(
-                    modifier = Modifier.padding(AppSpacing.xl),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = AppSpacing.xl),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "₹999",
-                            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Black),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = " / year",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Surface(
+                        modifier = Modifier
+                            .size(if (LocalConfiguration.current.screenWidthDp > 600) 120.dp else 100.dp)
+                            .clip(CircleShape),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                    ) {
+
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.WorkspacePremium,
+                                contentDescription = "Premium",
+                                tint = AsliColors.AlertOrange,
+                                modifier = Modifier.size(if (LocalConfiguration.current.screenWidthDp > 600) 64.dp else 56.dp)
+                            )
+                        }
                     }
+                    
+                    Spacer(modifier = Modifier.height(AppSpacing.lg))
                     
                     Text(
-                        text = "Less than ₹3 per day",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = AsliColors.SuccessGreen,
-                        modifier = Modifier.padding(top = AppSpacing.xs, bottom = AppSpacing.xl)
-                    )
-
-
-                    OrangeButton(
-                        text = "UPGRADE NOW",
-                        onClick = {
-                            vm.performUpgrade {
-                                onBack()
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        text = "UPGRADE TO PREMIUM",
+                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Black),
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                     
-                    TextButton(
-                        onClick = onBack,
-                        modifier = Modifier.padding(top = 8.dp)
-                    ) {
-                        Text(
-                            "MAYBE LATER",
-                            color = AsliColors.TextSecondary,
-                            style = AppTypography.labelCaps
-                        )
+                    Text(
+                        text = "Take your business to the next level",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = AppSpacing.xs)
+                    )
+
+                }
+
+                // Features List
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = AppSpacing.xl),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
+                ) {
+                    items(features) { feature ->
+                        PremiumFeatureRow(feature)
                     }
                 }
+
+                // Bottom CTA
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                ) {
+
+                    Column(
+                        modifier = Modifier.padding(AppSpacing.xl),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "₹999",
+                                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Black),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = " / year",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        
+                        Text(
+                            text = "Less than ₹3 per day",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = AsliColors.SuccessGreen,
+                            modifier = Modifier.padding(top = AppSpacing.xs, bottom = AppSpacing.xl)
+                        )
+
+
+                        OrangeButton(
+                            text = "UPGRADE NOW",
+                            onClick = {
+                                vm.performUpgrade {
+                                    onBack()
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                        
+                        TextButton(
+                            onClick = onBack,
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            Text(
+                                "MAYBE LATER",
+                                color = AsliColors.TextSecondary,
+                                style = AppTypography.labelCaps
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (isLoading) {
+                com.aslibill.ui.components.AsliLoader()
             }
         }
     }

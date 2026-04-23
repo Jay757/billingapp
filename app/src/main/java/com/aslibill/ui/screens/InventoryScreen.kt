@@ -95,6 +95,7 @@ fun InventoryScreen(
 ) {
   val categories by vm.categories.collectAsState()
   val products by vm.products.collectAsState()
+  val isLoading by vm.isLoading.collectAsState()
 
   var tab by remember { mutableStateOf(InventoryTab.Category) }
 
@@ -103,14 +104,12 @@ fun InventoryScreen(
   var editProduct by remember { mutableStateOf<ProductDraft?>(null) }
 
   ScreenSurface {
-    Box(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(contentPadding)
-        .padding(AppSpacing.lg)
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
       Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(contentPadding)
+          .padding(AppSpacing.lg),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
       ) {
         // Use BoxWithConstraints to adjust header design based on width
@@ -272,9 +271,9 @@ fun InventoryScreen(
                               )
                             )
                           },
-                          modifier = Modifier.size(40.dp).background(AsliColors.AlertOrange.copy(alpha = 0.1f), CircleShape)
+                          modifier = Modifier.size(40.dp).background(AsliColors.Red.copy(alpha = 0.1f), CircleShape)
                         ) {
-                          Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.AlertOrange, modifier = Modifier.size(22.dp))
+                          Icon(Icons.Outlined.Delete, contentDescription = "Delete", tint = AsliColors.Red, modifier = Modifier.size(22.dp))
                         }
                       }
                     }
@@ -327,6 +326,10 @@ fun InventoryScreen(
             }
           )
         }
+      }
+
+      if (isLoading) {
+        com.aslibill.ui.components.AsliLoader()
       }
     }
   }

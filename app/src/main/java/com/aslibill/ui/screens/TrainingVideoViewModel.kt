@@ -12,6 +12,9 @@ data class TrainingVideo(
 )
 
 class TrainingVideoViewModel : ViewModel() {
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     private val _videos = MutableStateFlow(
         listOf(
             TrainingVideo("Getting Started with NovaBill", "2:30"),
@@ -24,6 +27,11 @@ class TrainingVideoViewModel : ViewModel() {
         )
     )
     val videos: StateFlow<List<TrainingVideo>> = _videos.asStateFlow()
+
+    init {
+        // Simulate local data load completion
+        _isLoading.value = false
+    }
 
     fun playVideo(video: TrainingVideo) {
         // In a real app, this would open a video player or YouTube intent

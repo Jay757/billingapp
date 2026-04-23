@@ -8,12 +8,20 @@ import com.aslibill.data.db.CashTransactionEntity
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
 class CashManagementViewModel(private val repo: CashRepository) : ViewModel() {
 
+  private val _isLoading = MutableStateFlow(true)
+  val isLoading = _isLoading.asStateFlow()
+
   val transactions: StateFlow<List<CashTransactionEntity>> = repo.observeAll()
+    .onEach { _isLoading.value = false }
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val balance: StateFlow<Double> = repo.observeAll().map { list ->
@@ -28,19 +36,27 @@ class CashManagementViewModel(private val repo: CashRepository) : ViewModel() {
 
   fun addTransaction(type: String, amount: Double, note: String) {
     viewModelScope.launch {
-      repo.add(
-        CashTransactionEntity(
-          type = type,
-          amount = amount,
-          note = note.trim().ifEmpty { null },
-          createdAtEpochMs = System.currentTimeMillis()
+      _isLoading.value = true
+      try {
+        repo.add(
+          CashTransactionEntity(
+            type = type,
+            amount = amount,
+            note = note.trim().ifEmpty { null },
+            createdAtEpochMs = System.currentTimeMillis()
+          )
         )
-      )
+      } finally {
+        _isLoading.value = false
+      }
     }
   }
 
   fun clearAll() {
-    viewModelScope.launch { repo.deleteAll() }
+    viewModelScope.launch {
+      _isLoading.value = true
+      try { repo.deleteAll() } finally { _isLoading.value = false }
+    }
   }
 }
 

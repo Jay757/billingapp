@@ -43,56 +43,64 @@ fun CreditDetailsScreen(
   val credits by vm.credits.collectAsState()
   val totalOutstanding by vm.totalOutstanding.collectAsState()
 
+  val isLoading by vm.isLoading.collectAsState()
+  
   ScreenSurface {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(contentPadding)
-        .padding(horizontal = AppSpacing.md),
-      verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
-    ) {
-      Text(
-        "Credit Details",
-        color = MaterialTheme.colorScheme.onBackground,
-        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
-        modifier = Modifier.padding(top = AppSpacing.md)
-      )
-
-
-      // Summary Stats
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
+    Box(modifier = Modifier.fillMaxSize()) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(contentPadding)
+          .padding(horizontal = AppSpacing.md),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
       ) {
-        StatsCard(
-          label = "OUTSTANDING",
-          value = "₹${String.format("%.0f", totalOutstanding)}",
-          icon = Icons.Outlined.AccountBalanceWallet,
-          color = AsliColors.AlertOrange,
-          modifier = Modifier.weight(1f)
+        Text(
+          "Credit Details",
+          color = MaterialTheme.colorScheme.onBackground,
+          style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
+          modifier = Modifier.padding(top = AppSpacing.md)
         )
-        StatsCard(
-          label = "CUSTOMERS",
-          value = "${credits.size}",
-          icon = Icons.Outlined.Groups,
-          color = AsliColors.PrimaryBlue,
-          modifier = Modifier.weight(1f)
-        )
+
+
+        // Summary Stats
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
+        ) {
+          StatsCard(
+            label = "OUTSTANDING",
+            value = "₹${String.format("%.0f", totalOutstanding)}",
+            icon = Icons.Outlined.AccountBalanceWallet,
+            color = AsliColors.AlertOrange,
+            modifier = Modifier.weight(1f)
+          )
+          StatsCard(
+            label = "CUSTOMERS",
+            value = "${credits.size}",
+            icon = Icons.Outlined.Groups,
+            color = AsliColors.PrimaryBlue,
+            modifier = Modifier.weight(1f)
+          )
+        }
+
+        SectionHeader("CREDIT BY CUSTOMER")
+
+        if (credits.isEmpty()) {
+          Box(modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl), contentAlignment = Alignment.Center) {
+            Text("No credit bills found. Create a bill with CREDIT payment to see it here.", color = AsliColors.TextSecondary)
+          }
+        } else {
+          LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+          ) {
+            items(credits) { row -> CreditCard(row = row) }
+          }
+        }
       }
 
-      SectionHeader("CREDIT BY CUSTOMER")
-
-      if (credits.isEmpty()) {
-        Box(modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl), contentAlignment = Alignment.Center) {
-          Text("No credit bills found. Create a bill with CREDIT payment to see it here.", color = AsliColors.TextSecondary)
-        }
-      } else {
-        LazyColumn(
-          modifier = Modifier.weight(1f),
-          verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
-        ) {
-          items(credits) { row -> CreditCard(row = row) }
-        }
+      if (isLoading) {
+        com.aslibill.ui.components.AsliLoader()
       }
     }
   }

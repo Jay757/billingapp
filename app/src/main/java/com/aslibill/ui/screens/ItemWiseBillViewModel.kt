@@ -11,9 +11,12 @@ import com.aslibill.data.db.ProductWithCategory
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 data class CartLine(
   val productId: Long,
@@ -38,10 +41,14 @@ class ItemWiseBillViewModel(
   private val billing: BillingRepository
 ) : ViewModel() {
 
+  private val _isLoading = MutableStateFlow(true)
+  val isLoading = _isLoading.asStateFlow()
+
   val categories: StateFlow<List<CategoryEntity>> =
     inventory.observeCategories().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
   private val allProductsFlow = inventory.observeProductsWithCategory()
+    .onEach { _isLoading.value = false }
 
   val allProducts: StateFlow<List<ProductWithCategory>> =
     allProductsFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -108,6 +115,7 @@ class ItemWiseBillViewModel(
     if (lines.isEmpty()) return
 
     viewModelScope.launch {
+      _isLoading.value = true
       try {
         val subtotal = lines.sumOf { it.total }
         val discount = subtotal * (draft.discountPercent.coerceIn(0.0, 100.0) / 100.0)
@@ -141,6 +149,8 @@ class ItemWiseBillViewModel(
         onSaved(billId)
       } catch (t: Throwable) {
         onError(t)
+      } finally {
+        _isLoading.value = false
       }
     }
   }

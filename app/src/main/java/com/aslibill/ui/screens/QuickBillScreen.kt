@@ -68,10 +68,12 @@ fun QuickBillScreen(
   val mode by vm.mode.collectAsState()
   val qtyText by vm.qtyText.collectAsState()
   val rateText by vm.rateText.collectAsState()
+  val isLoading by vm.isLoading.collectAsState()
 
   var printMessage by remember { mutableStateOf<String?>(null) }
 
   ScreenSurface {
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
       modifier = Modifier
         .fillMaxSize()
@@ -289,7 +291,13 @@ fun QuickBillScreen(
             GrayButton(text = "Clear All", onClick = vm::clearAll, modifier = Modifier.fillMaxWidth())
           }
         }
-      }    }
+      }
+    }
+
+    if (isLoading) {
+      com.aslibill.ui.components.AsliLoader()
+    }
+    }
   }
 }
 

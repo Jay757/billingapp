@@ -62,6 +62,7 @@ fun BluetoothPrinterScreen(
   val ctx = LocalContext.current
   val devices by vm.devices.collectAsState()
   val state by vm.state.collectAsState()
+  val isLoading by vm.isLoading.collectAsState()
 
   var toastText by remember { mutableStateOf<String?>(null) }
 
@@ -87,7 +88,8 @@ fun BluetoothPrinterScreen(
   }
 
   ScreenSurface {
-    Column(
+    Box(modifier = Modifier.fillMaxSize()) {
+      Column(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
@@ -212,8 +214,13 @@ fun BluetoothPrinterScreen(
         }
       }
     }
+
+    if (isLoading || state.status == com.aslibill.bluetooth.BtConnectionState.Status.CONNECTING) {
+      com.aslibill.ui.components.AsliLoader()
+    }
+    }
+   }
   }
-}
 
 @Composable
 private fun DeviceRow(

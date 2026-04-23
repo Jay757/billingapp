@@ -11,10 +11,16 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
 
 class CreditDetailsViewModel(private val repo: AnalyticsRepository) : ViewModel() {
+  private val _isLoading = MutableStateFlow(true)
+  val isLoading = _isLoading.asStateFlow()
 
   private val creditFlow = flow { emit(repo.fetchCreditSummary()) }
+    .onEach { _isLoading.value = false }
 
   val credits: StateFlow<List<CreditSummaryRow>> = creditFlow
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())

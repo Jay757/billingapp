@@ -8,11 +8,15 @@ import com.aslibill.ui.theme.ThemeMode
 import com.aslibill.ui.theme.UiPreferences
 import kotlinx.coroutines.flow.StateFlow
 import com.aslibill.data.UserSession
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class PrintSettingsViewModel(
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
 
     val settings: StateFlow<StoreConfig> = settingsRepository.settings
     val uiPreferences: StateFlow<UiPreferences> = settingsRepository.uiPreferences
@@ -35,7 +39,12 @@ class PrintSettingsViewModel(
             paperWidthChars = paperWidth
         )
         viewModelScope.launch {
-            settingsRepository.saveSettings(config)
+            _isLoading.value = true
+            try {
+                settingsRepository.saveSettings(config)
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 

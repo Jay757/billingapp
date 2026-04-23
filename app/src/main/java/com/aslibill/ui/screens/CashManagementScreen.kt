@@ -56,11 +56,13 @@ fun CashManagementScreen(
 ) {
   val transactions by vm.transactions.collectAsState()
   val balance by vm.balance.collectAsState()
+  val isLoading by vm.isLoading.collectAsState()
   var showAddDialog by remember { mutableStateOf<String?>(null) } // "IN" or "OUT"
 
   val df = remember { SimpleDateFormat("dd-MM-yyyy hh:mm a", Locale.getDefault()) }
 
   ScreenSurface {
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
       modifier = Modifier
         .fillMaxSize()
@@ -163,8 +165,13 @@ fun CashManagementScreen(
       )
 
     }
+
+    if (isLoading) {
+      com.aslibill.ui.components.AsliLoader()
+    }
+    }
+   }
   }
-}
 
 @Composable
 private fun CashTxCard(tx: CashTransactionEntity, dateStr: String) {

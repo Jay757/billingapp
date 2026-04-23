@@ -81,6 +81,7 @@ fun ItemWiseBillScreen(
   val products by vm.filteredProducts.collectAsState()
   val selectedCategoryId by vm.selectedCategoryId.collectAsState()
   val searchQuery by vm.searchQuery.collectAsState()
+  val isLoading by vm.isLoading.collectAsState()
 
   var showQtyFor by remember { mutableStateOf<CartLine?>(null) }
   var showSearch by remember { mutableStateOf(false) }
@@ -91,7 +92,8 @@ fun ItemWiseBillScreen(
   var isSaveAndPrint by remember { mutableStateOf(false) }
 
   ScreenSurface {
-    Column(
+    Box(modifier = Modifier.fillMaxSize()) {
+      Column(
       modifier = Modifier
         .fillMaxSize()
         .padding(contentPadding)
@@ -340,6 +342,11 @@ fun ItemWiseBillScreen(
         },
         errorText = saveError
       )
+    }
+
+    if (isLoading) {
+      com.aslibill.ui.components.AsliLoader()
+    }
     }
   }
 }

@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.util.Calendar
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.flow
 
 private fun thisMonthRange(): DateRangeFilter {
@@ -39,25 +41,31 @@ data class SalesSummaryState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SalesSummaryViewModel(private val repo: AnalyticsRepository) : ViewModel() {
+  private val _isLoading = MutableStateFlow(true)
+  val isLoading = _isLoading.asStateFlow()
+
   val filters = MutableStateFlow(thisMonthRange())
 
-  val summary: StateFlow<SalesSummaryState> = filters.flatMapLatest { f ->
-    flow {
-      val res = repo.fetchSalesSummary(f.fromEpochMs, f.toEpochMs)
-      if (res != null) {
-        emit(SalesSummaryState(
-          totalBills = res.totalBills,
-          totalRevenue = res.totalRevenue,
-          avgBillValue = if (res.totalBills > 0) res.totalRevenue / res.totalBills else 0.0,
-          cashTotal = res.cashTotal,
-          onlineTotal = res.onlineTotal,
-          topItems = res.topItems
-        ))
-      } else {
-        emit(SalesSummaryState())
+  val summary: StateFlow<SalesSummaryState> = filters
+    .onEach { _isLoading.value = true }
+    .flatMapLatest { f ->
+      flow {
+        val res = repo.fetchSalesSummary(f.fromEpochMs, f.toEpochMs)
+        if (res != null) {
+          emit(SalesSummaryState(
+            totalBills = res.totalBills,
+            totalRevenue = res.totalRevenue,
+            avgBillValue = if (res.totalBills > 0) res.totalRevenue / res.totalBills else 0.0,
+            cashTotal = res.cashTotal,
+            onlineTotal = res.onlineTotal,
+            topItems = res.topItems
+          ))
+        } else {
+          emit(SalesSummaryState())
+        }
       }
-    }
-  }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SalesSummaryState())
+    }.onEach { _isLoading.value = false }
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SalesSummaryState())
 
   fun setFrom(epochMs: Long) {
     val cal = Calendar.getInstance().apply { timeInMillis = epochMs }

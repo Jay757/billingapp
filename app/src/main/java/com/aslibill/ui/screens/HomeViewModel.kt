@@ -9,8 +9,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.util.Calendar
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
 
 class HomeViewModel(billingRepository: BillingRepository) : ViewModel() {
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading = _isLoading.asStateFlow()
 
     private val startOfDay: Long
     private val endOfDay: Long
@@ -26,6 +31,7 @@ class HomeViewModel(billingRepository: BillingRepository) : ViewModel() {
     }
 
     private val todayFlow = billingRepository.observeBillsBetween(startOfDay, endOfDay)
+        .onEach { _isLoading.value = false }
 
     val todaySalesTotal: StateFlow<Double> = todayFlow
         .map { bills -> bills.sumOf { it.total } }

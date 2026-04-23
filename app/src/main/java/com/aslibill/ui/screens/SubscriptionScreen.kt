@@ -38,68 +38,75 @@ fun SubscriptionScreen(
 ) {
     val currentPlan by vm.currentPlan.collectAsState()
     val features by vm.premiumFeatures.collectAsState()
+    val isLoading by vm.isLoading.collectAsState()
 
     ScreenSurface {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(AppSpacing.lg),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
-        ) {
-            SectionHeader("Subscription")
+        androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .padding(AppSpacing.lg),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
+            ) {
+                SectionHeader("Subscription")
 
-            // Current Plan Card
-            DarkCard(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.padding(AppSpacing.lg),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.lg)
-                ) {
-                    Icon(
-                        Icons.Outlined.Star,
-                        contentDescription = null,
-                        tint = if (currentPlan == PlanType.PREMIUM) AsliColors.Orange else AsliColors.TextSecondary,
-                        modifier = Modifier.size(40.dp)
-                    )
-                    Column {
-                        Text(
-                            "Current Plan",
-                            color = AsliColors.TextSecondary,
-                            style = MaterialTheme.typography.labelSmall
+                // Current Plan Card
+                DarkCard(modifier = Modifier.fillMaxWidth()) {
+                    Row(
+                        modifier = Modifier.padding(AppSpacing.lg),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(AppSpacing.lg)
+                    ) {
+                        Icon(
+                            Icons.Outlined.Star,
+                            contentDescription = null,
+                            tint = if (currentPlan == PlanType.PREMIUM) AsliColors.Orange else AsliColors.TextSecondary,
+                            modifier = Modifier.size(40.dp)
                         )
-                        Text(
-                            currentPlan.name,
-                            color = AsliColors.TextPrimary,
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Column {
+                            Text(
+                                "Current Plan",
+                                color = AsliColors.TextSecondary,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                            Text(
+                                currentPlan.name,
+                                color = AsliColors.TextPrimary,
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
-            }
 
-            Text(
-                "Premium Features",
-                color = AsliColors.TextPrimary,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
+                Text(
+                    "Premium Features",
+                    color = AsliColors.TextPrimary,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
 
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
-            ) {
-                items(features) { feature ->
-                    FeatureItem(feature)
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+                ) {
+                    items(features) { feature ->
+                        FeatureItem(feature)
+                    }
+                }
+
+                if (currentPlan == PlanType.FREE) {
+                    OrangeButton(
+                        "UPGRADE TO PREMIUM",
+                        onClick = { vm.upgrade() },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
 
-            if (currentPlan == PlanType.FREE) {
-                OrangeButton(
-                    "UPGRADE TO PREMIUM",
-                    onClick = { vm.upgrade() },
-                    modifier = Modifier.fillMaxWidth()
-                )
+            if (isLoading) {
+                com.aslibill.ui.components.AsliLoader()
             }
         }
     }

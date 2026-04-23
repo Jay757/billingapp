@@ -8,39 +8,84 @@ import com.aslibill.data.db.ProductEntity
 import com.aslibill.data.db.ProductWithCategory
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class InventoryViewModel(
   private val repo: InventoryRepository
 ) : ViewModel() {
 
+  private val _categoriesLoaded = MutableStateFlow(false)
+  private val _productsLoaded = MutableStateFlow(false)
+
+  private val _isLoading = MutableStateFlow(true)
+  val isLoading = _isLoading.asStateFlow()
+
   val categories: StateFlow<List<CategoryEntity>> =
-    repo.observeCategories().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    repo.observeCategories()
+      .onEach { _categoriesLoaded.value = true; checkInitialLoad() }
+      .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
   val products: StateFlow<List<ProductWithCategory>> =
-    repo.observeProductsWithCategory().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    repo.observeProductsWithCategory()
+      .onEach { _productsLoaded.value = true; checkInitialLoad() }
+      .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+  private fun checkInitialLoad() {
+    if (_categoriesLoaded.value && _productsLoaded.value) {
+      _isLoading.value = false
+    }
+  }
 
   init {
     // API sync is handled at the app container level on login
   }
 
-  fun addCategory(name: String) = viewModelScope.launch { repo.addCategory(name) }
-  fun updateCategory(id: Long, name: String) = viewModelScope.launch { repo.updateCategory(id, name) }
-  fun deleteCategory(entity: CategoryEntity) = viewModelScope.launch { repo.deleteCategory(entity) }
+  fun addCategory(name: String) = viewModelScope.launch {
+    _isLoading.value = true
+    try { repo.addCategory(name) } finally { _isLoading.value = false }
+  }
+
+  fun updateCategory(id: Long, name: String) = viewModelScope.launch {
+    _isLoading.value = true
+    try { repo.updateCategory(id, name) } finally { _isLoading.value = false }
+  }
+
+  fun deleteCategory(entity: CategoryEntity) = viewModelScope.launch {
+    _isLoading.value = true
+    try { repo.deleteCategory(entity) } finally { _isLoading.value = false }
+  }
 
   fun addProduct(categoryId: Long, name: String, price: Double) =
-    viewModelScope.launch { repo.addProduct(categoryId, name, price) }
+    viewModelScope.launch {
+      _isLoading.value = true
+      try { repo.addProduct(categoryId, name, price) } finally { _isLoading.value = false }
+    }
 
   fun addProducts(categoryId: Long, items: List<Pair<String, Double>>) = viewModelScope.launch {
-    items.forEach { (name, price) ->
-      repo.addProduct(categoryId, name, price)
+    _isLoading.value = true
+    try {
+      items.forEach { (name, price) ->
+        repo.addProduct(categoryId, name, price)
+      }
+    } finally {
+      _isLoading.value = false
     }
   }
 
   fun updateProduct(id: Long, categoryId: Long, name: String, price: Double, isActive: Boolean) =
-    viewModelScope.launch { repo.updateProduct(id, categoryId, name, price, isActive) }
+    viewModelScope.launch {
+      _isLoading.value = true
+      try { repo.updateProduct(id, categoryId, name, price, isActive) } finally { _isLoading.value = false }
+    }
 
-  fun deleteProduct(entity: ProductEntity) = viewModelScope.launch { repo.deleteProduct(entity) }
+  fun deleteProduct(entity: ProductEntity) = viewModelScope.launch {
+    _isLoading.value = true
+    try { repo.deleteProduct(entity) } finally { _isLoading.value = false }
+  }
 }
 

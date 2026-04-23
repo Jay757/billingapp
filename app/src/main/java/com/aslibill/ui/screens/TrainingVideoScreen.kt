@@ -39,24 +39,31 @@ fun TrainingVideoScreen(
     vm: TrainingVideoViewModel
 ) {
     val videos by vm.videos.collectAsState()
+    val isLoading by vm.isLoading.collectAsState()
 
     ScreenSurface {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(AppSpacing.lg),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
-        ) {
-            SectionHeader("Training Videos")
-
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+        androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .padding(AppSpacing.lg),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
             ) {
-                items(videos) { video ->
-                    VideoListItem(video = video, onClick = { vm.playVideo(video) })
+                SectionHeader("Training Videos")
+
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+                ) {
+                    items(videos) { video ->
+                        VideoListItem(video = video, onClick = { vm.playVideo(video) })
+                    }
                 }
+            }
+
+            if (isLoading) {
+                com.aslibill.ui.components.AsliLoader()
             }
         }
     }

@@ -50,49 +50,57 @@ fun ItemWiseSalesReportScreen(
   val fromText = remember(filters.fromEpochMs) { df.format(Date(filters.fromEpochMs)) }
   val toText = remember(filters.toEpochMs) { df.format(Date(filters.toEpochMs)) }
 
+  val isLoading by vm.isLoading.collectAsState()
+  
   ScreenSurface {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(contentPadding)
-        .padding(horizontal = AppSpacing.md),
-      verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
-    ) {
-      Text(
-        "Item Sales Report",
-        color = AsliColors.TextPrimary,
-        style = AppTypography.h2,
-        modifier = Modifier.padding(top = AppSpacing.md)
-      )
-
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
+    Box(modifier = Modifier.fillMaxSize()) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(contentPadding)
+          .padding(horizontal = AppSpacing.md),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
       ) {
-        DateBox(
-          label = "FROM",
-          date = fromText,
-          onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } },
-          modifier = Modifier.weight(1f)
+        Text(
+          "Item Sales Report",
+          color = AsliColors.TextPrimary,
+          style = AppTypography.h2,
+          modifier = Modifier.padding(top = AppSpacing.md)
         )
-        DateBox(
-          label = "TO",
-          date = toText,
-          onClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } },
-          modifier = Modifier.weight(1f)
-        )
+
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
+        ) {
+          DateBox(
+            label = "FROM",
+            date = fromText,
+            onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } },
+            modifier = Modifier.weight(1f)
+          )
+          DateBox(
+            label = "TO",
+            date = toText,
+            onClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } },
+            modifier = Modifier.weight(1f)
+          )
+        }
+
+        SectionHeader("SALES BREAKDOWN")
+
+        if (items.isEmpty()) {
+          Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+            Text("No sales for selected period.", color = AsliColors.TextSecondary)
+          }
+        } else {
+          LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            items(items) { row -> ItemSaleCard(row = row) }
+          }
+        }
       }
 
-      SectionHeader("SALES BREAKDOWN")
-
-      if (items.isEmpty()) {
-        Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-          Text("No sales for selected period.", color = AsliColors.TextSecondary)
-        }
-      } else {
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-          items(items) { row -> ItemSaleCard(row = row) }
-        }
+      if (isLoading) {
+        com.aslibill.ui.components.AsliLoader()
       }
     }
   }

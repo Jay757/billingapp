@@ -79,6 +79,7 @@ fun ReportsScreen(
   val filters by vm.filters.collectAsState()
   val bills by vm.bills.collectAsState()
   val totalAmount by vm.totalAmount.collectAsState()
+  val isLoading by vm.isLoading.collectAsState()
 
   var showItemsFor by remember { mutableStateOf<BillWithItemsRow?>(null) }
   var items by remember { mutableStateOf<List<BillItemEntity>>(emptyList()) }
@@ -95,13 +96,14 @@ fun ReportsScreen(
   val toText = remember(filters.toEpochMs) { dfDay.format(Date(filters.toEpochMs)) }
 
   ScreenSurface {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(contentPadding)
-        .padding(AppSpacing.md),
-      verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(contentPadding)
+          .padding(AppSpacing.md),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+      ) {
       // Header
       Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = AppSpacing.sm),
@@ -313,6 +315,11 @@ fun ReportsScreen(
           }
         }
       )
+    }
+
+    if (isLoading) {
+      com.aslibill.ui.components.AsliLoader()
+    }
     }
   }
 }

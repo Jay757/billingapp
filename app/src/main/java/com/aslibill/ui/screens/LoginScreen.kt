@@ -197,6 +197,10 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
+
+            if (vm.isLoading) {
+                com.aslibill.ui.components.AsliLoader()
+            }
         }
     }
 }

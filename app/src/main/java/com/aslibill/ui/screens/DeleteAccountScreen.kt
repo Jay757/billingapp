@@ -49,68 +49,70 @@ fun DeleteAccountScreen(
     )
 
     ScreenSurface {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(contentPadding)
-        .padding(AppSpacing.lg),
-      verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
-      horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-            SectionHeader("Delete Account")
+        androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .padding(AppSpacing.lg),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                SectionHeader("Delete Account")
 
-            if (deletionRequested) {
-                Text(
-                    "Account Deletion Requested!",
-                    color = AsliColors.Orange,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    "Your request is being processed. Our team will contact you within 24-48 hours to confirm the deletion.",
-                    color = AsliColors.TextPrimary,
-                    textAlign = TextAlign.Center
-                )
-            } else {
-                Icon(
-                    Icons.Outlined.Warning,
-                    contentDescription = null,
-                    tint = AsliColors.Orange,
-                    modifier = Modifier.size(64.dp)
-                )
-
-                Text(
-                    "Warning: Permanent Action",
-                    color = AsliColors.Orange,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Text(
-                    "Deleting your account will permanently remove all your data, including bills, inventory, and reports. This action cannot be undone.",
-                    color = AsliColors.TextPrimary,
-                    textAlign = TextAlign.Center
-                )
-
-                OutlinedTextField(
-                    value = reason,
-                    onValueChange = { vm.onReasonChange(it) },
-                    label = { Text("Reason for Deletion (Optional)") },
-                    colors = fieldColors,
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3
-                )
-
-                if (isDeleting) {
-                    CircularProgressIndicator(color = AsliColors.Orange)
+                if (deletionRequested) {
+                    Text(
+                        "Account Deletion Requested!",
+                        color = AsliColors.Orange,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        "Your request is being processed. Our team will contact you within 24-48 hours to confirm the deletion.",
+                        color = AsliColors.TextPrimary,
+                        textAlign = TextAlign.Center
+                    )
                 } else {
+                    Icon(
+                        Icons.Outlined.Warning,
+                        contentDescription = null,
+                        tint = AsliColors.Orange,
+                        modifier = Modifier.size(64.dp)
+                    )
+
+                    Text(
+                        "Warning: Permanent Action",
+                        color = AsliColors.Orange,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Text(
+                        "Deleting your account will permanently remove all your data, including bills, inventory, and reports. This action cannot be undone.",
+                        color = AsliColors.TextPrimary,
+                        textAlign = TextAlign.Center
+                    )
+
+                    OutlinedTextField(
+                        value = reason,
+                        onValueChange = { vm.onReasonChange(it) },
+                        label = { Text("Reason for Deletion (Optional)") },
+                        colors = fieldColors,
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3
+                    )
+
                     OrangeButton(
                         "DELETE MY ACCOUNT",
                         onClick = { vm.requestDeletion() },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+            }
+
+            if (isDeleting) {
+                com.aslibill.ui.components.AsliLoader()
             }
         }
     }

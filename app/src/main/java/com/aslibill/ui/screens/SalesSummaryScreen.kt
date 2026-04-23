@@ -56,117 +56,125 @@ fun SalesSummaryScreen(
   val fromText = remember(filters.fromEpochMs) { df.format(Date(filters.fromEpochMs)) }
   val toText = remember(filters.toEpochMs) { df.format(Date(filters.toEpochMs)) }
 
+  val isLoading by vm.isLoading.collectAsState()
+  
   ScreenSurface {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(contentPadding)
-        .padding(horizontal = AppSpacing.md)
-        .verticalScroll(rememberScrollState()),
-      verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
-    ) {
-      Text(
-        "Sales Summary",
-        color = AsliColors.TextPrimary,
-        style = AppTypography.h2,
-        modifier = Modifier.padding(top = AppSpacing.md)
-      )
-
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
+    androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize()) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(contentPadding)
+          .padding(horizontal = AppSpacing.md)
+          .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
       ) {
-        DateBox(
-          label = "FROM",
-          date = fromText,
-          onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } },
-          modifier = Modifier.weight(1f)
+        Text(
+          "Sales Summary",
+          color = AsliColors.TextPrimary,
+          style = AppTypography.h2,
+          modifier = Modifier.padding(top = AppSpacing.md)
         )
-        DateBox(
-          label = "TO",
-          date = toText,
-          onClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } },
-          modifier = Modifier.weight(1f)
-        )
-      }
 
-      SectionHeader("REVENUE OVERVIEW")
-      
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
-        StatsCard(
-          label = "TOTAL BILLS",
-          value = summary.totalBills.toString(),
-          icon = Icons.AutoMirrored.Outlined.ReceiptLong,
-          color = AsliColors.PrimaryBlue,
-          modifier = Modifier.weight(1f)
-        )
-        StatsCard(
-          label = "REVENUE",
-          value = "₹${summary.totalRevenue.toInt()}",
-          icon = Icons.Outlined.AttachMoney,
-          color = AsliColors.SuccessGreen,
-          modifier = Modifier.weight(1f)
-        )
-      }
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
-        StatsCard(
-          label = "CASH",
-          value = "₹${summary.cashTotal.toInt()}",
-          icon = Icons.Outlined.Payments,
-          color = AsliColors.AlertOrange,
-          modifier = Modifier.weight(1f)
-        )
-        StatsCard(
-          label = "ONLINE",
-          value = "₹${summary.onlineTotal.toInt()}",
-          icon = Icons.Outlined.AccountBalance,
-          color = MaterialTheme.colorScheme.secondary, // Purple/Secondary for online
-          modifier = Modifier.weight(1f)
-        )
-      }
-
-      SectionHeader("TOP SELLING ITEMS")
-      DarkCard(modifier = Modifier.fillMaxWidth()) {
-        Column(
-          modifier = Modifier.padding(AppSpacing.lg),
-          verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
         ) {
-          if (summary.topItems.isEmpty()) {
-            Text(
-              "No data available",
-              color = AsliColors.TextSecondary,
-              style = AppTypography.bodyMedium
-            )
-          } else {
-            summary.topItems.forEachIndexed { index, item ->
-              Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-              ) {
-                Text(
-                  "${index + 1}. ${item.productName.uppercase()}",
-                  color = AsliColors.TextPrimary,
-                  style = AppTypography.bodyBold,
-                  modifier = Modifier.weight(1f)
-                )
-                Surface(
-                  color = AsliColors.PrimaryBlue.copy(alpha = 0.1f),
-                  shape = RoundedCornerShape(4.dp)
+          DateBox(
+            label = "FROM",
+            date = fromText,
+            onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } },
+            modifier = Modifier.weight(1f)
+          )
+          DateBox(
+            label = "TO",
+            date = toText,
+            onClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } },
+            modifier = Modifier.weight(1f)
+          )
+        }
+
+        SectionHeader("REVENUE OVERVIEW")
+        
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
+          StatsCard(
+            label = "TOTAL BILLS",
+            value = summary.totalBills.toString(),
+            icon = Icons.AutoMirrored.Outlined.ReceiptLong,
+            color = AsliColors.PrimaryBlue,
+            modifier = Modifier.weight(1f)
+          )
+          StatsCard(
+            label = "REVENUE",
+            value = "₹${summary.totalRevenue.toInt()}",
+            icon = Icons.Outlined.AttachMoney,
+            color = AsliColors.SuccessGreen,
+            modifier = Modifier.weight(1f)
+          )
+        }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
+          StatsCard(
+            label = "CASH",
+            value = "₹${summary.cashTotal.toInt()}",
+            icon = Icons.Outlined.Payments,
+            color = AsliColors.AlertOrange,
+            modifier = Modifier.weight(1f)
+          )
+          StatsCard(
+            label = "ONLINE",
+            value = "₹${summary.onlineTotal.toInt()}",
+            icon = Icons.Outlined.AccountBalance,
+            color = MaterialTheme.colorScheme.secondary, // Purple/Secondary for online
+            modifier = Modifier.weight(1f)
+          )
+        }
+
+        SectionHeader("TOP SELLING ITEMS")
+        DarkCard(modifier = Modifier.fillMaxWidth()) {
+          Column(
+            modifier = Modifier.padding(AppSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
+          ) {
+            if (summary.topItems.isEmpty()) {
+              Text(
+                "No data available",
+                color = AsliColors.TextSecondary,
+                style = AppTypography.bodyMedium
+              )
+            } else {
+              summary.topItems.forEachIndexed { index, item ->
+                Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                   Text(
-                    "₹${item.totalRevenue.toInt()}",
-                    color = AsliColors.PrimaryBlue,
+                    "${index + 1}. ${item.productName.uppercase()}",
+                    color = AsliColors.TextPrimary,
                     style = AppTypography.bodyBold,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                    fontWeight = FontWeight.Black
+                    modifier = Modifier.weight(1f)
                   )
+                  Surface(
+                    color = AsliColors.PrimaryBlue.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(4.dp)
+                  ) {
+                    Text(
+                      "₹${item.totalRevenue.toInt()}",
+                      color = AsliColors.PrimaryBlue,
+                      style = AppTypography.bodyBold,
+                      modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                      fontWeight = FontWeight.Black
+                    )
+                  }
                 }
               }
             }
           }
         }
+        Spacer(Modifier.height(AppSpacing.md))
       }
-      Spacer(Modifier.height(AppSpacing.md))
+
+      if (isLoading) {
+        com.aslibill.ui.components.AsliLoader()
+      }
     }
   }
 }

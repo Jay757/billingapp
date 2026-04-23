@@ -1,6 +1,7 @@
 package com.aslibill.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -54,89 +55,97 @@ fun PrintSettingsScreen(
     var paperWidth by remember(settings) { mutableStateOf(settings.paperWidthChars) }
     var themeMode by remember(uiPreferences) { mutableStateOf(uiPreferences.mode) }
 
+    val isLoading by vm.isLoading.collectAsState()
+    
     ScreenSurface {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(horizontal = AppSpacing.md)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
-        ) {
-            Text(
-                "App Settings",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Black),
-                modifier = Modifier.padding(top = AppSpacing.md)
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .padding(horizontal = AppSpacing.md)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
+            ) {
+                Text(
+                    "App Settings",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Black),
+                    modifier = Modifier.padding(top = AppSpacing.md)
+                )
 
 
-            SectionHeader("STORE INFORMATION")
+                SectionHeader("STORE INFORMATION")
 
-            AsliTextField(
-                value = storeName,
-                onValueChange = { storeName = it },
-                label = "Store Name"
-            )
+                AsliTextField(
+                    value = storeName,
+                    onValueChange = { storeName = it },
+                    label = "Store Name"
+                )
 
-            AsliTextField(
-                value = address,
-                onValueChange = { address = it },
-                label = "Address"
-            )
+                AsliTextField(
+                    value = address,
+                    onValueChange = { address = it },
+                    label = "Address"
+                )
 
-            AsliTextField(
-                value = phone,
-                onValueChange = { phone = it },
-                label = "Phone"
-            )
+                AsliTextField(
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = "Phone"
+                )
 
-            AsliTextField(
-                value = gst,
-                onValueChange = { gst = it },
-                label = "GST Number"
-            )
+                AsliTextField(
+                    value = gst,
+                    onValueChange = { gst = it },
+                    label = "GST Number"
+                )
 
-            AsliTextField(
-                value = thankYou,
-                onValueChange = { thankYou = it },
-                label = "Thank You Message"
-            )
+                AsliTextField(
+                    value = thankYou,
+                    onValueChange = { thankYou = it },
+                    label = "Thank You Message"
+                )
 
-            SectionHeader("PRINTER PREFERENCES")
-            Text("PAPER WIDTH", style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
+                SectionHeader("PRINTER PREFERENCES")
+                Text("PAPER WIDTH", style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
 
-            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
-                Chip(text = "58mm", selected = paperWidth == 32, onSelected = { paperWidth = 32 })
-                Chip(text = "80mm", selected = paperWidth == 42, onSelected = { paperWidth = 42 })
+                Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
+                    Chip(text = "58mm", selected = paperWidth == 32, onSelected = { paperWidth = 32 })
+                    Chip(text = "80mm", selected = paperWidth == 42, onSelected = { paperWidth = 42 })
+                }
+
+                SectionHeader("APPEARANCE")
+                Text("THEME MODE", style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
+
+                Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
+                    Chip(text = "Light", selected = themeMode == ThemeMode.LIGHT, onSelected = { themeMode = ThemeMode.LIGHT })
+                    Chip(text = "Dark", selected = themeMode == ThemeMode.DARK, onSelected = { themeMode = ThemeMode.DARK })
+                    Chip(text = "System", selected = themeMode == ThemeMode.SYSTEM, onSelected = { themeMode = ThemeMode.SYSTEM })
+                }
+
+                Spacer(Modifier.height(AppSpacing.md))
+                OrangeButton(
+                    text = "SAVE SETTINGS",
+                    onClick = {
+                        vm.saveSettings(
+                            storeName = storeName,
+                            address = address,
+                            phone = phone,
+                            gst = gst,
+                            thankYou = thankYou,
+                            paperWidth = paperWidth
+                        )
+                        vm.saveAppearance(themeMode)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(Modifier.height(AppSpacing.xl))
             }
 
-            SectionHeader("APPEARANCE")
-            Text("THEME MODE", style = MaterialTheme.typography.labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
-
-            Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
-                Chip(text = "Light", selected = themeMode == ThemeMode.LIGHT, onSelected = { themeMode = ThemeMode.LIGHT })
-                Chip(text = "Dark", selected = themeMode == ThemeMode.DARK, onSelected = { themeMode = ThemeMode.DARK })
-                Chip(text = "System", selected = themeMode == ThemeMode.SYSTEM, onSelected = { themeMode = ThemeMode.SYSTEM })
+            if (isLoading) {
+                com.aslibill.ui.components.AsliLoader()
             }
-
-            Spacer(Modifier.height(AppSpacing.md))
-            OrangeButton(
-                text = "SAVE SETTINGS",
-                onClick = {
-                    vm.saveSettings(
-                        storeName = storeName,
-                        address = address,
-                        phone = phone,
-                        gst = gst,
-                        thankYou = thankYou,
-                        paperWidth = paperWidth
-                    )
-                    vm.saveAppearance(themeMode)
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(AppSpacing.xl))
         }
     }
 }

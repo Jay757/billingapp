@@ -39,44 +39,40 @@ fun FeedbackScreen(
 
 
   ScreenSurface {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(contentPadding)
-        .padding(AppSpacing.lg),
-      verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
-      horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-      SectionHeader("Give Feedback")
+    androidx.compose.foundation.layout.Box(modifier = Modifier.fillMaxSize()) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(contentPadding)
+          .padding(AppSpacing.lg),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
+        horizontalAlignment = Alignment.CenterHorizontally
+      ) {
+        SectionHeader("Give Feedback")
 
-      if (submissionSuccess) {
-        Text(
-          "Thank you for your feedback!",
-          color = AsliColors.SuccessGreen,
-          style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-        )
-
-        OrangeButton("NEW FEEDBACK", onClick = { vm.resetSuccess() })
-      } else {
-        Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
-          com.aslibill.ui.components.AsliTextField(
-            value = message,
-            onValueChange = { vm.onMessageChange(it) },
-            label = "Your Message",
-            modifier = Modifier.fillMaxWidth().height(160.dp)
+        if (submissionSuccess) {
+          Text(
+            "Thank you for your feedback!",
+            color = AsliColors.SuccessGreen,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
           )
 
-          com.aslibill.ui.components.AsliTextField(
-            value = contactInfo,
-            onValueChange = { vm.onContactInfoChange(it) },
-            label = "Email or Mobile (Optional)",
-            modifier = Modifier.fillMaxWidth()
-          )
+          OrangeButton("NEW FEEDBACK", onClick = { vm.resetSuccess() })
+        } else {
+          Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.md)) {
+            com.aslibill.ui.components.AsliTextField(
+              value = message,
+              onValueChange = { vm.onMessageChange(it) },
+              label = "Your Message",
+              modifier = Modifier.fillMaxWidth().height(160.dp)
+            )
 
-
-          if (isSubmitting) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-          } else {
+            com.aslibill.ui.components.AsliTextField(
+              value = contactInfo,
+              onValueChange = { vm.onContactInfoChange(it) },
+              label = "Email or Mobile (Optional)",
+              modifier = Modifier.fillMaxWidth()
+            )
 
             OrangeButton(
               "SUBMIT FEEDBACK",
@@ -85,6 +81,10 @@ fun FeedbackScreen(
             )
           }
         }
+      }
+
+      if (isSubmitting) {
+        com.aslibill.ui.components.AsliLoader()
       }
     }
   }

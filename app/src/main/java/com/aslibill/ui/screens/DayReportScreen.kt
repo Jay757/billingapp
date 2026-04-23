@@ -51,38 +51,46 @@ fun DayReportScreen(
   val fromText = remember(filters.fromEpochMs) { df.format(Date(filters.fromEpochMs)) }
   val toText = remember(filters.toEpochMs) { df.format(Date(filters.toEpochMs)) }
 
+  val isLoading by vm.isLoading.collectAsState()
+  
   ScreenSurface {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(contentPadding)
-        .padding(AppSpacing.md),
-      verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
-    ) {
-      Text(
-        "Day Report", 
-        color = AsliColors.TextPrimary, 
-        style = AppTypography.h1
-      )
+    Box(modifier = Modifier.fillMaxSize()) {
+      Column(
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(contentPadding)
+          .padding(AppSpacing.md),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
+      ) {
+        Text(
+          "Day Report", 
+          color = AsliColors.TextPrimary, 
+          style = AppTypography.h1
+        )
 
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
-        DateBox(label = "FROM", value = fromText, onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } }, modifier = Modifier.weight(1f))
-        DateBox(label = "TO", value = toText, onClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } }, modifier = Modifier.weight(1f))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
+          DateBox(label = "FROM", value = fromText, onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } }, modifier = Modifier.weight(1f))
+          DateBox(label = "TO", value = toText, onClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } }, modifier = Modifier.weight(1f))
+        }
+
+        SectionHeader("Daily Totals")
+
+        if (rows.isEmpty()) {
+          Box(modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl), contentAlignment = Alignment.Center) {
+            Text("No data for selected period.", color = AsliColors.TextSecondary)
+          }
+        } else {
+          LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+          ) {
+            items(rows) { row -> DayReportCard(row = row) }
+          }
+        }
       }
 
-      SectionHeader("Daily Totals")
-
-      if (rows.isEmpty()) {
-        Box(modifier = Modifier.fillMaxWidth().padding(AppSpacing.xl), contentAlignment = Alignment.Center) {
-          Text("No data for selected period.", color = AsliColors.TextSecondary)
-        }
-      } else {
-        LazyColumn(
-          modifier = Modifier.weight(1f),
-          verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
-        ) {
-          items(rows) { row -> DayReportCard(row = row) }
-        }
+      if (isLoading) {
+        com.aslibill.ui.components.AsliLoader()
       }
     }
   }

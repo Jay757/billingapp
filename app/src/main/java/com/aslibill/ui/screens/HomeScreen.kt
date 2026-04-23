@@ -71,144 +71,152 @@ fun HomeScreen(
   val todaySales by homeVm.todaySalesTotal.collectAsState()
   val todayBillCount by homeVm.todayBillCount.collectAsState()
   
+  val isLoading by homeVm.isLoading.collectAsState()
+  
   ScreenSurface {
-    Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .padding(contentPadding)
-        .padding(horizontal = AppSpacing.lg)
-        .verticalScroll(rememberScrollState()),
-      verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
-    ) {
-      Spacer(modifier = Modifier.height(12.dp))
-      
-      // Full Background Header
-      Box(
+    Box(modifier = Modifier.fillMaxSize()) {
+      Column(
         modifier = Modifier
-          .fillMaxWidth()
-          .padding(top = AppSpacing.sm)
-          .height(180.dp)
-          .clip(RoundedCornerShape(28.dp))
+          .fillMaxSize()
+          .padding(contentPadding)
+          .padding(horizontal = AppSpacing.lg)
+          .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
       ) {
-        // Illustration as Full Background Cover
-        Image(
-          painter = painterResource(id = R.drawable.header),
-          contentDescription = null,
-          contentScale = ContentScale.Crop,
-          modifier = Modifier.fillMaxSize()
-        )
+        Spacer(modifier = Modifier.height(12.dp))
         
-        // Soft Scrim for Readability (Now limited to text area)
+        // Full Background Header
         Box(
           modifier = Modifier
-            .fillMaxWidth(0.7f)
-            .fillMaxHeight()
-            .background(
-              Brush.horizontalGradient(
-                colors = listOf(
-                  MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
-                  MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
-                  Color.Transparent
+            .fillMaxWidth()
+            .padding(top = AppSpacing.sm)
+            .height(180.dp)
+            .clip(RoundedCornerShape(28.dp))
+        ) {
+          // Illustration as Full Background Cover
+          Image(
+            painter = painterResource(id = R.drawable.header),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+          )
+          
+          // Soft Scrim for Readability (Now limited to text area)
+          Box(
+            modifier = Modifier
+              .fillMaxWidth(0.7f)
+              .fillMaxHeight()
+              .background(
+                Brush.horizontalGradient(
+                  colors = listOf(
+                    MaterialTheme.colorScheme.background.copy(alpha = 0.95f),
+                    MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                    Color.Transparent
+                  )
                 )
               )
-            )
-        )
-        
-        // Greeting Text on Top
-        Column(
-          modifier = Modifier
-            .fillMaxHeight()
-            .padding(AppSpacing.lg),
-          verticalArrangement = Arrangement.Center
-        ) {
-          Text(
-            text = "Hello, ${userName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}!",
-            style = MaterialTheme.typography.headlineMedium.copy(
-              fontWeight = FontWeight.Black,
-              fontSize = 30.sp
-            ),
-            color = MaterialTheme.colorScheme.onBackground
           )
-          Text(
-            text = userPhone,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-            fontWeight = FontWeight.SemiBold
+          
+          // Greeting Text on Top
+          Column(
+            modifier = Modifier
+              .fillMaxHeight()
+              .padding(AppSpacing.lg),
+            verticalArrangement = Arrangement.Center
+          ) {
+            Text(
+              text = "Hello, ${userName.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }}!",
+              style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Black,
+                fontSize = 30.sp
+              ),
+              color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+              text = userPhone,
+              style = MaterialTheme.typography.bodyLarge,
+              color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+              fontWeight = FontWeight.SemiBold
+            )
+          }
+        }
+
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // Stats Section
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(AppSpacing.lg)
+        ) {
+          StatsCard(
+            label = "Today's Sales",
+            value = "₹ ${todaySales.toInt()}",
+            icon = Icons.AutoMirrored.Outlined.TrendingUp,
+            color = AsliColors.SuccessGreen,
+            modifier = Modifier.weight(1f)
+          )
+          StatsCard(
+            label = "Total Bills",
+            value = "$todayBillCount",
+            icon = Icons.AutoMirrored.Outlined.ReceiptLong,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f)
           )
         }
-      }
 
 
-      Spacer(modifier = Modifier.height(4.dp))
-
-      // Stats Section
-      Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(AppSpacing.lg)
-      ) {
-        StatsCard(
-          label = "Today's Sales",
-          value = "₹ ${todaySales.toInt()}",
-          icon = Icons.AutoMirrored.Outlined.TrendingUp,
-          color = AsliColors.SuccessGreen,
-          modifier = Modifier.weight(1f)
-        )
-        StatsCard(
-          label = "Total Bills",
-          value = "$todayBillCount",
-          icon = Icons.AutoMirrored.Outlined.ReceiptLong,
-          color = MaterialTheme.colorScheme.primary,
-          modifier = Modifier.weight(1f)
-        )
-      }
-
-
-      // Quick Actions
-      SectionHeader("Quick Actions")
-      DarkCard(modifier = Modifier.fillMaxWidth()) {
-        HomeGridSection(
-          tiles = listOf(
-            HomeTile("Quick Bill", Icons.AutoMirrored.Outlined.ReceiptLong, onQuickBill),
-            HomeTile("Item Wise Bill", Icons.AutoMirrored.Outlined.List, onItemWiseBill),
-            HomeTile("Category / Product", Icons.Outlined.Inventory2, onInventory),
-            HomeTile("Staff Management", Icons.Outlined.Groups, onStaffManagement),
-            HomeTile("Customer Management", Icons.Outlined.Person, onCustomerManagement),
-            HomeTile("Credit Details", Icons.Outlined.CreditCard, onCreditDetails),
-            HomeTile("Cash Management", Icons.Outlined.AccountBalanceWallet, onCashManagement),
-            HomeTile("Training Video", Icons.Outlined.PlayCircle, onTrainingVideo)
+        // Quick Actions
+        SectionHeader("Quick Actions")
+        DarkCard(modifier = Modifier.fillMaxWidth()) {
+          HomeGridSection(
+            tiles = listOf(
+              HomeTile("Quick Bill", Icons.AutoMirrored.Outlined.ReceiptLong, onQuickBill),
+              HomeTile("Item Wise Bill", Icons.AutoMirrored.Outlined.List, onItemWiseBill),
+              HomeTile("Category / Product", Icons.Outlined.Inventory2, onInventory),
+              HomeTile("Staff Management", Icons.Outlined.Groups, onStaffManagement),
+              HomeTile("Customer Management", Icons.Outlined.Person, onCustomerManagement),
+              HomeTile("Credit Details", Icons.Outlined.CreditCard, onCreditDetails),
+              HomeTile("Cash Management", Icons.Outlined.AccountBalanceWallet, onCashManagement),
+              HomeTile("Training Video", Icons.Outlined.PlayCircle, onTrainingVideo)
+            )
           )
-        )
-      }
+        }
 
-      // Reports
-      SectionHeader("Reports")
-      DarkCard(modifier = Modifier.fillMaxWidth()) {
-        HomeGridSection(
-          tiles = listOf(
-            HomeTile("Bill Report", Icons.Outlined.Description, onReports),
-            HomeTile("Item Wise Sales", Icons.AutoMirrored.Outlined.ShowChart, onItemWiseSalesReport),
-            HomeTile("Day Report", Icons.Outlined.Today, onDayReport),
-            HomeTile("Sales Summary", Icons.Outlined.BarChart, onSalesSummary)
+        // Reports
+        SectionHeader("Reports")
+        DarkCard(modifier = Modifier.fillMaxWidth()) {
+          HomeGridSection(
+            tiles = listOf(
+              HomeTile("Bill Report", Icons.Outlined.Description, onReports),
+              HomeTile("Item Wise Sales", Icons.AutoMirrored.Outlined.ShowChart, onItemWiseSalesReport),
+              HomeTile("Day Report", Icons.Outlined.Today, onDayReport),
+              HomeTile("Sales Summary", Icons.Outlined.BarChart, onSalesSummary)
+            )
           )
-        )
-      }
+        }
 
-      // Settings & Others
-      SectionHeader("Settings & More")
-      DarkCard(modifier = Modifier.fillMaxWidth()) {
-        HomeGridSection(
-          tiles = listOf(
-            HomeTile("Printers", Icons.Outlined.Bluetooth, onBluetoothPrinter),
-            HomeTile("Settings", Icons.Outlined.Print, onPrintSettings),
-            HomeTile("Feedback", Icons.Outlined.Feedback, onFeedback),
-            HomeTile("Contact Us", Icons.Outlined.SupportAgent, onContactUs),
-            HomeTile("Log Out", Icons.AutoMirrored.Outlined.Logout, onLogOut)
+        // Settings & Others
+        SectionHeader("Settings & More")
+        DarkCard(modifier = Modifier.fillMaxWidth()) {
+          HomeGridSection(
+            tiles = listOf(
+              HomeTile("Printers", Icons.Outlined.Bluetooth, onBluetoothPrinter),
+              HomeTile("Settings", Icons.Outlined.Print, onPrintSettings),
+              HomeTile("Feedback", Icons.Outlined.Feedback, onFeedback),
+              HomeTile("Contact Us", Icons.Outlined.SupportAgent, onContactUs),
+              HomeTile("Log Out", Icons.AutoMirrored.Outlined.Logout, onLogOut)
+            )
           )
-        )
+        }
+
+        PremiumBanner(onClick = onUpgradePremium)
+        Spacer(modifier = Modifier.height(24.dp))
       }
 
-      PremiumBanner(onClick = onUpgradePremium)
-      Spacer(modifier = Modifier.height(24.dp))
+      if (isLoading) {
+        com.aslibill.ui.components.AsliLoader()
+      }
     }
   }
 }

@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 data class QuickBillLine(
   val sr: Int,
@@ -25,6 +27,9 @@ enum class QuickInputMode { QTY, RATE }
 class QuickBillViewModel(
   private val billing: BillingRepository
 ) : ViewModel() {
+
+  private val _isLoading = MutableStateFlow(false)
+  val isLoading = _isLoading.asStateFlow()
 
   private val _lines = kotlinx.coroutines.flow.MutableStateFlow<List<QuickBillLine>>(emptyList())
   val lines: StateFlow<List<QuickBillLine>> = _lines
@@ -92,6 +97,7 @@ class QuickBillViewModel(
     if (lines.isEmpty()) return
 
     viewModelScope.launch {
+      _isLoading.value = true
       try {
         val subtotal = lines.sumOf { it.total }
         val bill = BillEntity(
@@ -117,6 +123,8 @@ class QuickBillViewModel(
         onSaved(id)
       } catch (t: Throwable) {
         onError(t)
+      } finally {
+        _isLoading.value = false
       }
     }
   }

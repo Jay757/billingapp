@@ -21,6 +21,9 @@ data class PlanFeature(
 class SubscriptionViewModel(
     private val authRepository: AuthRepository
 ) : ViewModel() {
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
     private val _currentPlan = MutableStateFlow(PlanType.FREE)
     val currentPlan: StateFlow<PlanType> = _currentPlan.asStateFlow()
 
@@ -38,15 +41,25 @@ class SubscriptionViewModel(
 
     init {
         viewModelScope.launch {
-            val plan = authRepository.getSubscriptionPlan()
-            _currentPlan.value = if (plan.equals("PREMIUM", ignoreCase = true)) PlanType.PREMIUM else PlanType.FREE
+            _isLoading.value = true
+            try {
+                val plan = authRepository.getSubscriptionPlan()
+                _currentPlan.value = if (plan.equals("PREMIUM", ignoreCase = true)) PlanType.PREMIUM else PlanType.FREE
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
     fun upgrade() {
         viewModelScope.launch {
-            val ok = authRepository.upgradeSubscription()
-            if (ok) _currentPlan.value = PlanType.PREMIUM
+            _isLoading.value = true
+            try {
+                val ok = authRepository.upgradeSubscription()
+                if (ok) _currentPlan.value = PlanType.PREMIUM
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 }

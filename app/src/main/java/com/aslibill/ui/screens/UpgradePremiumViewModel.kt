@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 data class PremiumFeature(
     val title: String,
@@ -11,6 +14,8 @@ data class PremiumFeature(
 )
 
 class UpgradePremiumViewModel : ViewModel() {
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
     private val _features = MutableStateFlow(
         listOf(
             PremiumFeature("Unlimited Bills", "Generate as many bills as you need without any daily or monthly limits."),
@@ -24,7 +29,11 @@ class UpgradePremiumViewModel : ViewModel() {
     val features: StateFlow<List<PremiumFeature>> = _features.asStateFlow()
 
     fun performUpgrade(onSuccess: () -> Unit) {
-        // Simulated upgrade logic
-        onSuccess()
+        viewModelScope.launch {
+            _isLoading.value = true
+            delay(1500) // Simulate network delay
+            _isLoading.value = false
+            onSuccess()
+        }
     }
 }

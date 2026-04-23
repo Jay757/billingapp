@@ -57,10 +57,12 @@ fun StaffManagementScreen(
   vm: StaffManagementViewModel
 ) {
   val staffList by vm.staffList.collectAsState()
+  val isLoading by vm.isLoading.collectAsState()
   var showAdd by remember { mutableStateOf(false) }
   var editTarget by remember { mutableStateOf<StaffEntity?>(null) }
 
   ScreenSurface {
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
       modifier = Modifier
         .fillMaxSize()
@@ -134,8 +136,13 @@ fun StaffManagementScreen(
         onDismiss = { editTarget = null }
       )
     }
+
+    if (isLoading) {
+      com.aslibill.ui.components.AsliLoader()
+    }
+    }
+   }
   }
-}
 
 @Composable
 private fun StaffCard(
@@ -205,8 +212,8 @@ private fun StaffCard(
         AsliIconButton(
           icon = Icons.Outlined.Delete,
           onClick = onDelete,
-          containerColor = AsliColors.AlertOrange.copy(alpha = 0.1f),
-          contentColor = AsliColors.AlertOrange
+          containerColor = AsliColors.Red.copy(alpha = 0.1f),
+          contentColor = AsliColors.Red
         )
       }
     }
