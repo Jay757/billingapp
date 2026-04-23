@@ -15,49 +15,25 @@ class SettingsRepository(
     private val client: com.aslibill.network.ApiHttpClient,
     private val appScope: kotlinx.coroutines.CoroutineScope
 ) {
-    private val prefs = context.getSharedPreferences("print_settings", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("ui_settings", Context.MODE_PRIVATE)
 
-    private val _settings = MutableStateFlow(loadSettings())
+    private val _settings = MutableStateFlow(StoreConfig(
+        storeName = "Loading...",
+        addressLines = listOf("", ""),
+        phone = null,
+        gstNumber = null,
+        thankYouMessage = null,
+        paperWidthChars = 32
+    ))
     val settings: StateFlow<StoreConfig> = _settings.asStateFlow()
+    
     private val _uiPreferences = MutableStateFlow(loadUiPreferences())
     val uiPreferences: StateFlow<UiPreferences> = _uiPreferences.asStateFlow()
 
-    private fun loadSettings(): StoreConfig {
-        // We still use local prefs as a cache, but we'll prefix by userId if possible
-        // For simplicity during migration, we'll keep the names but they will be overwritten by sync
-        val storeName = prefs.getString("store_name", "NOVABILL") ?: "NOVABILL"
-        val address1 = prefs.getString("address_1", "Address line 1") ?: "Address line 1"
-        val address2 = prefs.getString("address_2", "Address line 2") ?: "Address line 2"
-        val phone = prefs.getString("phone", "") ?: ""
-        val gst = prefs.getString("gst", "") ?: ""
-        val thankYou = prefs.getString("thank_you", "THANK YOU") ?: "THANK YOU"
-        val paperWidth = prefs.getInt("paper_width", 32)
-        
-        return StoreConfig(
-            storeName = storeName,
-            addressLines = listOf(address1, address2),
-            phone = if (phone.isBlank()) null else phone,
-            gstNumber = if (gst.isBlank()) null else gst,
-            thankYouMessage = if (thankYou.isBlank()) null else thankYou,
-            paperWidthChars = paperWidth
-        )
-    }
-
     fun saveSettings(config: StoreConfig) {
-        prefs.edit().apply {
-            putString("store_name", config.storeName)
-            putString("address_1", config.addressLines.getOrNull(0) ?: "")
-            putString("address_2", config.addressLines.getOrNull(1) ?: "")
-            putString("phone", config.phone ?: "")
-            putString("gst", config.gstNumber ?: "")
-            putString("thank_you", config.thankYouMessage ?: "")
-            putInt("paper_width", config.paperWidthChars)
-            apply()
-        }
         _settings.value = config
 
-        // Sync to remote
-        // Use the shared appScope — avoids leaking an unmanaged CoroutineScope on every save
+        // Sync to remote immediately
         appScope.launch(Dispatchers.IO) {
             runCatching {
                 val token = authRepository.currentToken() ?: return@runCatching
@@ -86,7 +62,7 @@ class SettingsRepository(
                 thankYouMessage = obj.optString("thankYouMessage").takeIf { !obj.isNull("thankYouMessage") },
                 paperWidthChars = obj.getInt("paperWidthChars")
             )
-            saveSettings(config)
+            _settings.value = config
         }
     }
 
@@ -105,3 +81,4 @@ class SettingsRepository(
         _uiPreferences.value = UiPreferences(mode = mode)
     }
 }
+

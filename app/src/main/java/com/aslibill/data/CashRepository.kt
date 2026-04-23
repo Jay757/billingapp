@@ -1,56 +1,50 @@
 package com.aslibill.data
 
-import com.aslibill.BuildConfig
-import com.aslibill.data.db.CashDao
 import com.aslibill.data.db.CashTransactionEntity
 import com.aslibill.network.ApiHttpClient
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONObject
 
 class CashRepository(
-  private val dao: CashDao,
   private val authRepository: AuthRepository,
   private val client: ApiHttpClient
 ) {
 
+  private val _transactions = MutableStateFlow<List<CashTransactionEntity>>(emptyList())
+  val transactions: StateFlow<List<CashTransactionEntity>> = _transactions.asStateFlow()
+
   private suspend fun getUserId(): Int = authRepository.userSession.value?.id ?: throw IllegalStateException("Not logged in")
 
-  fun observeAll(): Flow<List<CashTransactionEntity>> {
-    val session = authRepository.userSession.value ?: return kotlinx.coroutines.flow.flowOf(emptyList())
-    return dao.observeAll(session.id)
-  }
+  fun observeAll(): StateFlow<List<CashTransactionEntity>> = transactions
 
   suspend fun add(entity: CashTransactionEntity) {
-    val uid = getUserId()
-    dao.insert(entity.copy(userId = uid))
-    runCatching {
-      val token = authRepository.currentToken() ?: return@runCatching
-      val body = JSONObject()
-        .put("type", entity.type)
-        .put("amount", entity.amount)
-        .put("note", entity.note)
-        .put("createdAtEpochMs", entity.createdAtEpochMs)
-      client.postJson("/cash/transactions", token, body)
-    }
+    val token = authRepository.currentToken() ?: return
+    val body = JSONObject()
+      .put("type", entity.type)
+      .put("amount", entity.amount)
+      .put("note", entity.note)
+      .put("createdAtEpochMs", entity.createdAtEpochMs)
+    client.postJson("/cash/transactions", token, body)
+    refresh()
   }
 
   suspend fun deleteAll() {
-    val uid = getUserId()
-    dao.deleteAll(uid)
-    runCatching {
-      val token = authRepository.currentToken() ?: return@runCatching
-      client.delete("/cash/transactions", token)
-    }
+    val token = authRepository.currentToken() ?: return
+    client.delete("/cash/transactions", token)
+    refresh()
   }
 
-  suspend fun syncFromRemote() {
+  suspend fun refresh() {
     val uid = getUserId()
     val token = authRepository.currentToken() ?: return
     runCatching {
       val resp = client.getJsonArray("/cash/transactions", token)
+      val list = mutableListOf<CashTransactionEntity>()
       for (i in 0 until resp.length()) {
         val obj = resp.getJSONObject(i)
-        dao.insert(CashTransactionEntity(
+        list.add(CashTransactionEntity(
           id = obj.getLong("id"),
           userId = uid,
           type = obj.getString("type"),
@@ -59,6 +53,10 @@ class CashRepository(
           createdAtEpochMs = obj.getLong("createdAtEpochMs")
         ))
       }
+      _transactions.value = list.sortedByDescending { it.createdAtEpochMs }
     }
   }
+
+  suspend fun syncFromRemote() = refresh()
 }
+

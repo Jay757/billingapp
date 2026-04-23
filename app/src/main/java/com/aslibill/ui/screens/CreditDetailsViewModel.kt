@@ -10,15 +10,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
+import kotlinx.coroutines.flow.flow
+
 class CreditDetailsViewModel(private val repo: AnalyticsRepository) : ViewModel() {
 
-  val credits: StateFlow<List<CreditSummaryRow>> = repo.observeCreditSummary()
+  private val creditFlow = flow { emit(repo.fetchCreditSummary()) }
+
+  val credits: StateFlow<List<CreditSummaryRow>> = creditFlow
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-  val totalOutstanding: StateFlow<Double> = repo.observeCreditSummary().map { list ->
+  val totalOutstanding: StateFlow<Double> = creditFlow.map { list ->
     list.sumOf { it.totalCredit }
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 }
+
 
 class CreditDetailsViewModelFactory(private val repo: AnalyticsRepository) : ViewModelProvider.Factory {
   override fun <T : ViewModel> create(modelClass: Class<T>): T {

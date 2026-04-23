@@ -1,34 +1,13 @@
 package com.aslibill.data.db
 
-import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
-import androidx.room.PrimaryKey
-
-@Entity(
-  tableName = "categories",
-  indices = [Index(value = ["userId", "name"], unique = true)]
-)
 data class CategoryEntity(
-  @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val id: Long = 0,
   val userId: Int = 0,
   val name: String
 )
 
-@Entity(
-  tableName = "products",
-  foreignKeys = [
-    ForeignKey(
-      entity = CategoryEntity::class,
-      parentColumns = ["id"],
-      childColumns = ["categoryId"],
-      onDelete = ForeignKey.RESTRICT
-    )
-  ],
-  indices = [Index("userId"), Index("categoryId"), Index(value = ["userId", "name"], unique = false)]
-)
 data class ProductEntity(
-  @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val id: Long = 0,
   val userId: Int = 0,
   val categoryId: Long,
   val name: String,
@@ -36,18 +15,16 @@ data class ProductEntity(
   val isActive: Boolean = true
 )
 
-@Entity(tableName = "customers", indices = [Index(value = ["userId", "mobile"], unique = true)])
 data class CustomerEntity(
-  @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val id: Long = 0,
   val userId: Int = 0,
   val name: String,
   val mobile: String,
   val address: String? = null
 )
 
-@Entity(tableName = "bills", indices = [Index("userId"), Index("createdAtEpochMs"), Index("customerId")])
 data class BillEntity(
-  @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val id: Long = 0,
   val userId: Int = 0,
   val createdAtEpochMs: Long,
   val cashierName: String? = null,
@@ -58,20 +35,8 @@ data class BillEntity(
   val paymentMethod: String = "CASH"
 )
 
-@Entity(
-  tableName = "bill_items",
-  foreignKeys = [
-    ForeignKey(
-      entity = BillEntity::class,
-      parentColumns = ["id"],
-      childColumns = ["billId"],
-      onDelete = ForeignKey.CASCADE
-    )
-  ],
-  indices = [Index("userId"), Index("billId"), Index("productId")]
-)
 data class BillItemEntity(
-  @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val id: Long = 0,
   val userId: Int = 0,
   val billId: Long,
   val productId: Long? = null,
@@ -81,10 +46,8 @@ data class BillItemEntity(
   val lineTotal: Double
 )
 
-
-@Entity(tableName = "staff", indices = [Index("userId")])
 data class StaffEntity(
-  @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val id: Long = 0,
   val userId: Int = 0,
   val name: String,
   val role: String,
@@ -92,12 +55,12 @@ data class StaffEntity(
   val isActive: Boolean = true
 )
 
-@Entity(tableName = "cash_transactions", indices = [Index("userId")])
 data class CashTransactionEntity(
-  @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  val id: Long = 0,
   val userId: Int = 0,
   val type: String, // OPEN | IN | OUT | CLOSE
   val amount: Double,
   val note: String? = null,
   val createdAtEpochMs: Long
 )
+

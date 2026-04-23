@@ -1,70 +1,62 @@
 package com.aslibill.data
 
-import com.aslibill.BuildConfig
-import com.aslibill.data.db.StaffDao
 import com.aslibill.data.db.StaffEntity
 import com.aslibill.network.ApiHttpClient
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONObject
 
 class StaffRepository(
-  private val dao: StaffDao,
   private val authRepository: AuthRepository,
   private val client: ApiHttpClient
 ) {
 
+  private val _staff = MutableStateFlow<List<StaffEntity>>(emptyList())
+  val staff: StateFlow<List<StaffEntity>> = _staff.asStateFlow()
+
   private suspend fun getUserId(): Int = authRepository.userSession.value?.id ?: throw IllegalStateException("Not logged in")
 
-  fun observeAll(): Flow<List<StaffEntity>> {
-    val session = authRepository.userSession.value ?: return kotlinx.coroutines.flow.flowOf(emptyList())
-    return dao.observeAll(session.id)
-  }
+  fun observeAll(): StateFlow<List<StaffEntity>> = staff
 
   suspend fun add(entity: StaffEntity): Long {
-    val uid = getUserId()
-    val id = dao.insert(entity.copy(userId = uid))
-    runCatching {
-      val token = authRepository.currentToken() ?: return@runCatching
-      val body = JSONObject()
-        .put("name", entity.name)
-        .put("role", entity.role)
-        .put("mobile", entity.mobile)
-        .put("isActive", entity.isActive)
-      client.postJson("/staff", token, body)
-    }
-    return id
+    val token = authRepository.currentToken() ?: return 0
+    val body = JSONObject()
+      .put("name", entity.name)
+      .put("role", entity.role)
+      .put("mobile", entity.mobile)
+      .put("isActive", entity.isActive)
+    val resp = client.postJson("/staff", token, body)
+    refresh()
+    return resp.optLong("id", 0)
   }
 
   suspend fun update(entity: StaffEntity) {
-    val uid = getUserId()
-    dao.update(entity.copy(userId = uid))
-    runCatching {
-      val token = authRepository.currentToken() ?: return@runCatching
-      val body = JSONObject()
-        .put("name", entity.name)
-        .put("role", entity.role)
-        .put("mobile", entity.mobile)
-        .put("isActive", entity.isActive)
-      client.putJson("/staff/${entity.id}", token, body)
-    }
+    val token = authRepository.currentToken() ?: return
+    val body = JSONObject()
+      .put("name", entity.name)
+      .put("role", entity.role)
+      .put("mobile", entity.mobile)
+      .put("isActive", entity.isActive)
+    client.putJson("/staff/${entity.id}", token, body)
+    refresh()
   }
 
   suspend fun delete(entity: StaffEntity) {
-    dao.delete(entity)
-    runCatching {
-      val token = authRepository.currentToken() ?: return@runCatching
-      client.delete("/staff/${entity.id}", token)
-    }
+    val token = authRepository.currentToken() ?: return
+    client.delete("/staff/${entity.id}", token)
+    refresh()
   }
 
-  suspend fun syncFromRemote() {
+  suspend fun refresh() {
     val uid = getUserId()
     val token = authRepository.currentToken() ?: return
     runCatching {
       val resp = client.getJsonArray("/staff", token)
+      val list = mutableListOf<StaffEntity>()
       for (i in 0 until resp.length()) {
         val obj = resp.getJSONObject(i)
-        dao.insert(StaffEntity(
+        list.add(StaffEntity(
           id = obj.getLong("id"),
           userId = uid,
           name = obj.getString("name"),
@@ -73,6 +65,10 @@ class StaffRepository(
           isActive = obj.getBoolean("isActive")
         ))
       }
+      _staff.value = list.sortedBy { it.name }
     }
   }
+
+  suspend fun syncFromRemote() = refresh()
 }
+

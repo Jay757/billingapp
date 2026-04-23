@@ -1,28 +1,74 @@
 package com.aslibill.data
 
-import com.aslibill.data.db.BillAnalyticsDao
 import com.aslibill.data.db.CreditSummaryRow
 import com.aslibill.data.db.DayReportRow
 import com.aslibill.data.db.ItemSalesRow
-import kotlinx.coroutines.flow.Flow
+import com.aslibill.network.ApiHttpClient
+import org.json.JSONArray
 
 class AnalyticsRepository(
-    private val dao: BillAnalyticsDao,
     private val authRepository: AuthRepository,
-    private val client: com.aslibill.network.ApiHttpClient
+    private val client: ApiHttpClient
 ) {
-  fun observeItemSales(from: Long, to: Long): Flow<List<ItemSalesRow>> {
-    val uid = authRepository.userSession.value?.id ?: return kotlinx.coroutines.flow.flowOf(emptyList())
-    return dao.observeItemSales(uid, from, to)
+  suspend fun fetchItemSales(from: Long, to: Long): List<ItemSalesRow> {
+    val token = authRepository.currentToken() ?: return emptyList()
+    return try {
+      val resp = client.getJsonArray("/analytics/item-sales?fromEpochMs=$from&toEpochMs=$to", token)
+      val list = mutableListOf<ItemSalesRow>()
+      for (i in 0 until resp.length()) {
+        val obj = resp.getJSONObject(i)
+        list.add(ItemSalesRow(
+          productName = obj.getString("productName"),
+          totalQty = obj.getDouble("totalQty"),
+          totalRevenue = obj.getDouble("totalRevenue")
+        ))
+      }
+      list
+    } catch (_: Throwable) {
+      emptyList()
+    }
   }
 
-  fun observeDayReport(from: Long, to: Long): Flow<List<DayReportRow>> {
-    val uid = authRepository.userSession.value?.id ?: return kotlinx.coroutines.flow.flowOf(emptyList())
-    return dao.observeDayReport(uid, from, to)
+  suspend fun fetchDayReport(from: Long, to: Long): List<DayReportRow> {
+    val token = authRepository.currentToken() ?: return emptyList()
+    return try {
+      val resp = client.getJsonArray("/analytics/day-report?fromEpochMs=$from&toEpochMs=$to", token)
+      val list = mutableListOf<DayReportRow>()
+      for (i in 0 until resp.length()) {
+        val obj = resp.getJSONObject(i)
+        list.add(DayReportRow(
+          dateLabel = obj.getString("dateLabel"),
+          billCount = obj.getInt("billCount"),
+          cashTotal = obj.getDouble("cashTotal"),
+          onlineTotal = obj.getDouble("onlineTotal"),
+          grandTotal = obj.getDouble("grandTotal")
+        ))
+      }
+      list
+    } catch (_: Throwable) {
+      emptyList()
+    }
   }
 
-  fun observeCreditSummary(): Flow<List<CreditSummaryRow>> {
-    val uid = authRepository.userSession.value?.id ?: return kotlinx.coroutines.flow.flowOf(emptyList())
-    return dao.observeCreditSummary(uid)
+  suspend fun fetchCreditSummary(): List<CreditSummaryRow> {
+    val token = authRepository.currentToken() ?: return emptyList()
+    return try {
+      val resp = client.getJsonArray("/analytics/credit-summary", token)
+      val list = mutableListOf<CreditSummaryRow>()
+      for (i in 0 until resp.length()) {
+        val obj = resp.getJSONObject(i)
+        list.add(CreditSummaryRow(
+          customerId = obj.optLong("customerId", -1L).takeIf { it != -1L },
+          customerName = obj.getString("customerName"),
+          customerMobile = obj.getString("customerMobile"),
+          totalCredit = obj.getDouble("totalCredit"),
+          billCount = obj.getInt("billCount")
+        ))
+      }
+      list
+    } catch (_: Throwable) {
+      emptyList()
+    }
   }
 }
+

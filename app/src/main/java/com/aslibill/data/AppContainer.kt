@@ -3,8 +3,6 @@ package com.aslibill.data
 import android.content.Context
 import com.aslibill.BuildConfig
 import com.aslibill.bluetooth.BluetoothPrinterManager
-import com.aslibill.data.db.AppDatabase
-import com.aslibill.data.db.BillDao
 import com.aslibill.network.ApiHttpClient
 import com.aslibill.network.BackendHealthMonitor
 import kotlinx.coroutines.CoroutineScope
@@ -18,27 +16,24 @@ class AppContainer(context: Context) {
   val networkStatusRepository = NetworkStatusRepository()
   val apiClient = ApiHttpClient(BuildConfig.API_BASE_URL, networkStatusRepository)
 
-  private val db = AppDatabase.get(context)
-
-  // authRepository must be declared first — BluetoothPrinterConfigRepository depends on it
+  // AuthRepository must be declared first — other repositories depend on it
   val authRepository = AuthRepository(context, apiClient)
-  val inventoryRepository = InventoryRepository(db.categoryDao(), db.productDao(), authRepository, apiClient)
-  val billingRepository = BillingRepository(db.billDao(), db.productDao(), authRepository, apiClient)
-  val customerRepository = CustomerRepository(db.customerDao(), authRepository, apiClient)
-  val staffRepository = StaffRepository(db.staffDao(), authRepository, apiClient)
-  val cashRepository = CashRepository(db.cashDao(), authRepository, apiClient)
-  val analyticsRepository = AnalyticsRepository(db.billAnalyticsDao(), authRepository, apiClient)
+  
+  // All repositories are now purely API-based, no local DAO dependencies
+  val inventoryRepository = InventoryRepository(authRepository, apiClient)
+  val billingRepository = BillingRepository(authRepository, apiClient)
+  val customerRepository = CustomerRepository(authRepository, apiClient)
+  val staffRepository = StaffRepository(authRepository, apiClient)
+  val cashRepository = CashRepository(authRepository, apiClient)
+  val analyticsRepository = AnalyticsRepository(authRepository, apiClient)
   val settingsRepository = SettingsRepository(context, authRepository, apiClient, appScope)
-  val billDao: BillDao = db.billDao()
 
-  // BT repos declared after authRepository (dependency) and before init block (usage)
   val bluetoothPrinterManager = BluetoothPrinterManager(context, appScope)
-  val bluetoothPrinterConfigRepository = BluetoothPrinterConfigRepository(context, authRepository, apiClient)
+  val bluetoothPrinterConfigRepository = BluetoothPrinterConfigRepository(authRepository, apiClient)
 
   private val healthMonitor = BackendHealthMonitor(apiClient, networkStatusRepository, appScope)
 
   init {
-    // 30 s interval — keeps the offline banner accurate during normal usage
     healthMonitor.start(intervalMs = 30_000)
 
     appScope.launch {
@@ -46,11 +41,12 @@ class AppContainer(context: Context) {
         if (session != null) {
           appScope.launch(Dispatchers.IO) {
             runCatching {
-              inventoryRepository.syncFromRemote()
-              staffRepository.syncFromRemote()
-              customerRepository.syncFromRemote()
-              billingRepository.syncFromRemote()
-              cashRepository.syncFromRemote()
+              // Trigger initial fetch from API for all modules
+              inventoryRepository.refresh()
+              staffRepository.refresh()
+              customerRepository.refresh()
+              billingRepository.refresh()
+              cashRepository.refresh()
               settingsRepository.syncFromRemote()
 
               val btConfig = bluetoothPrinterConfigRepository.loadRemoteConfig()
@@ -67,3 +63,4 @@ class AppContainer(context: Context) {
     bluetoothPrinterManager.disconnect()
   }
 }
+

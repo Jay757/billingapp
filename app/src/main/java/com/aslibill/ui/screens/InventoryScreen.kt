@@ -33,6 +33,12 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -393,7 +400,6 @@ private fun ProductDialog(
     mutableStateOf(initial?.categoryId ?: categories.firstOrNull()?.id ?: 0L)
   }
   
-  // Use a state list for multiple products
   val productItems = remember { 
     mutableStateListOf<ProductItemDraft>().apply {
         if (initial != null) {
@@ -407,164 +413,216 @@ private fun ProductDialog(
   var expanded by remember { mutableStateOf(false) }
   val selectedCategory = categories.find { it.id == categoryId }
 
-  AlertDialog(
+  Dialog(
     onDismissRequest = onDismiss,
-    title = { 
-        Text(
-            if (initial == null) "Add Product" else "Edit Product", 
-            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black)
-        ) 
-    },
-    containerColor = Color(0xFF1A1C1E), // Match dark theme in image
-    titleContentColor = Color.White,
-    textContentColor = Color.White,
-    text = {
+    properties = DialogProperties(usePlatformDefaultWidth = false)
+  ) {
+    Surface(
+      modifier = Modifier
+        .fillMaxWidth(0.92f)
+        .wrapContentHeight()
+        .shadow(
+          elevation = 24.dp,
+          shape = RoundedCornerShape(28.dp),
+          spotColor = AsliColors.PrimaryBlue.copy(alpha = 0.5f)
+        )
+        .border(
+          width = 1.dp,
+          color = Color.White.copy(alpha = 0.05f),
+          shape = RoundedCornerShape(28.dp)
+        ),
+      color = MaterialTheme.colorScheme.surface, 
+      shape = RoundedCornerShape(28.dp)
+    ) {
       Column(
-          modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
-          verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = Modifier
+          .padding(24.dp)
+          .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
       ) {
-        // Dropdown for Category
-        Text("Category", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
-        ExposedDropdownMenuBox(
-          expanded = expanded,
-          onExpandedChange = { expanded = !expanded },
-          modifier = Modifier.fillMaxWidth()
-        ) {
-          OutlinedTextField(
-            value = selectedCategory?.name ?: "Select Category",
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedTextColor = Color.White,
-                focusedTextColor = Color.White
-            ),
-            shape = RoundedCornerShape(12.dp)
+        // Header
+        Text(
+          text = if (initial == null) "Add Product" else "Edit Product",
+          style = MaterialTheme.typography.headlineSmall.copy(
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.onSurface
+          )
+        )
+
+        // Category Selection
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          Text(
+            text = "Category",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
           )
           
-          ExposedDropdownMenu(
+          ExposedDropdownMenuBox(
             expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.background(Color(0xFF2A2D31))
+            onExpandedChange = { expanded = !expanded },
+            modifier = Modifier.fillMaxWidth()
           ) {
-            categories.forEach { cat ->
-              DropdownMenuItem(
-                text = { Text(cat.name, color = Color.White) },
-                onClick = {
-                  categoryId = cat.id
-                  expanded = false
+            OutlinedTextField(
+              value = selectedCategory?.name ?: "Select Category",
+              onValueChange = {},
+              readOnly = true,
+              modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
+              trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+              colors = OutlinedTextFieldDefaults.colors(
+                  unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                  focusedBorderColor = AsliColors.PrimaryBlue,
+                  focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                  unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                  focusedContainerColor = Color.Transparent,
+                  unfocusedContainerColor = Color.Transparent
+              ),
+              shape = RoundedCornerShape(16.dp)
+            )
+
+            ExposedDropdownMenu(
+              expanded = expanded,
+              onDismissRequest = { expanded = false },
+              modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+            ) {
+              categories.forEach { cat ->
+                DropdownMenuItem(
+                  text = { Text(cat.name, color = MaterialTheme.colorScheme.onSurface) },
+                  onClick = {
+                    categoryId = cat.id
+                    expanded = false
+                  }
+                )
+              }
+            }
+          }
+        }
+
+        // Products List
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          Text(
+            text = "Products",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+          )
+
+          productItems.forEachIndexed { index, item ->
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.spacedBy(12.dp),
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              com.aslibill.ui.components.AsliTextField(
+                value = item.name,
+                onValueChange = { productItems[index] = item.copy(name = it) },
+                label = "Product Name",
+                modifier = Modifier.weight(1.8f)
+              )
+              
+              com.aslibill.ui.components.AsliTextField(
+                value = item.price,
+                onValueChange = { productItems[index] = item.copy(price = it) },
+                label = "Price",
+                modifier = Modifier.weight(1f),
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number)
+              )
+
+              if (initial == null && productItems.size > 1) {
+                IconButton(
+                  onClick = { productItems.removeAt(index) },
+                  modifier = Modifier.size(40.dp)
+                ) {
+                  Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "Remove",
+                    tint = AsliColors.Red.copy(alpha = 0.7f)
+                  )
                 }
+              } else if (initial != null || (initial == null && index == 0)) {
+                // Spacer for alignment if no delete button
+                Spacer(Modifier.width(4.dp))
+              }
+            }
+          }
+        }
+
+        // Add Another Product Button (Dashed Border) - Only for new products
+        if (initial == null) {
+          Box(
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(52.dp)
+              .clip(RoundedCornerShape(16.dp))
+              .clickable { productItems.add(ProductItemDraft()) }
+              .dashedBorder(AsliColors.PrimaryBlue.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center
+          ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                imageVector = Icons.Outlined.Add,
+                contentDescription = null,
+                tint = AsliColors.PrimaryBlue,
+                modifier = Modifier.size(20.dp)
+              )
+              Spacer(Modifier.width(8.dp))
+              Text(
+                text = "Add Product",
+                color = AsliColors.PrimaryBlue,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
               )
             }
           }
         }
 
-        Text("Products", style = MaterialTheme.typography.labelMedium, color = Color.Gray)
+        Spacer(Modifier.height(8.dp))
 
-        productItems.forEachIndexed { index, item ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = item.name,
-                    onValueChange = { productItems[index] = item.copy(name = it) },
-                    label = { Text("Product Name", fontSize = 12.sp) },
-                    modifier = Modifier.weight(2f),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
-                        unfocusedTextColor = Color.White,
-                        focusedTextColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    singleLine = true
-                )
-                OutlinedTextField(
-                    value = item.price,
-                    onValueChange = { productItems[index] = item.copy(price = it) },
-                    label = { Text("Price", fontSize = 12.sp) },
-                    modifier = Modifier.weight(1f),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
-                        unfocusedTextColor = Color.White,
-                        focusedTextColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
-                    singleLine = true
-                )
-                
-                if (initial == null && productItems.size > 1) {
-                    IconButton(onClick = { productItems.removeAt(index) }) {
-                        Icon(Icons.Outlined.Delete, contentDescription = "Remove", tint = AsliColors.Red)
-                    }
-                } else if (initial == null && index == 0) {
-                     // Empty space to align
-                     Spacer(Modifier.width(40.dp))
-                } else if (initial != null) {
-                    // No delete for edit in this view
-                    Spacer(Modifier.width(40.dp))
-                } else {
-                     IconButton(onClick = { productItems.removeAt(index) }) {
-                        Icon(Icons.Outlined.Delete, contentDescription = "Remove", tint = AsliColors.Red)
-                    }
-                }
-            }
-        }
-
-        if (initial == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .dashedBorder(Color.Gray.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                    .clickable { productItems.add(ProductItemDraft()) },
-                contentAlignment = Alignment.Center
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.Add, contentDescription = null, tint = AsliColors.PrimaryBlue, modifier = Modifier.size(20.dp))
-                    Spacer(Modifier.width(8.dp))
-                    Text("Add Product", color = AsliColors.PrimaryBlue, fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-      }
-    },
-    confirmButton = {
-      val isValid = categoryId != 0L && productItems.all { it.name.isNotBlank() && it.price.toDoubleOrNull() != null }
-      TextButton(
-        onClick = {
-            if (initial != null) {
+        // Action Buttons
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.End,
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          TextButton(onClick = onDismiss) {
+            Text(
+              "CANCEL",
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+            )
+          }
+          
+          Spacer(Modifier.width(16.dp))
+          
+          val isValid = categoryId != 0L && productItems.all { it.name.isNotBlank() && it.price.toDoubleOrNull() != null }
+          Button(
+            onClick = {
+              if (initial != null) {
                 val item = productItems.first()
                 onUpdate(initial.copy(
-                    name = item.name,
-                    price = item.price.toDoubleOrNull() ?: 0.0
+                  name = item.name,
+                  price = item.price.toDoubleOrNull() ?: 0.0
                 ))
-            } else {
+              } else {
                 val items = productItems.map { it.name to (it.price.toDoubleOrNull() ?: 0.0) }
                 onSave(categoryId, items)
-            }
-        },
-        enabled = isValid
-      ) {
-        Text(
-          "SAVE",
-          color = if (isValid) AsliColors.PrimaryBlue else Color.Gray,
-          fontWeight = FontWeight.Bold
-        )
-      }
-    },
-    dismissButton = {
-      TextButton(onClick = onDismiss) {
-        Text("CANCEL", color = Color.Gray)
+              }
+            },
+            enabled = isValid,
+            colors = ButtonDefaults.buttonColors(
+              containerColor = AsliColors.PrimaryBlue,
+              disabledContainerColor = AsliColors.PrimaryBlue.copy(alpha = 0.1f)
+            ),
+            shape = RoundedCornerShape(14.dp),
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+          ) {
+            Text(
+              "SAVE",
+              color = if (isValid) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+              fontWeight = FontWeight.Black
+            )
+          }
+        }
       }
     }
-  )
+  }
 }
 
 // Helper for dashed border

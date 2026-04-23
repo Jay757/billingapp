@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import java.util.Calendar
+import kotlinx.coroutines.flow.flow
 
 data class DateRangeFilter(val fromEpochMs: Long, val toEpochMs: Long)
 
@@ -23,12 +24,14 @@ private fun todayRange(): DateRangeFilter {
   return DateRangeFilter(from, cal.timeInMillis)
 }
 
+
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class ItemWiseSalesReportViewModel(private val repo: AnalyticsRepository) : ViewModel() {
   val filters = MutableStateFlow(todayRange())
 
   val items: StateFlow<List<ItemSalesRow>> = filters.flatMapLatest { f ->
-    repo.observeItemSales(f.fromEpochMs, f.toEpochMs)
+    flow { emit(repo.fetchItemSales(f.fromEpochMs, f.toEpochMs)) }
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   fun setFrom(epochMs: Long) {

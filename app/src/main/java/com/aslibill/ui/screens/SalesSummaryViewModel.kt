@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import java.util.Calendar
+import kotlinx.coroutines.flow.flow
 
 private fun thisMonthRange(): DateRangeFilter {
   val cal = Calendar.getInstance()
@@ -34,16 +35,18 @@ data class SalesSummaryState(
   val topItems: List<ItemSalesRow> = emptyList()
 )
 
+
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class SalesSummaryViewModel(private val repo: AnalyticsRepository) : ViewModel() {
   val filters = MutableStateFlow(thisMonthRange())
 
   private val dayRows: StateFlow<List<DayReportRow>> = filters.flatMapLatest { f ->
-    repo.observeDayReport(f.fromEpochMs, f.toEpochMs)
+    flow { emit(repo.fetchDayReport(f.fromEpochMs, f.toEpochMs)) }
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   private val itemRows: StateFlow<List<ItemSalesRow>> = filters.flatMapLatest { f ->
-    repo.observeItemSales(f.fromEpochMs, f.toEpochMs)
+    flow { emit(repo.fetchItemSales(f.fromEpochMs, f.toEpochMs)) }
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   val summary: StateFlow<SalesSummaryState> = dayRows.map { days ->

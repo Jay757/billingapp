@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import java.util.Calendar
+import kotlinx.coroutines.flow.flow
 
 private fun last7DaysRange(): DateRangeFilter {
   val cal = Calendar.getInstance()
@@ -22,12 +23,14 @@ private fun last7DaysRange(): DateRangeFilter {
   return DateRangeFilter(cal.timeInMillis, to)
 }
 
+
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class DayReportViewModel(private val repo: AnalyticsRepository) : ViewModel() {
   val filters = MutableStateFlow(last7DaysRange())
 
   val rows: StateFlow<List<DayReportRow>> = filters.flatMapLatest { f ->
-    repo.observeDayReport(f.fromEpochMs, f.toEpochMs)
+    flow { emit(repo.fetchDayReport(f.fromEpochMs, f.toEpochMs)) }
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   fun setFrom(epochMs: Long) {

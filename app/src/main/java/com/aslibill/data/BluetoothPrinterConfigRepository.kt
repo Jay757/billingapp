@@ -1,7 +1,5 @@
 package com.aslibill.data
 
-import android.content.Context
-import com.aslibill.BuildConfig
 import com.aslibill.network.ApiHttpClient
 import org.json.JSONObject
 
@@ -11,50 +9,35 @@ data class BluetoothPrinterConfig(
 )
 
 class BluetoothPrinterConfigRepository(
-  context: Context,
   private val authRepository: AuthRepository,
   private val client: ApiHttpClient
 ) {
-  private val prefs = context.getSharedPreferences("bluetooth_printer", Context.MODE_PRIVATE)
+  // In-memory cache for the current session
+  private var currentConfig: BluetoothPrinterConfig = BluetoothPrinterConfig(null, null)
 
   fun loadLocalConfig(): BluetoothPrinterConfig {
-    val address = prefs.getString("device_address", null)
-    val name = prefs.getString("device_name", null)
-    return BluetoothPrinterConfig(
-      deviceAddress = address?.takeIf { it.isNotBlank() },
-      deviceName = name?.takeIf { it.isNotBlank() }
-    )
-  }
-
-  fun saveLocalConfig(config: BluetoothPrinterConfig) {
-    prefs.edit().apply {
-      putString("device_address", config.deviceAddress)
-      putString("device_name", config.deviceName)
-      apply()
-    }
+    return currentConfig
   }
 
   suspend fun loadRemoteConfig(): BluetoothPrinterConfig {
-    val token = authRepository.currentToken()
-    if (token.isNullOrBlank()) return loadLocalConfig()
+    val token = authRepository.currentToken() ?: return currentConfig
 
     return try {
       val resp = client.getJson("/bluetooth/printer", token = token)
-      BluetoothPrinterConfig(
+      val config = BluetoothPrinterConfig(
         deviceAddress = resp.optString("deviceAddress").takeIf { it.isNotBlank() },
         deviceName = resp.optString("deviceName").takeIf { it.isNotBlank() }
       )
+      currentConfig = config
+      config
     } catch (_: Throwable) {
-      loadLocalConfig()
+      currentConfig
     }
   }
 
   suspend fun persistRemoteConfig(config: BluetoothPrinterConfig) {
-    // Always persist locally too for offline usage.
-    saveLocalConfig(config)
-
-    val token = authRepository.currentToken()
-    if (token.isNullOrBlank()) return
+    currentConfig = config
+    val token = authRepository.currentToken() ?: return
 
     try {
       val body = JSONObject().apply {
@@ -63,7 +46,12 @@ class BluetoothPrinterConfigRepository(
       }
       client.putJson("/bluetooth/printer", token = token, body = body)
     } catch (_: Throwable) {
-      // Best-effort: keep local state even if remote fails.
+      // Best-effort
     }
   }
+
+  fun saveLocalConfig(config: BluetoothPrinterConfig) {
+    currentConfig = config
+  }
 }
+
