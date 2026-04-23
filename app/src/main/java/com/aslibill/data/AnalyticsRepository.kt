@@ -3,6 +3,7 @@ package com.aslibill.data
 import com.aslibill.data.db.CreditSummaryRow
 import com.aslibill.data.db.DayReportRow
 import com.aslibill.data.db.ItemSalesRow
+import com.aslibill.data.db.SalesSummaryRow
 import com.aslibill.network.ApiHttpClient
 import org.json.JSONArray
 
@@ -68,6 +69,32 @@ class AnalyticsRepository(
       list
     } catch (_: Throwable) {
       emptyList()
+    }
+  }
+
+  suspend fun fetchSalesSummary(from: Long, to: Long): SalesSummaryRow? {
+    val token = authRepository.currentToken() ?: return null
+    return try {
+      val obj = client.getJson("/analytics/sales-summary?fromEpochMs=$from&toEpochMs=$to", token)
+      val itemsArr = obj.optJSONArray("topItems") ?: JSONArray()
+      val topItems = mutableListOf<ItemSalesRow>()
+      for (i in 0 until itemsArr.length()) {
+        val io = itemsArr.getJSONObject(i)
+        topItems.add(ItemSalesRow(
+          productName = io.getString("productName"),
+          totalQty = io.getDouble("totalQty"),
+          totalRevenue = io.getDouble("totalRevenue")
+        ))
+      }
+      SalesSummaryRow(
+        totalBills = obj.getInt("totalBills"),
+        totalRevenue = obj.getDouble("totalRevenue"),
+        cashTotal = obj.getDouble("cashTotal"),
+        onlineTotal = obj.getDouble("onlineTotal"),
+        topItems = topItems
+      )
+    } catch (_: Throwable) {
+      null
     }
   }
 }

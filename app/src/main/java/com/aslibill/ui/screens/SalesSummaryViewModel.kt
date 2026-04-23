@@ -41,25 +41,22 @@ data class SalesSummaryState(
 class SalesSummaryViewModel(private val repo: AnalyticsRepository) : ViewModel() {
   val filters = MutableStateFlow(thisMonthRange())
 
-  private val dayRows: StateFlow<List<DayReportRow>> = filters.flatMapLatest { f ->
-    flow { emit(repo.fetchDayReport(f.fromEpochMs, f.toEpochMs)) }
-  }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-  private val itemRows: StateFlow<List<ItemSalesRow>> = filters.flatMapLatest { f ->
-    flow { emit(repo.fetchItemSales(f.fromEpochMs, f.toEpochMs)) }
-  }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
-  val summary: StateFlow<SalesSummaryState> = dayRows.map { days ->
-    val bills = days.sumOf { it.billCount }
-    val revenue = days.sumOf { it.grandTotal }
-    SalesSummaryState(
-      totalBills = bills,
-      totalRevenue = revenue,
-      avgBillValue = if (bills > 0) revenue / bills else 0.0,
-      cashTotal = days.sumOf { it.cashTotal },
-      onlineTotal = days.sumOf { it.onlineTotal },
-      topItems = itemRows.value.take(5)
-    )
+  val summary: StateFlow<SalesSummaryState> = filters.flatMapLatest { f ->
+    flow {
+      val res = repo.fetchSalesSummary(f.fromEpochMs, f.toEpochMs)
+      if (res != null) {
+        emit(SalesSummaryState(
+          totalBills = res.totalBills,
+          totalRevenue = res.totalRevenue,
+          avgBillValue = if (res.totalBills > 0) res.totalRevenue / res.totalBills else 0.0,
+          cashTotal = res.cashTotal,
+          onlineTotal = res.onlineTotal,
+          topItems = res.topItems
+        ))
+      } else {
+        emit(SalesSummaryState())
+      }
+    }
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SalesSummaryState())
 
   fun setFrom(epochMs: Long) {

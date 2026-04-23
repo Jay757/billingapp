@@ -42,3 +42,11 @@ data class CreditSummaryRow(
   val billCount: Int
 )
 
+data class SalesSummaryRow(
+  val totalBills: Int,
+  val totalRevenue: Double,
+  val cashTotal: Double,
+  val onlineTotal: Double,
+  val topItems: List<ItemSalesRow>
+)
+
