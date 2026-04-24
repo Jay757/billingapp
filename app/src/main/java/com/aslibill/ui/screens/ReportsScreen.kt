@@ -173,7 +173,7 @@ fun ReportsScreen(
         items(bills, key = { it.billId }) { row ->
           BillCard(
             row = row,
-            dateTime = dfTime.format(Date(row.createdAtEpochMs)),
+            dateTime = dfDay.format(Date(row.createdAtEpochMs)),
             onDelete = { vm.deleteBill(row.billId) },
             onView = {
               showItemsFor = row

@@ -397,7 +397,7 @@ private fun SaveBillDialog(
   onSave: () -> Unit,
   errorText: String?
 ) {
-  val df = remember { SimpleDateFormat("dd-MM-yyyy hh:mm a", Locale.getDefault()) }
+  val df = remember { SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()) }
   val now = remember { df.format(Date()) }
 
   AlertDialog(

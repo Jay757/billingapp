@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
   id("com.android.application")
   id("org.jetbrains.kotlin.android")
@@ -29,13 +31,23 @@ android {
   }
 
   buildTypes {
+    val env = Properties()
+    val envFile = project.rootProject.file(".env")
+    if (envFile.exists()) {
+      envFile.inputStream().use { env.load(it) }
+    }
+
     debug {
-      buildConfigField("String", "API_BASE_URL", "\"https://billingappbackend-cjxo.onrender.com\"")
+      val baseUrl = env.getProperty("API_BASE_URL_DEBUG") ?: "http://10.0.2.2:8000"
+      println("DEBUG: Using API_BASE_URL=$baseUrl from .env")
+      buildConfigField("String", "API_BASE_URL", "\"$baseUrl\"")
     }
     release {
-      buildConfigField("String", "API_BASE_URL", "\"https://billingappbackend-cjxo.onrender.com\"")
+      val baseUrl = env.getProperty("API_BASE_URL_RELEASE") ?: "https://billingappbackend-cjxo.onrender.com"
+      println("RELEASE: Using API_BASE_URL=$baseUrl from .env")
+      buildConfigField("String", "API_BASE_URL", "\"$baseUrl\"")
       signingConfig = signingConfigs.getByName("release")
-      isMinifyEnabled = false
+      isMinifyEnabled = true
       proguardFiles(
         getDefaultProguardFile("proguard-android-optimize.txt"),
         "proguard-rules.pro"

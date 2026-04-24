@@ -62,6 +62,7 @@ fun HomeScreen(
   onContactUs: () -> Unit,
   onSubscription: () -> Unit,
   onDeleteAccount: () -> Unit,
+  onPrivacyPolicy: () -> Unit,
   onLogOut: () -> Unit,
   userName: String,
   userPhone: String,
@@ -204,7 +205,18 @@ fun HomeScreen(
               HomeTile("Printers", Icons.Outlined.Bluetooth, onBluetoothPrinter),
               HomeTile("Settings", Icons.Outlined.Print, onPrintSettings),
               HomeTile("Feedback", Icons.Outlined.Feedback, onFeedback),
-              HomeTile("Contact Us", Icons.Outlined.SupportAgent, onContactUs),
+              HomeTile("Contact Us", Icons.Outlined.SupportAgent, onContactUs)
+            )
+          )
+        }
+
+        // Legal & Security
+        SectionHeader("Legal & Security")
+        DarkCard(modifier = Modifier.fillMaxWidth()) {
+          HomeGridSection(
+            tiles = listOf(
+              HomeTile("Privacy Policy", Icons.Outlined.PrivacyTip, onPrivacyPolicy),
+              HomeTile("Delete Account", Icons.Outlined.DeleteForever, onDeleteAccount),
               HomeTile("Log Out", Icons.AutoMirrored.Outlined.Logout, onLogOut)
             )
           )

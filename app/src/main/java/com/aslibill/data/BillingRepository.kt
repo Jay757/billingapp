@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class BillingRepository(
   private val authRepository: AuthRepository,
@@ -74,7 +77,12 @@ class BillingRepository(
     return try {
       val url = when {
         range != null -> "/bills?range=$range"
-        else -> "/bills?fromEpochMs=$fromEpochMs&toEpochMs=$toEpochMs"
+        else -> {
+          val df = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+          val f = if (fromEpochMs != null) df.format(Date(fromEpochMs)) else ""
+          val t = if (toEpochMs != null) df.format(Date(toEpochMs)) else ""
+          "/bills?fromDate=$f&toDate=$t"
+        }
       }
       val billsResp = client.getJsonArray(url, token)
       

@@ -59,7 +59,7 @@ fun CashManagementScreen(
   val isLoading by vm.isLoading.collectAsState()
   var showAddDialog by remember { mutableStateOf<String?>(null) } // "IN" or "OUT"
 
-  val df = remember { SimpleDateFormat("dd-MM-yyyy hh:mm a", Locale.getDefault()) }
+  val df = remember { SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()) }
 
   ScreenSurface {
     Box(modifier = Modifier.fillMaxSize()) {

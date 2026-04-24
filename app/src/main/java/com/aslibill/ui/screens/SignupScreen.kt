@@ -1,6 +1,7 @@
 package com.aslibill.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.style.TextAlign
 import com.aslibill.ui.components.AsliTextField
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.DarkCard
@@ -36,6 +38,7 @@ fun SignupScreen(
     vm: SignupViewModel,
     onSignupSuccess: (String?) -> Unit,
     onGoToLogin: () -> Unit,
+    onPrivacyPolicy: () -> Unit,
     contentPadding: PaddingValues
 ) {
     ScreenSurface {
@@ -201,7 +204,26 @@ fun SignupScreen(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // Privacy Policy Consent
+                        Text(
+                            text = "By signing up, you agree to our Privacy Policy",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = "Read Privacy Policy",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            ),
+                            modifier = Modifier.clickable { onPrivacyPolicy() },
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
 
                         OrangeButton(
                             text = if (vm.isLoading) "CREATING ACCOUNT..." else "GET STARTED",

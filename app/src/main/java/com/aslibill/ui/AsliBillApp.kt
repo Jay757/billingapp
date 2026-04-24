@@ -84,6 +84,7 @@ import com.aslibill.ui.screens.OTPScreen
 import com.aslibill.ui.screens.OTPSuccessScreen
 import com.aslibill.ui.screens.OTPViewModel
 import com.aslibill.ui.screens.OTPViewModelFactory
+import com.aslibill.ui.screens.PrivacyPolicyScreen
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
@@ -163,6 +164,7 @@ fun NovaBillApp() {
           onContactUs = { navController.navigate(Routes.ContactUs) },
           onSubscription = { navController.navigate(Routes.Subscription) },
           onDeleteAccount = { navController.navigate(Routes.DeleteAccount) },
+          onPrivacyPolicy = { navController.navigate(Routes.PrivacyPolicy) },
           onLogOut = {
             scope.launch {
                 app.container.performLogout()
@@ -199,6 +201,7 @@ fun NovaBillApp() {
             navController.navigate(Routes.OTP + "/${vm.phone}?code=$code")
           },
           onGoToLogin = { navController.navigate(Routes.Login) },
+          onPrivacyPolicy = { navController.navigate(Routes.PrivacyPolicy) },
           contentPadding = padding
         )
       }
@@ -367,6 +370,12 @@ fun NovaBillApp() {
         val vm: BuyPrintersViewModel = viewModel()
         BuyPrintersScreen(contentPadding = padding, vm = vm)
       }
+      composable(Routes.PrivacyPolicy) {
+        PrivacyPolicyScreen(
+          onBack = { navController.popBackStack() },
+          contentPadding = padding
+        )
+      }
       composable(Routes.Welcome) {
         com.aslibill.ui.screens.WelcomeScreen(
           onGetStarted = { 
@@ -425,6 +434,7 @@ object Routes {
   const val Subscription = "subscription"
   const val DeleteAccount = "deleteAccount"
   const val BuyPrinters = "buyPrinters"
+  const val PrivacyPolicy = "privacyPolicy"
   const val Login = "login"
   const val Signup = "signup"
   const val OTP = "otp"

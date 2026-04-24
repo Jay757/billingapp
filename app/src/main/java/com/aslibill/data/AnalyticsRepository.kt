@@ -6,6 +6,9 @@ import com.aslibill.data.db.ItemSalesRow
 import com.aslibill.data.db.SalesSummaryRow
 import com.aslibill.network.ApiHttpClient
 import org.json.JSONArray
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class AnalyticsRepository(
     private val authRepository: AuthRepository,
@@ -16,7 +19,12 @@ class AnalyticsRepository(
     return try {
       val url = when {
         range != null -> "/analytics/item-sales?range=$range"
-        else -> "/analytics/item-sales?fromEpochMs=$from&toEpochMs=$to"
+        else -> {
+          val df = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+          val f = if (from != null) df.format(Date(from)) else ""
+          val t = if (to != null) df.format(Date(to)) else ""
+          "/analytics/item-sales?fromDate=$f&toDate=$t"
+        }
       }
       val resp = client.getJsonArray(url, token)
       val list = mutableListOf<ItemSalesRow>()
@@ -39,7 +47,12 @@ class AnalyticsRepository(
     return try {
       val url = when {
         range != null -> "/analytics/day-report?range=$range"
-        else -> "/analytics/day-report?fromEpochMs=$from&toEpochMs=$to"
+        else -> {
+          val df = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+          val f = if (from != null) df.format(Date(from)) else ""
+          val t = if (to != null) df.format(Date(to)) else ""
+          "/analytics/day-report?fromDate=$f&toDate=$t"
+        }
       }
       val resp = client.getJsonArray(url, token)
       val list = mutableListOf<DayReportRow>()
@@ -85,7 +98,12 @@ class AnalyticsRepository(
     return try {
       val url = when {
         range != null -> "/analytics/sales-summary?range=$range"
-        else -> "/analytics/sales-summary?fromEpochMs=$from&toEpochMs=$to"
+        else -> {
+          val df = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+          val f = if (from != null) df.format(Date(from)) else ""
+          val t = if (to != null) df.format(Date(to)) else ""
+          "/analytics/sales-summary?fromDate=$f&toDate=$t"
+        }
       }
       val obj = client.getJson(url, token)
       val itemsArr = obj.optJSONArray("topItems") ?: JSONArray()
