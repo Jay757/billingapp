@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.json.JSONObject
 
 class InventoryViewModel(
   private val repo: InventoryRepository
@@ -86,6 +87,15 @@ class InventoryViewModel(
   fun deleteProduct(entity: ProductEntity) = viewModelScope.launch {
     _isLoading.value = true
     try { repo.deleteProduct(entity) } finally { _isLoading.value = false }
+  }
+
+  suspend fun bulkUpload(items: List<Triple<String, String, Double>>): JSONObject {
+    _isLoading.value = true
+    return try {
+      repo.bulkUpload(items)
+    } finally {
+      _isLoading.value = false
+    }
   }
 }
 

@@ -112,6 +112,24 @@ class InventoryRepository(
     }
   }
 
+  suspend fun bulkUpload(items: List<Triple<String, String, Double>>): JSONObject {
+    val token = authRepository.currentToken() ?: throw IllegalStateException("Not logged in")
+    
+    val itemsArray = org.json.JSONArray()
+    items.forEach { (catName, prodName, price) ->
+      itemsArray.put(JSONObject()
+        .put("categoryName", catName)
+        .put("productName", prodName)
+        .put("price", price)
+      )
+    }
+    
+    val body = JSONObject().put("items", itemsArray)
+    val response = client.postJson("/inventory/bulk-upload", token, body)
+    refresh()
+    return response
+  }
+
   suspend fun syncFromRemote() = refresh()
 }
 

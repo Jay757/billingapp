@@ -86,6 +86,22 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Outline
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import android.net.Uri
+import android.widget.Toast
+import kotlinx.coroutines.launch
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import androidx.compose.material.icons.outlined.UploadFile
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.material3.HorizontalDivider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,6 +116,7 @@ fun InventoryScreen(
   var tab by remember { mutableStateOf(InventoryTab.Category) }
 
   var showAdd by remember { mutableStateOf(false) }
+  var showBulk by remember { mutableStateOf(false) }
   var editCategory by remember { mutableStateOf<CategoryEntity?>(null) }
   var editProduct by remember { mutableStateOf<ProductDraft?>(null) }
 
@@ -133,7 +150,7 @@ fun InventoryScreen(
               )
             }
 
-            OrangeButton(if (isWide) "Bulk Product Upload" else "Bulk Upload", onClick = { /* TODO */ })
+            OrangeButton(if (isWide) "Bulk Product Upload" else "Bulk Upload", onClick = { showBulk = true })
           }
         }
 
@@ -326,6 +343,13 @@ fun InventoryScreen(
             }
           )
         }
+      }
+
+      if (showBulk) {
+        BulkUploadDialog(
+            vm = vm,
+            onDismiss = { showBulk = false }
+        )
       }
 
       if (isLoading) {
@@ -612,6 +636,169 @@ fun Modifier.dashedBorder(color: Color, shape: Shape): Modifier = this.drawBehin
         }
         is Outline.Generic -> {
             drawPath(path = outline.path, color = color, style = stroke)
+        }
+    }
+}
+
+@Composable
+private fun BulkUploadDialog(
+    vm: InventoryViewModel,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var isUploading by remember { mutableStateOf(false) }
+    var resultMessage by remember { mutableStateOf<String?>(null) }
+    var isError by remember { mutableStateOf(false) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            isUploading = true
+            scope.launch {
+                try {
+                    val inputStream = context.contentResolver.openInputStream(it)
+                    val reader = BufferedReader(InputStreamReader(inputStream))
+                    val items = mutableListOf<Triple<String, String, Double>>()
+                    
+                    var line: String? = reader.readLine() // Skip header
+                    while (reader.readLine().also { line = it } != null) {
+                        val parts = line?.split(",") ?: continue
+                        if (parts.size >= 3) {
+                            val cat = parts[0].trim()
+                            val prod = parts[1].trim()
+                            val price = parts[2].trim().toDoubleOrNull() ?: 0.0
+                            if (cat.isNotEmpty() && prod.isNotEmpty()) {
+                                items.add(Triple(cat, prod, price))
+                            }
+                        }
+                    }
+                    reader.close()
+
+                    if (items.isEmpty()) {
+                        resultMessage = "No valid data found in file."
+                        isError = true
+                    } else {
+                        val resp = vm.bulkUpload(items)
+                        val created = resp.optInt("created")
+                        val skipped = resp.optInt("skipped")
+                        resultMessage = "Successfully uploaded $created products. Skipped $skipped duplicates."
+                        isError = false
+                    }
+                } catch (e: Exception) {
+                    resultMessage = "Error: ${e.message}"
+                    isError = true
+                } finally {
+                    isUploading = false
+                }
+            }
+        }
+    }
+
+    com.aslibill.ui.components.AsliDialog(
+        onDismissRequest = if (isUploading) ({}) else onDismiss,
+        title = "Bulk Product Upload",
+        confirmButton = {
+            if (resultMessage != null) {
+                OrangeButton("CLOSE", onClick = onDismiss)
+            } else {
+                OrangeButton(
+                    "SELECT CSV FILE", 
+                    onClick = { launcher.launch("text/*") },
+                    enabled = !isUploading
+                )
+            }
+        },
+        dismissButton = {
+            if (resultMessage == null && !isUploading) {
+                TextButton(onClick = onDismiss) {
+                    Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            if (resultMessage == null) {
+                Text(
+                    "Upload your product inventory in bulk using a CSV file.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                DarkCard {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Outlined.Info, contentDescription = null, tint = AsliColors.PrimaryBlue, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text("CSV Format Instructions", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                        }
+                        
+                        Text(
+                            "Your CSV file must have these columns in order:\n1. Category Name\n2. Product Name\n3. Price",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                        
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                        
+                        Text(
+                            "Example Row:\nFruits, Apple, 120.0",
+                            style = MaterialTheme.typography.labelSmall.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace),
+                            color = AsliColors.PrimaryBlue
+                        )
+                    }
+                }
+
+                if (isUploading) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 3.dp,
+                            color = AsliColors.PrimaryBlue
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text("Processing file...", style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isError) Icons.Outlined.ErrorOutline else Icons.Outlined.CheckCircle,
+                        contentDescription = null,
+                        tint = if (isError) AsliColors.Red else Color(0xFF4CAF50),
+                        modifier = Modifier.size(48.dp)
+                    )
+                    
+                    Text(
+                        text = if (isError) "Upload Failed" else "Upload Complete",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    
+                    Text(
+                        text = resultMessage!!,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                }
+            }
         }
     }
 }

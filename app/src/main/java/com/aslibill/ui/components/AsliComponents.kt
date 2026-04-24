@@ -217,11 +217,13 @@ fun OrangeButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
-    containerColor: Color = MaterialTheme.colorScheme.primary
+    containerColor: Color = MaterialTheme.colorScheme.primary,
+    enabled: Boolean = true
 ) {
     Button(
         onClick = onClick,
         modifier = modifier.heightIn(min = 54.dp),
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = if (containerColor == MaterialTheme.colorScheme.primary) Color.White else MaterialTheme.colorScheme.onPrimary
