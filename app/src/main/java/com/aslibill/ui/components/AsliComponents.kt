@@ -354,7 +354,10 @@ fun AsliTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: androidx.compose.foundation.text.KeyboardOptions = androidx.compose.foundation.text.KeyboardOptions.Default,
     leadingIcon: @Composable (() -> Unit)? = null,
-    trailingIcon: @Composable (() -> Unit)? = null
+    trailingIcon: @Composable (() -> Unit)? = null,
+    singleLine: Boolean = true,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
+    minLines: Int = 1
 ) {
     val isPassword = keyboardOptions.keyboardType == KeyboardType.Password
     val passwordVisible = remember { mutableStateOf(false) }
@@ -402,7 +405,9 @@ fun AsliTextField(
         ),
         textStyle = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
         shape = RoundedCornerShape(16.dp),
-        singleLine = true
+        singleLine = singleLine,
+        maxLines = maxLines,
+        minLines = minLines
     )
 }
 

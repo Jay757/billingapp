@@ -145,26 +145,26 @@ fun NovaBillApp() {
       composable(Routes.Home) {
         val homeVm: HomeViewModel = viewModel(factory = HomeViewModelFactory(app.container.billingRepository))
         HomeScreen(
-          onQuickBill = { navController.navigate(Routes.QuickBill) },
-          onItemWiseBill = { navController.navigate(Routes.ItemWiseBill) },
-          onInventory = { navController.navigate(Routes.Inventory) },
-          onReports = { navController.navigate(Routes.Reports) },
-          onBluetoothPrinter = { navController.navigate(Routes.BluetoothPrinter) },
-          onPrintSettings = { navController.navigate(Routes.PrintSettings) },
-          onStaffManagement = { navController.navigate(Routes.StaffManagement) },
-          onCustomerManagement = { navController.navigate(Routes.CustomerManagement) },
-          onCreditDetails = { navController.navigate(Routes.CreditDetails) },
-          onCashManagement = { navController.navigate(Routes.CashManagement) },
-          onItemWiseSalesReport = { navController.navigate(Routes.ItemWiseSalesReport) },
-          onDayReport = { navController.navigate(Routes.DayReport) },
-          onSalesSummary = { navController.navigate(Routes.SalesSummary) },
-          onUpgradePremium = { navController.navigate(Routes.UpgradePremium) },
-          onTrainingVideo = { navController.navigate(Routes.TrainingVideo) },
-          onFeedback = { navController.navigate(Routes.Feedback) },
-          onContactUs = { navController.navigate(Routes.ContactUs) },
-          onSubscription = { navController.navigate(Routes.Subscription) },
-          onDeleteAccount = { navController.navigate(Routes.DeleteAccount) },
-          onPrivacyPolicy = { navController.navigate(Routes.PrivacyPolicy) },
+          onQuickBill = { navController.navigate(Routes.QuickBill) { launchSingleTop = true } },
+          onItemWiseBill = { navController.navigate(Routes.ItemWiseBill) { launchSingleTop = true } },
+          onInventory = { navController.navigate(Routes.Inventory) { launchSingleTop = true } },
+          onReports = { navController.navigate(Routes.Reports) { launchSingleTop = true } },
+          onBluetoothPrinter = { navController.navigate(Routes.BluetoothPrinter) { launchSingleTop = true } },
+          onPrintSettings = { navController.navigate(Routes.PrintSettings) { launchSingleTop = true } },
+          onStaffManagement = { navController.navigate(Routes.StaffManagement) { launchSingleTop = true } },
+          onCustomerManagement = { navController.navigate(Routes.CustomerManagement) { launchSingleTop = true } },
+          onCreditDetails = { navController.navigate(Routes.CreditDetails) { launchSingleTop = true } },
+          onCashManagement = { navController.navigate(Routes.CashManagement) { launchSingleTop = true } },
+          onItemWiseSalesReport = { navController.navigate(Routes.ItemWiseSalesReport) { launchSingleTop = true } },
+          onDayReport = { navController.navigate(Routes.DayReport) { launchSingleTop = true } },
+          onSalesSummary = { navController.navigate(Routes.SalesSummary) { launchSingleTop = true } },
+          onUpgradePremium = { navController.navigate(Routes.UpgradePremium) { launchSingleTop = true } },
+          onTrainingVideo = { navController.navigate(Routes.TrainingVideo) { launchSingleTop = true } },
+          onFeedback = { navController.navigate(Routes.Feedback) { launchSingleTop = true } },
+          onContactUs = { navController.navigate(Routes.ContactUs) { launchSingleTop = true } },
+          onSubscription = { navController.navigate(Routes.Subscription) { launchSingleTop = true } },
+          onDeleteAccount = { navController.navigate(Routes.DeleteAccount) { launchSingleTop = true } },
+          onPrivacyPolicy = { navController.navigate(Routes.PrivacyPolicy) { launchSingleTop = true } },
           onLogOut = {
             scope.launch {
                 app.container.performLogout()
@@ -189,7 +189,7 @@ fun NovaBillApp() {
               popUpTo(Routes.Login) { inclusive = true }
             }
           },
-          onGoToSignup = { navController.navigate(Routes.Signup) },
+          onGoToSignup = { navController.navigate(Routes.Signup) { launchSingleTop = true } },
           contentPadding = padding
         )
       }
@@ -200,8 +200,8 @@ fun NovaBillApp() {
           onSignupSuccess = { code: String? ->
             navController.navigate(Routes.OTP + "/${vm.phone}?code=$code")
           },
-          onGoToLogin = { navController.navigate(Routes.Login) },
-          onPrivacyPolicy = { navController.navigate(Routes.PrivacyPolicy) },
+          onGoToLogin = { navController.navigate(Routes.Login) { launchSingleTop = true } },
+          onPrivacyPolicy = { navController.navigate(Routes.PrivacyPolicy) { launchSingleTop = true } },
           contentPadding = padding
         )
       }
@@ -260,8 +260,18 @@ fun NovaBillApp() {
           contentPadding = padding,
           vm = vm,
           btVm = btVm,
-          onGoReport = { navController.navigate(Routes.Reports) },
-          onGoItemWise = { navController.navigate(Routes.ItemWiseBill) }
+          onGoReport = { 
+            navController.navigate(Routes.Reports) {
+                popUpTo(Routes.Home)
+                launchSingleTop = true
+            }
+          },
+          onGoItemWise = { 
+            navController.navigate(Routes.ItemWiseBill) {
+                popUpTo(Routes.Home)
+                launchSingleTop = true
+            }
+          }
         )
       }
       composable(Routes.ItemWiseBill) {
@@ -276,8 +286,18 @@ fun NovaBillApp() {
           contentPadding = padding,
           vm = vm,
           btVm = btVm,
-          onGoReport = { navController.navigate(Routes.Reports) },
-          onGoQuickBill = { navController.navigate(Routes.QuickBill) }
+          onGoReport = { 
+            navController.navigate(Routes.Reports) {
+                popUpTo(Routes.Home)
+                launchSingleTop = true
+            }
+          },
+          onGoQuickBill = { 
+            navController.navigate(Routes.QuickBill) {
+                popUpTo(Routes.Home)
+                launchSingleTop = true
+            }
+          }
         )
       }
       composable(Routes.Inventory) {
@@ -295,8 +315,18 @@ fun NovaBillApp() {
           contentPadding = padding,
           vm = vm,
           btVm = btVm,
-          onGoQuickBill = { navController.navigate(Routes.QuickBill) },
-          onGoItemWise = { navController.navigate(Routes.ItemWiseBill) }
+          onGoQuickBill = { 
+            navController.navigate(Routes.QuickBill) {
+                popUpTo(Routes.Home)
+                launchSingleTop = true
+            }
+          },
+          onGoItemWise = { 
+            navController.navigate(Routes.ItemWiseBill) {
+                popUpTo(Routes.Home)
+                launchSingleTop = true
+            }
+          }
         )
       }
       composable(Routes.BluetoothPrinter) {
