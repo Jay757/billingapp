@@ -18,14 +18,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.flow
 
-private fun thisMonthRange(): DateRangeFilter {
+private fun defaultMonthRange(): DateRangeFilter {
   val cal = Calendar.getInstance()
   cal.set(Calendar.DAY_OF_MONTH, 1)
-  cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0)
-  val from = cal.timeInMillis
-  cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH))
-  cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59)
-  return DateRangeFilter(from, cal.timeInMillis)
+  return DateRangeFilter(fromEpochMs = cal.timeInMillis, toEpochMs = System.currentTimeMillis())
 }
 
 data class SalesSummaryState(
@@ -44,13 +40,13 @@ class SalesSummaryViewModel(private val repo: AnalyticsRepository) : ViewModel()
   private val _isLoading = MutableStateFlow(true)
   val isLoading = _isLoading.asStateFlow()
 
-  val filters = MutableStateFlow(thisMonthRange())
+  val filters = MutableStateFlow(defaultMonthRange())
 
   val summary: StateFlow<SalesSummaryState> = filters
     .onEach { _isLoading.value = true }
     .flatMapLatest { f ->
       flow {
-        val res = repo.fetchSalesSummary(f.fromEpochMs, f.toEpochMs)
+        val res = repo.fetchSalesSummary(f.fromEpochMs, f.toEpochMs, f.range)
         if (res != null) {
           emit(SalesSummaryState(
             totalBills = res.totalBills,
@@ -68,15 +64,11 @@ class SalesSummaryViewModel(private val repo: AnalyticsRepository) : ViewModel()
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SalesSummaryState())
 
   fun setFrom(epochMs: Long) {
-    val cal = Calendar.getInstance().apply { timeInMillis = epochMs }
-    cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
-    filters.value = filters.value.copy(fromEpochMs = cal.timeInMillis)
+    filters.value = filters.value.copy(fromEpochMs = epochMs, range = null)
   }
 
   fun setTo(epochMs: Long) {
-    val cal = Calendar.getInstance().apply { timeInMillis = epochMs }
-    cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59); cal.set(Calendar.MILLISECOND, 999)
-    filters.value = filters.value.copy(toEpochMs = cal.timeInMillis)
+    filters.value = filters.value.copy(toEpochMs = epochMs, range = null)
   }
 }
 

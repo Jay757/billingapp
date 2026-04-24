@@ -19,7 +19,8 @@ import kotlinx.coroutines.flow.asStateFlow
 
 data class ReportFilters(
   val fromEpochMs: Long,
-  val toEpochMs: Long
+  val toEpochMs: Long,
+  val range: String? = null
 )
 
 class ReportsViewModel(
@@ -29,14 +30,14 @@ class ReportsViewModel(
   private val _isLoading = MutableStateFlow(true)
   val isLoading = _isLoading.asStateFlow()
 
-  private val _filters = kotlinx.coroutines.flow.MutableStateFlow(defaultTodayRange())
+  private val _filters = MutableStateFlow(defaultMonthRange())
   val filters: StateFlow<ReportFilters> = _filters
 
   @OptIn(ExperimentalCoroutinesApi::class)
   val bills: StateFlow<List<BillWithItemsRow>> =
     _filters
       .onEach { _isLoading.value = true }
-      .flatMapLatest { billing.observeBillsBetween(it.fromEpochMs, it.toEpochMs) }
+      .flatMapLatest { billing.observeBillsBetween(it.fromEpochMs, it.toEpochMs, it.range) }
       .onEach { _isLoading.value = false }
       .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -45,15 +46,11 @@ class ReportsViewModel(
       .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0.0)
 
   fun setFrom(epochMs: Long) {
-    val cal = Calendar.getInstance().apply { timeInMillis = epochMs }
-    cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
-    _filters.value = _filters.value.copy(fromEpochMs = cal.timeInMillis)
+    _filters.value = _filters.value.copy(fromEpochMs = epochMs)
   }
 
   fun setTo(epochMs: Long) {
-    val cal = Calendar.getInstance().apply { timeInMillis = epochMs }
-    cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59); cal.set(Calendar.MILLISECOND, 999)
-    _filters.value = _filters.value.copy(toEpochMs = cal.timeInMillis)
+    _filters.value = _filters.value.copy(toEpochMs = epochMs)
   }
 
   fun deleteBill(billId: Long) = viewModelScope.launch {
@@ -80,12 +77,11 @@ class ReportsViewModel(
   }
 }
 
-private fun defaultTodayRange(): ReportFilters {
+private fun defaultMonthRange(): ReportFilters {
   val cal = Calendar.getInstance()
-  cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59); cal.set(Calendar.MILLISECOND, 999)
-  val end = cal.timeInMillis
-  cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
+  cal.set(Calendar.DAY_OF_MONTH, 1)
   val start = cal.timeInMillis
+  val end = System.currentTimeMillis()
   return ReportFilters(fromEpochMs = start, toEpochMs = end)
 }
 

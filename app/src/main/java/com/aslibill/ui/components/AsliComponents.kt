@@ -491,6 +491,83 @@ fun Chip(
 }
 
 @Composable
+fun DateRangeOption(
+  label: String,
+  value: String,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  Surface(
+    modifier = modifier.clickable(onClick = onClick),
+    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+    shape = RoundedCornerShape(12.dp),
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
+  ) {
+    Column(
+      modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+      verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+      Text(
+        text = label, 
+        color = MaterialTheme.colorScheme.onSurfaceVariant, 
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
+      )
+      Text(
+        text = value, 
+        color = MaterialTheme.colorScheme.onSurface, 
+        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black)
+      )
+    }
+  }
+}
+
+@Composable
+fun UnifiedDateRangeSelector(
+    fromText: String,
+    toText: String,
+    onFromClick: () -> Unit,
+    onToClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    DarkCard(modifier = modifier.fillMaxWidth(), alpha = 0.5f) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(AppSpacing.md),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
+        ) {
+            DateRangeOption(
+                label = "FROM",
+                value = fromText,
+                onClick = onFromClick,
+                modifier = Modifier.weight(1f)
+            )
+            
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Outlined.CalendarMonth, 
+                    contentDescription = null, 
+                    tint = MaterialTheme.colorScheme.primary, 
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+
+            DateRangeOption(
+                label = "TO",
+                value = toText,
+                onClick = onToClick,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
 fun DateBox(
     label: String,
     date: String = "",

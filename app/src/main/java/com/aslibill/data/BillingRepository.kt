@@ -61,18 +61,21 @@ class BillingRepository(
     return resp.optLong("id", 0)
   }
 
-  fun observeBillsBetween(fromEpochMs: Long, toEpochMs: Long): kotlinx.coroutines.flow.Flow<List<BillWithItemsRow>> {
+  fun observeBillsBetween(fromEpochMs: Long? = null, toEpochMs: Long? = null, range: String? = null): kotlinx.coroutines.flow.Flow<List<BillWithItemsRow>> {
     return kotlinx.coroutines.flow.flow {
-      emit(fetchBillsBetween(fromEpochMs, toEpochMs))
+      emit(fetchBillsBetween(fromEpochMs, toEpochMs, range))
     }
   }
 
-  suspend fun fetchBillsBetween(fromEpochMs: Long, toEpochMs: Long): List<BillWithItemsRow> {
+  suspend fun fetchBillsBetween(fromEpochMs: Long? = null, toEpochMs: Long? = null, range: String? = null): List<BillWithItemsRow> {
     val uid = authRepository.userSession.value?.id ?: return emptyList()
     val token = authRepository.currentToken() ?: return emptyList()
     
     return try {
-      val url = "/bills?fromEpochMs=$fromEpochMs&toEpochMs=$toEpochMs"
+      val url = when {
+        range != null -> "/bills?range=$range"
+        else -> "/bills?fromEpochMs=$fromEpochMs&toEpochMs=$toEpochMs"
+      }
       val billsResp = client.getJsonArray(url, token)
       
       val newList = mutableListOf<BillWithItemsRow>()
@@ -135,10 +138,7 @@ class BillingRepository(
     val token = authRepository.currentToken() ?: return
     
     runCatching {
-      val now = System.currentTimeMillis()
-      val thirtyDaysAgo = now - (30L * 24 * 60 * 60 * 1000)
-      
-      val url = "/bills?fromEpochMs=$thirtyDaysAgo&toEpochMs=$now"
+      val url = "/bills?range=last30days"
       val billsResp = client.getJsonArray(url, token)
       
       val newList = mutableListOf<BillWithItemsRow>()

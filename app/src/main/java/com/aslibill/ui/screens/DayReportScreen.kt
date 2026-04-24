@@ -31,6 +31,7 @@ import com.aslibill.ui.components.DateBox
 import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
 import com.aslibill.ui.components.openDatePicker
+import com.aslibill.ui.components.UnifiedDateRangeSelector
 import com.aslibill.ui.theme.AsliColors
 import com.aslibill.ui.theme.AppTypography
 import com.aslibill.ui.theme.AppSpacing
@@ -48,8 +49,8 @@ fun DayReportScreen(
   val context = LocalContext.current
 
   val df = remember { SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()) }
-  val fromText = remember(filters.fromEpochMs) { df.format(Date(filters.fromEpochMs)) }
-  val toText = remember(filters.toEpochMs) { df.format(Date(filters.toEpochMs)) }
+  val fromText = remember(filters.fromEpochMs) { df.format(Date(filters.fromEpochMs ?: System.currentTimeMillis())) }
+  val toText = remember(filters.toEpochMs) { df.format(Date(filters.toEpochMs ?: System.currentTimeMillis())) }
 
   val isLoading by vm.isLoading.collectAsState()
   
@@ -68,10 +69,12 @@ fun DayReportScreen(
           style = AppTypography.h1
         )
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)) {
-          DateBox(label = "FROM", value = fromText, onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } }, modifier = Modifier.weight(1f))
-          DateBox(label = "TO", value = toText, onClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } }, modifier = Modifier.weight(1f))
-        }
+        UnifiedDateRangeSelector(
+          fromText = fromText,
+          toText = toText,
+          onFromClick = { openDatePicker(context, filters.fromEpochMs ?: System.currentTimeMillis()) { vm.setFrom(it) } },
+          onToClick = { openDatePicker(context, filters.toEpochMs ?: System.currentTimeMillis()) { vm.setTo(it) } }
+        )
 
         SectionHeader("Daily Totals")
 

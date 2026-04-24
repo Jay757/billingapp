@@ -16,14 +16,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.flow
 
-data class DateRangeFilter(val fromEpochMs: Long, val toEpochMs: Long)
+data class DateRangeFilter(val fromEpochMs: Long? = null, val toEpochMs: Long? = null, val range: String? = null)
 
-private fun todayRange(): DateRangeFilter {
+private fun defaultMonthRange(): DateRangeFilter {
   val cal = Calendar.getInstance()
-  cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
-  val from = cal.timeInMillis
-  cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59)
-  return DateRangeFilter(from, cal.timeInMillis)
+  cal.set(Calendar.DAY_OF_MONTH, 1)
+  return DateRangeFilter(fromEpochMs = cal.timeInMillis, toEpochMs = System.currentTimeMillis())
 }
 
 
@@ -33,25 +31,21 @@ class ItemWiseSalesReportViewModel(private val repo: AnalyticsRepository) : View
   private val _isLoading = MutableStateFlow(true)
   val isLoading = _isLoading.asStateFlow()
 
-  val filters = MutableStateFlow(todayRange())
+  val filters = MutableStateFlow(defaultMonthRange())
 
   val items: StateFlow<List<ItemSalesRow>> = filters
     .onEach { _isLoading.value = true }
     .flatMapLatest { f ->
-      flow { emit(repo.fetchItemSales(f.fromEpochMs, f.toEpochMs)) }
+      flow { emit(repo.fetchItemSales(f.fromEpochMs, f.toEpochMs, f.range)) }
     }.onEach { _isLoading.value = false }
     .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
   fun setFrom(epochMs: Long) {
-    val cal = Calendar.getInstance().apply { timeInMillis = epochMs }
-    cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0); cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
-    filters.value = filters.value.copy(fromEpochMs = cal.timeInMillis)
+    filters.value = filters.value.copy(fromEpochMs = epochMs, range = null)
   }
 
   fun setTo(epochMs: Long) {
-    val cal = Calendar.getInstance().apply { timeInMillis = epochMs }
-    cal.set(Calendar.HOUR_OF_DAY, 23); cal.set(Calendar.MINUTE, 59); cal.set(Calendar.SECOND, 59); cal.set(Calendar.MILLISECOND, 999)
-    filters.value = filters.value.copy(toEpochMs = cal.timeInMillis)
+    filters.value = filters.value.copy(toEpochMs = epochMs, range = null)
   }
 }
 

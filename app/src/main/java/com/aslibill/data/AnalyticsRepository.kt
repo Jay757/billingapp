@@ -11,10 +11,14 @@ class AnalyticsRepository(
     private val authRepository: AuthRepository,
     private val client: ApiHttpClient
 ) {
-  suspend fun fetchItemSales(from: Long, to: Long): List<ItemSalesRow> {
+  suspend fun fetchItemSales(from: Long? = null, to: Long? = null, range: String? = null): List<ItemSalesRow> {
     val token = authRepository.currentToken() ?: return emptyList()
     return try {
-      val resp = client.getJsonArray("/analytics/item-sales?fromEpochMs=$from&toEpochMs=$to", token)
+      val url = when {
+        range != null -> "/analytics/item-sales?range=$range"
+        else -> "/analytics/item-sales?fromEpochMs=$from&toEpochMs=$to"
+      }
+      val resp = client.getJsonArray(url, token)
       val list = mutableListOf<ItemSalesRow>()
       for (i in 0 until resp.length()) {
         val obj = resp.getJSONObject(i)
@@ -30,10 +34,14 @@ class AnalyticsRepository(
     }
   }
 
-  suspend fun fetchDayReport(from: Long, to: Long): List<DayReportRow> {
+  suspend fun fetchDayReport(from: Long? = null, to: Long? = null, range: String? = null): List<DayReportRow> {
     val token = authRepository.currentToken() ?: return emptyList()
     return try {
-      val resp = client.getJsonArray("/analytics/day-report?fromEpochMs=$from&toEpochMs=$to", token)
+      val url = when {
+        range != null -> "/analytics/day-report?range=$range"
+        else -> "/analytics/day-report?fromEpochMs=$from&toEpochMs=$to"
+      }
+      val resp = client.getJsonArray(url, token)
       val list = mutableListOf<DayReportRow>()
       for (i in 0 until resp.length()) {
         val obj = resp.getJSONObject(i)
@@ -72,10 +80,14 @@ class AnalyticsRepository(
     }
   }
 
-  suspend fun fetchSalesSummary(from: Long, to: Long): SalesSummaryRow? {
+  suspend fun fetchSalesSummary(from: Long? = null, to: Long? = null, range: String? = null): SalesSummaryRow? {
     val token = authRepository.currentToken() ?: return null
     return try {
-      val obj = client.getJson("/analytics/sales-summary?fromEpochMs=$from&toEpochMs=$to", token)
+      val url = when {
+        range != null -> "/analytics/sales-summary?range=$range"
+        else -> "/analytics/sales-summary?fromEpochMs=$from&toEpochMs=$to"
+      }
+      val obj = client.getJson(url, token)
       val itemsArr = obj.optJSONArray("topItems") ?: JSONArray()
       val topItems = mutableListOf<ItemSalesRow>()
       for (i in 0 until itemsArr.length()) {

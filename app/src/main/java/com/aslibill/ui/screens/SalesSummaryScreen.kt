@@ -36,6 +36,7 @@ import com.aslibill.ui.components.ScreenSurface
 import com.aslibill.ui.components.SectionHeader
 import com.aslibill.ui.components.StatsCard
 import com.aslibill.ui.components.openDatePicker
+import com.aslibill.ui.components.UnifiedDateRangeSelector
 import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.theme.AppTypography
 import com.aslibill.ui.theme.AsliColors
@@ -53,8 +54,8 @@ fun SalesSummaryScreen(
   val context = LocalContext.current
 
   val df = remember { SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()) }
-  val fromText = remember(filters.fromEpochMs) { df.format(Date(filters.fromEpochMs)) }
-  val toText = remember(filters.toEpochMs) { df.format(Date(filters.toEpochMs)) }
+  val fromText = remember(filters.fromEpochMs) { df.format(Date(filters.fromEpochMs ?: System.currentTimeMillis())) }
+  val toText = remember(filters.toEpochMs) { df.format(Date(filters.toEpochMs ?: System.currentTimeMillis())) }
 
   val isLoading by vm.isLoading.collectAsState()
   
@@ -75,23 +76,12 @@ fun SalesSummaryScreen(
           modifier = Modifier.padding(top = AppSpacing.md)
         )
 
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
-        ) {
-          DateBox(
-            label = "FROM",
-            date = fromText,
-            onClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } },
-            modifier = Modifier.weight(1f)
-          )
-          DateBox(
-            label = "TO",
-            date = toText,
-            onClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } },
-            modifier = Modifier.weight(1f)
-          )
-        }
+        UnifiedDateRangeSelector(
+          fromText = fromText,
+          toText = toText,
+          onFromClick = { openDatePicker(context, filters.fromEpochMs ?: System.currentTimeMillis()) { vm.setFrom(it) } },
+          onToClick = { openDatePicker(context, filters.toEpochMs ?: System.currentTimeMillis()) { vm.setTo(it) } }
+        )
 
         SectionHeader("REVENUE OVERVIEW")
         

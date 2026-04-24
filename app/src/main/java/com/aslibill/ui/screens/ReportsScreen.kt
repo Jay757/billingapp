@@ -64,6 +64,7 @@ import com.aslibill.ui.theme.AppSpacing
 import com.aslibill.ui.screens.BluetoothPrinterViewModel
 import com.aslibill.ui.components.DateBox
 import com.aslibill.ui.components.openDatePicker
+import com.aslibill.ui.components.UnifiedDateRangeSelector
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -136,41 +137,12 @@ fun ReportsScreen(
       }
 
       // Unified Date Range Selector
-      DarkCard(modifier = Modifier.fillMaxWidth(), alpha = 0.5f) {
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(AppSpacing.md),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(AppSpacing.md)
-        ) {
-          DateRangeOption(
-            label = "FROM",
-            value = fromText,
-            onClick = {
-              openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) }
-            },
-            modifier = Modifier.weight(1f)
-          )
-          
-          Box(
-            modifier = Modifier
-              .size(32.dp)
-              .clip(CircleShape)
-              .background(AsliColors.Primary.copy(alpha = 0.1f)),
-            contentAlignment = Alignment.Center
-          ) {
-            Icon(Icons.Outlined.CalendarMonth, contentDescription = null, tint = AsliColors.Primary, modifier = Modifier.size(16.dp))
-          }
-
-          DateRangeOption(
-            label = "TO",
-            value = toText,
-            onClick = {
-              openDatePicker(context, filters.toEpochMs) { vm.setTo(it) }
-            },
-            modifier = Modifier.weight(1f)
-          )
-        }
-      }
+      UnifiedDateRangeSelector(
+        fromText = fromText,
+        toText = toText,
+        onFromClick = { openDatePicker(context, filters.fromEpochMs) { vm.setFrom(it) } },
+        onToClick = { openDatePicker(context, filters.toEpochMs) { vm.setTo(it) } }
+      )
 
       // High-Contrast Sales Stats
       Row(
@@ -431,33 +403,3 @@ private fun BillCard(
   }
 }
 
-@Composable
-private fun DateRangeOption(
-  label: String,
-  value: String,
-  onClick: () -> Unit,
-  modifier: Modifier = Modifier
-) {
-  Surface(
-    modifier = modifier.clickable(onClick = onClick),
-    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-    shape = RoundedCornerShape(12.dp),
-    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f))
-  ) {
-    Column(
-      modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-      verticalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-      Text(
-        text = label, 
-        color = MaterialTheme.colorScheme.onSurfaceVariant, 
-        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold)
-      )
-      Text(
-        text = value, 
-        color = MaterialTheme.colorScheme.onSurface, 
-        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Black)
-      )
-    }
-  }
-}
