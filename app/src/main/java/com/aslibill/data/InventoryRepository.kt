@@ -130,6 +130,13 @@ class InventoryRepository(
     return response
   }
 
+  suspend fun bulkUploadFile(fileBytes: ByteArray, fileName: String): JSONObject {
+    val token = authRepository.currentToken() ?: throw IllegalStateException("Not logged in")
+    val response = client.uploadFile("/inventory/bulk-upload-file", token, fileBytes, fileName)
+    refresh()
+    return response
+  }
+
   suspend fun syncFromRemote() = refresh()
 }
 

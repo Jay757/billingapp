@@ -659,33 +659,23 @@ private fun BulkUploadDialog(
             scope.launch {
                 try {
                     val inputStream = context.contentResolver.openInputStream(it)
-                    val reader = BufferedReader(InputStreamReader(inputStream))
-                    val items = mutableListOf<Triple<String, String, Double>>()
-                    
-                    var line: String? = reader.readLine() // Skip header
-                    while (reader.readLine().also { line = it } != null) {
-                        val parts = line?.split(",") ?: continue
-                        if (parts.size >= 3) {
-                            val cat = parts[0].trim()
-                            val prod = parts[1].trim()
-                            val price = parts[2].trim().toDoubleOrNull() ?: 0.0
-                            if (cat.isNotEmpty() && prod.isNotEmpty()) {
-                                items.add(Triple(cat, prod, price))
-                            }
+                    val bytes = inputStream?.readBytes() ?: throw Exception("Could not read file")
+                    inputStream.close()
+
+                    // Get filename from URI if possible
+                    var fileName = "inventory_upload.csv"
+                    context.contentResolver.query(it, null, null, null, null)?.use { cursor ->
+                        val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                        if (nameIndex != -1 && cursor.moveToFirst()) {
+                            fileName = cursor.getString(nameIndex)
                         }
                     }
-                    reader.close()
 
-                    if (items.isEmpty()) {
-                        resultMessage = "No valid data found in file."
-                        isError = true
-                    } else {
-                        val resp = vm.bulkUpload(items)
-                        val created = resp.optInt("created")
-                        val skipped = resp.optInt("skipped")
-                        resultMessage = "Successfully uploaded $created products. Skipped $skipped duplicates."
-                        isError = false
-                    }
+                    val resp = vm.bulkUploadFile(bytes, fileName)
+                    val created = resp.optInt("created")
+                    val skipped = resp.optInt("skipped")
+                    resultMessage = "Successfully uploaded $created products. Skipped $skipped duplicates."
+                    isError = false
                 } catch (e: Exception) {
                     resultMessage = "Error: ${e.message}"
                     isError = true
@@ -704,8 +694,8 @@ private fun BulkUploadDialog(
                 OrangeButton("CLOSE", onClick = onDismiss)
             } else {
                 OrangeButton(
-                    "SELECT CSV FILE", 
-                    onClick = { launcher.launch("text/*") },
+                    "SELECT FILE", 
+                    onClick = { launcher.launch("*/*") },
                     enabled = !isUploading
                 )
             }
@@ -724,7 +714,7 @@ private fun BulkUploadDialog(
         ) {
             if (resultMessage == null) {
                 Text(
-                    "Upload your product inventory in bulk using a CSV file.",
+                    "Upload your product inventory in bulk using a CSV or XLSX file.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -737,11 +727,11 @@ private fun BulkUploadDialog(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Outlined.Info, contentDescription = null, tint = AsliColors.PrimaryBlue, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text("CSV Format Instructions", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                            Text("File Format Instructions", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                         }
                         
                         Text(
-                            "Your CSV file must have these columns in order:\n1. Category Name\n2. Product Name\n3. Price",
+                            "Your file must have these columns in order:\n1. Category Name\n2. Product Name\n3. Price",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )

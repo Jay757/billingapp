@@ -190,4 +190,59 @@ class ApiHttpClient(
       conn.disconnect()
     }
   }
+
+  suspend fun uploadFile(
+    path: String,
+    token: String?,
+    fileBytes: ByteArray,
+    fileName: String,
+    mimeType: String = "application/octet-stream"
+  ): JSONObject = withContext(Dispatchers.IO) {
+    val boundary = "Boundary-${System.currentTimeMillis()}"
+    val lineEnd = "\r\n"
+    val twoHyphens = "--"
+
+    val url = URL(buildUrl(path))
+    val conn = (url.openConnection() as HttpURLConnection).apply {
+      requestMethod = "POST"
+      connectTimeout = connectTimeoutMs
+      readTimeout = readTimeoutMs
+      doOutput = true
+      setRequestProperty("Connection", "Keep-Alive")
+      setRequestProperty("Cache-Control", "no-cache")
+      setRequestProperty("Content-Type", "multipart/form-data;boundary=$boundary")
+      if (!token.isNullOrBlank()) setRequestProperty("Authorization", "Bearer $token")
+    }
+
+    try {
+      conn.outputStream.use { os ->
+        val writer = os.bufferedWriter()
+        
+        // Form field: file
+        writer.write(twoHyphens + boundary + lineEnd)
+        writer.write("Content-Disposition: form-data; name=\"file\"; filename=\"$fileName\"$lineEnd")
+        writer.write("Content-Type: $mimeType$lineEnd")
+        writer.write(lineEnd)
+        writer.flush()
+        
+        os.write(fileBytes)
+        os.write(lineEnd.toByteArray())
+        
+        // Final boundary
+        writer.write(twoHyphens + boundary + twoHyphens + lineEnd)
+        writer.flush()
+      }
+
+      val respBody = readBody(conn)
+      ensureSuccess(conn, respBody)
+      statusRepo?.updateStatus(true)
+      if (respBody.isBlank()) return@withContext JSONObject()
+      return@withContext JSONObject(respBody)
+    } catch (e: Exception) {
+      statusRepo?.updateStatus(false, e.message)
+      throw e
+    } finally {
+      conn.disconnect()
+    }
+  }
 }

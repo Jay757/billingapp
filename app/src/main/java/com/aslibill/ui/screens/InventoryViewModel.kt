@@ -97,5 +97,14 @@ class InventoryViewModel(
       _isLoading.value = false
     }
   }
+
+  suspend fun bulkUploadFile(fileBytes: ByteArray, fileName: String): JSONObject {
+    _isLoading.value = true
+    return try {
+      repo.bulkUploadFile(fileBytes, fileName)
+    } finally {
+      _isLoading.value = false
+    }
+  }
 }
 
