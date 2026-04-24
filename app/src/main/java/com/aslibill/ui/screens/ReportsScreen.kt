@@ -221,72 +221,92 @@ fun ReportsScreen(
     }
 
     if (showDeleteAll) {
-      AlertDialog(
+      com.aslibill.ui.components.AsliDialog(
         onDismissRequest = { showDeleteAll = false },
-        title = { Text("Delete All Bills", style = MaterialTheme.typography.titleLarge) },
-        text = {
-          Text(
-            "This will permanently delete all bills and cannot be undone.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodyMedium
-          )
-        },
-        containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.error,
-        textContentColor = MaterialTheme.colorScheme.onSurface,
+        title = "Delete All Bills",
         confirmButton = {
-          TextButton(onClick = { vm.deleteAll(); showDeleteAll = false }) {
-            Text("DELETE ALL", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+          androidx.compose.material3.Button(
+            onClick = { vm.deleteAll(); showDeleteAll = false },
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+              containerColor = AsliColors.Red.copy(alpha = 0.1f)
+            ),
+            shape = RoundedCornerShape(14.dp),
+            contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp)
+          ) {
+            Text(
+              "DELETE ALL",
+              color = AsliColors.Red,
+              fontWeight = FontWeight.Black,
+              style = MaterialTheme.typography.labelLarge
+            )
           }
         },
         dismissButton = {
           TextButton(onClick = { showDeleteAll = false }) {
-            Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+              "CANCEL",
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+            )
           }
         }
-      )
+      ) {
+        Text(
+          "This will permanently delete all bills and cannot be undone.",
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          style = MaterialTheme.typography.bodyMedium
+        )
+      }
     }
 
     if (showItemsFor != null) {
       val row = showItemsFor!!
-      AlertDialog(
+      com.aslibill.ui.components.AsliDialog(
         onDismissRequest = { showItemsFor = null },
-        title = { Text("Invoice #${row.billId}", style = MaterialTheme.typography.titleLarge) },
-        containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurface,
-        text = {
-          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if (!loadErr.isNullOrBlank()) {
-              Text(loadErr!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
-            }
-            if (items.isEmpty() && loadErr.isNullOrBlank()) {
-              Text("Loading...", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            } else {
-              DarkCard(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                  items.forEach {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                      Text(it.productNameSnapshot, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)
-                      Text("${it.qty.toInt()} x ₹${it.rate.toInt()} = ₹${it.lineTotal.toInt()}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-                    }
+        title = "Invoice #${row.billId}",
+        confirmButton = {
+          androidx.compose.material3.Button(
+            onClick = { showItemsFor = null },
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+              containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            ),
+            shape = RoundedCornerShape(14.dp),
+            contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp)
+          ) {
+            Text(
+              "CLOSE",
+              color = AsliColors.PrimaryBlue,
+              fontWeight = FontWeight.Black,
+              style = MaterialTheme.typography.labelLarge
+            )
+          }
+        }
+      ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          if (!loadErr.isNullOrBlank()) {
+            Text(loadErr!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+          }
+          if (items.isEmpty() && loadErr.isNullOrBlank()) {
+            Text("Loading...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+          } else {
+            DarkCard(modifier = Modifier.fillMaxWidth()) {
+              Column(modifier = Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                items.forEach {
+                  Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(it.productNameSnapshot, color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)
+                    Text("${it.qty.toInt()} x ₹${it.rate.toInt()} = ₹${it.lineTotal.toInt()}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                   }
                 }
               }
-              Text(
-                "Total: ₹ ${row.total.toInt()}",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-              )
             }
-          }
-        },
-        confirmButton = {
-          TextButton(onClick = { showItemsFor = null }) {
-            Text("CLOSE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            Text(
+              "Total: ₹ ${row.total.toInt()}",
+              color = MaterialTheme.colorScheme.primary,
+              style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
           }
         }
-      )
+      }
     }
 
     if (isLoading) {

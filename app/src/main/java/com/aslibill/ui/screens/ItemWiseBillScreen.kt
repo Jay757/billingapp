@@ -223,75 +223,99 @@ fun ItemWiseBillScreen(
     if (showQtyFor != null) {
       val line = showQtyFor!!
       var qtyText by remember(line) { mutableStateOf(line.qty.toInt().toString()) }
-      AlertDialog(
+      val isValid = qtyText.toDoubleOrNull() != null
+
+      com.aslibill.ui.components.AsliDialog(
         onDismissRequest = { showQtyFor = null },
-        title = { Text("Qty - ${line.name}", style = MaterialTheme.typography.titleLarge) },
-        text = {
-          AsliTextField(
-            value = qtyText,
-            onValueChange = { qtyText = it },
-            label = "Quantity",
-            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
-          )
-        },
+        title = "Qty - ${line.name}",
         confirmButton = {
-          TextButton(
+          androidx.compose.material3.Button(
             onClick = {
               val q = qtyText.toDoubleOrNull() ?: 0.0
               vm.setQty(line.productId, q)
               showQtyFor = null
-            }
-          ) { Text("OK", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold) }
+            },
+            enabled = isValid,
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+              containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+              disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+            ),
+            shape = RoundedCornerShape(14.dp),
+            contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp)
+          ) {
+            Text(
+              "OK",
+              color = if (isValid) AsliColors.PrimaryBlue else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+              fontWeight = FontWeight.Black,
+              style = MaterialTheme.typography.labelLarge
+            )
+          }
         },
         dismissButton = {
           TextButton(onClick = { showQtyFor = null }) {
-            Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+              "CANCEL",
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+            )
           }
-        },
-        containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurface
-      )
+        }
+      ) {
+        AsliTextField(
+          value = qtyText,
+          onValueChange = { qtyText = it },
+          label = "Quantity",
+          keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+        )
+      }
     }
 
     if (showSearch) {
-      AlertDialog(
+      com.aslibill.ui.components.AsliDialog(
         onDismissRequest = { showSearch = false },
-        title = { Text("Search Product", style = MaterialTheme.typography.titleLarge) },
-        text = {
-          Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            AsliTextField(
-              value = searchQuery,
-              onValueChange = vm::setSearchQuery,
-              label = "Search by name..."
+        title = "Search Product",
+        confirmButton = {
+          androidx.compose.material3.Button(
+            onClick = { showSearch = false; vm.setSearchQuery("") },
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+              containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            ),
+            shape = RoundedCornerShape(14.dp),
+            contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp)
+          ) {
+            Text(
+              "DONE",
+              color = AsliColors.PrimaryBlue,
+              fontWeight = FontWeight.Black,
+              style = MaterialTheme.typography.labelLarge
             )
-            DarkCard(modifier = Modifier.fillMaxWidth(), alpha = 0.9f) {
-              Column(modifier = Modifier.padding(8.dp)) {
-                products.take(8).forEach { p ->
-                  Row(
-                    modifier = Modifier
-                      .fillMaxWidth()
-                      .clickable { vm.addProduct(p) }
-                      .padding(vertical = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                  ) {
-                    Text(p.name, color = MaterialTheme.colorScheme.onSurface)
-                    Text("₹${p.price.toInt()}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                  }
+          }
+        }
+      ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          AsliTextField(
+            value = searchQuery,
+            onValueChange = vm::setSearchQuery,
+            label = "Search by name..."
+          )
+          DarkCard(modifier = Modifier.fillMaxWidth(), alpha = 0.9f) {
+            Column(modifier = Modifier.padding(8.dp)) {
+              products.take(8).forEach { p ->
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { vm.addProduct(p) }
+                    .padding(vertical = 6.dp),
+                  horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                  Text(p.name, color = MaterialTheme.colorScheme.onSurface)
+                  Text("₹${p.price.toInt()}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
               }
             }
           }
-        },
-        confirmButton = {
-          TextButton(onClick = { showSearch = false; vm.setSearchQuery("") }) {
-            Text("DONE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-          }
-        },
-        containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurface
-      )
+        }
+      }
     }
 
     if (showSave) {
@@ -400,88 +424,100 @@ private fun SaveBillDialog(
   val df = remember { SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()) }
   val now = remember { df.format(Date()) }
 
-  AlertDialog(
+  val isValid = subtotal > 0
+
+  com.aslibill.ui.components.AsliDialog(
     onDismissRequest = onDismiss,
-    title = { Text("Save Bill", style = MaterialTheme.typography.titleLarge) },
-    containerColor = MaterialTheme.colorScheme.surface,
-    titleContentColor = MaterialTheme.colorScheme.onSurface,
-    textContentColor = MaterialTheme.colorScheme.onSurface,
-    text = {
-      Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        AsliTextField(value = "", onValueChange = {}, label = "Select Customer...", enabled = false)
-        AsliTextField(
-          value = if (draft.discountPercent == 0.0) "" else draft.discountPercent.toString(),
-          onValueChange = { onDraftChange(draft.copy(discountPercent = it.toDoubleOrNull() ?: 0.0)) },
-          label = "% DISCOUNT",
-          keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
-        )
-        Row(
-          modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
-            .padding(12.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Text("Include GST", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge)
-          TextButton(onClick = { onDraftChange(draft.copy(includeGst = !draft.includeGst)) }) {
-            Text(if (draft.includeGst) "ON" else "OFF", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-          }
-        }
-
-        DarkCard(modifier = Modifier.fillMaxWidth()) {
-          Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-              Text("Total", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
-              Text("₹ ${subtotal.toInt()}", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
-            }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-              val discounted = subtotal * (1 - draft.discountPercent / 100)
-              Text("Grand Total", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
-              Text("₹ ${discounted.toInt()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black))
-            }
-          }
-        }
-
-        Text("Payment Mode :", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PaymentChip("NONE", draft.paymentMode == PaymentMode.NONE) { onDraftChange(draft.copy(paymentMode = PaymentMode.NONE)) }
-            PaymentChip("CASH", draft.paymentMode == PaymentMode.CASH) { onDraftChange(draft.copy(paymentMode = PaymentMode.CASH)) }
-            PaymentChip("ONLINE", draft.paymentMode == PaymentMode.ONLINE) { onDraftChange(draft.copy(paymentMode = PaymentMode.ONLINE)) }
-          }
-          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            PaymentChip("CREDIT", draft.paymentMode == PaymentMode.CREDIT) { onDraftChange(draft.copy(paymentMode = PaymentMode.CREDIT)) }
-            PaymentChip("SPLIT", draft.paymentMode == PaymentMode.SPLIT) { onDraftChange(draft.copy(paymentMode = PaymentMode.SPLIT)) }
-          }
-        }
-
-        AsliTextField(
-          value = draft.note,
-          onValueChange = { onDraftChange(draft.copy(note = it)) },
-          label = "Note"
-        )
-        Text(now, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
-        if (!errorText.isNullOrBlank()) {
-          Text(errorText, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
-        }
-      }
-    },
+    title = "Save Bill",
     confirmButton = {
-      TextButton(onClick = onSave, enabled = subtotal > 0) {
+      androidx.compose.material3.Button(
+        onClick = onSave,
+        enabled = isValid,
+        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+          containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+          disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+        ),
+        shape = RoundedCornerShape(14.dp),
+        contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp)
+      ) {
         Text(
           "SAVE",
-          color = if (subtotal > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-          fontWeight = FontWeight.Bold
+          color = if (isValid) AsliColors.PrimaryBlue else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+          fontWeight = FontWeight.Black,
+          style = MaterialTheme.typography.labelLarge
         )
       }
     },
     dismissButton = {
       TextButton(onClick = onDismiss) {
-        Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+          "CANCEL",
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+        )
       }
     }
-  )
+  ) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+      AsliTextField(value = "", onValueChange = {}, label = "Select Customer...", enabled = false)
+      AsliTextField(
+        value = if (draft.discountPercent == 0.0) "" else draft.discountPercent.toString(),
+        onValueChange = { onDraftChange(draft.copy(discountPercent = it.toDoubleOrNull() ?: 0.0)) },
+        label = "% DISCOUNT",
+        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+      )
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
+          .padding(12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Text("Include GST", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge)
+        TextButton(onClick = { onDraftChange(draft.copy(includeGst = !draft.includeGst)) }) {
+          Text(if (draft.includeGst) "ON" else "OFF", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+        }
+      }
+
+      DarkCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Total", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+            Text("₹ ${subtotal.toInt()}", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
+          }
+          Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            val discounted = subtotal * (1 - draft.discountPercent / 100)
+            Text("Grand Total", color = MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold))
+            Text("₹ ${discounted.toInt()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black))
+          }
+        }
+      }
+
+      Text("Payment Mode :", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+      Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          PaymentChip("NONE", draft.paymentMode == PaymentMode.NONE) { onDraftChange(draft.copy(paymentMode = PaymentMode.NONE)) }
+          PaymentChip("CASH", draft.paymentMode == PaymentMode.CASH) { onDraftChange(draft.copy(paymentMode = PaymentMode.CASH)) }
+          PaymentChip("ONLINE", draft.paymentMode == PaymentMode.ONLINE) { onDraftChange(draft.copy(paymentMode = PaymentMode.ONLINE)) }
+        }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          PaymentChip("CREDIT", draft.paymentMode == PaymentMode.CREDIT) { onDraftChange(draft.copy(paymentMode = PaymentMode.CREDIT)) }
+          PaymentChip("SPLIT", draft.paymentMode == PaymentMode.SPLIT) { onDraftChange(draft.copy(paymentMode = PaymentMode.SPLIT)) }
+        }
+      }
+
+      AsliTextField(
+        value = draft.note,
+        onValueChange = { onDraftChange(draft.copy(note = it)) },
+        label = "Note"
+      )
+      Text(now, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+      if (!errorText.isNullOrBlank()) {
+        Text(errorText, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
+      }
+    }
+  }
 }
 
 

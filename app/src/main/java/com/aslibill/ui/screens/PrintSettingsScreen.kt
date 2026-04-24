@@ -67,12 +67,18 @@ fun PrintSettingsScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
             ) {
-                Text(
-                    "App Settings",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Black),
-                    modifier = Modifier.padding(top = AppSpacing.md)
-                )
+                Column(modifier = Modifier.padding(top = AppSpacing.md)) {
+                    Text(
+                        "App Settings",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Black)
+                    )
+                    Text(
+                        "Manage store info, printer and theme",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
 
 
                 SectionHeader("STORE INFORMATION")

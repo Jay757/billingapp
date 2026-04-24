@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -68,11 +69,18 @@ fun CustomerManagementScreen(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
       ) {
-        Text(
-          "Customers",
-          color = MaterialTheme.colorScheme.onBackground,
-          style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
-        )
+        Column {
+          Text(
+            "Customers",
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
+          )
+          Text(
+            "Directory of your registered customers",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium
+          )
+        }
 
         OrangeButton(
           text = "Add Customer",
@@ -198,31 +206,45 @@ private fun CustomerDialog(
   var name by remember { mutableStateOf(initial.name) }
   var mobile by remember { mutableStateOf(initial.mobile) }
   var address by remember { mutableStateOf(initial.address ?: "") }
+  val isValid = name.isNotBlank() && mobile.isNotBlank()
 
-
-  AlertDialog(
+  com.aslibill.ui.components.AsliDialog(
     onDismissRequest = onDismiss,
-    title = { Text(title, style = MaterialTheme.typography.titleLarge) },
-    containerColor = MaterialTheme.colorScheme.surface,
-    titleContentColor = MaterialTheme.colorScheme.onSurface,
-    textContentColor = MaterialTheme.colorScheme.onSurface,
-    text = {
-      Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        com.aslibill.ui.components.AsliTextField(value = name, onValueChange = { name = it }, label = "Name")
-        com.aslibill.ui.components.AsliTextField(value = mobile, onValueChange = { mobile = it }, label = "Mobile")
-        com.aslibill.ui.components.AsliTextField(value = address, onValueChange = { address = it }, label = "Address (optional)")
-      }
-    },
+    title = title,
     confirmButton = {
-      TextButton(onClick = {
-        if (name.isNotBlank() && mobile.isNotBlank()) onConfirm(name, mobile, address)
-      }) { Text("SAVE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold) }
+      androidx.compose.material3.Button(
+        onClick = { if (isValid) onConfirm(name, mobile, address) },
+        enabled = isValid,
+        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+          containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+          disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+        ),
+        shape = RoundedCornerShape(14.dp),
+        contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp)
+      ) {
+        Text(
+          "SAVE",
+          color = if (isValid) AsliColors.PrimaryBlue else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+          fontWeight = FontWeight.Black,
+          style = MaterialTheme.typography.labelLarge
+        )
+      }
     },
     dismissButton = {
       TextButton(onClick = onDismiss) {
-        Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+          "CANCEL",
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+        )
       }
     }
-  )
+  ) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+      com.aslibill.ui.components.AsliTextField(value = name, onValueChange = { name = it }, label = "Name")
+      com.aslibill.ui.components.AsliTextField(value = mobile, onValueChange = { mobile = it }, label = "Mobile")
+      com.aslibill.ui.components.AsliTextField(value = address, onValueChange = { address = it }, label = "Address (optional)")
+    }
+  }
 }
 

@@ -70,12 +70,18 @@ fun CashManagementScreen(
         .padding(horizontal = AppSpacing.md),
       verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
     ) {
-      Text(
-        "Cash Management",
-        color = MaterialTheme.colorScheme.onBackground,
-        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
-        modifier = Modifier.padding(top = AppSpacing.md)
-      )
+      Column(modifier = Modifier.padding(top = AppSpacing.md)) {
+        Text(
+          "Cash Management",
+          color = MaterialTheme.colorScheme.onBackground,
+          style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
+        )
+        Text(
+          "Monitor cash flow and account balance",
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          style = MaterialTheme.typography.bodyMedium
+        )
+      }
 
 
       // Balance Card
@@ -127,42 +133,60 @@ fun CashManagementScreen(
       var amount by remember { mutableStateOf("") }
       var note by remember { mutableStateOf("") }
 
-      AlertDialog(
+      val isValid = (amount.toDoubleOrNull() ?: 0.0) > 0
+
+      com.aslibill.ui.components.AsliDialog(
         onDismissRequest = { showAddDialog = null },
-        title = { Text("Cash $type", style = MaterialTheme.typography.titleLarge) },
-        containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurface,
-        text = {
-          Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            com.aslibill.ui.components.AsliTextField(
-              value = amount,
-              onValueChange = { if (it.isEmpty() || it.toDoubleOrNull() != null) amount = it },
-              label = "Amount",
-              keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
-            )
-            com.aslibill.ui.components.AsliTextField(
-              value = note,
-              onValueChange = { note = it },
-              label = "Note (Optional)"
+        title = "Cash $type",
+        confirmButton = {
+          androidx.compose.material3.Button(
+            onClick = {
+              val amt = amount.toDoubleOrNull() ?: 0.0
+              if (amt > 0) {
+                vm.addTransaction(type, amt, note)
+                showAddDialog = null
+              }
+            },
+            enabled = isValid,
+            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+              containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+              disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+            ),
+            shape = RoundedCornerShape(14.dp),
+            contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp)
+          ) {
+            Text(
+              "SAVE",
+              color = if (isValid) AsliColors.PrimaryBlue else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+              fontWeight = FontWeight.Black,
+              style = MaterialTheme.typography.labelLarge
             )
           }
-        },
-        confirmButton = {
-          TextButton(onClick = {
-            val amt = amount.toDoubleOrNull() ?: 0.0
-            if (amt > 0) {
-              vm.addTransaction(type, amt, note)
-              showAddDialog = null
-            }
-          }) { Text("SAVE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold) }
         },
         dismissButton = {
           TextButton(onClick = { showAddDialog = null }) {
-            Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+              "CANCEL",
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+            )
           }
         }
-      )
+      ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+          com.aslibill.ui.components.AsliTextField(
+            value = amount,
+            onValueChange = { if (it.isEmpty() || it.toDoubleOrNull() != null) amount = it },
+            label = "Amount",
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+          )
+          com.aslibill.ui.components.AsliTextField(
+            value = note,
+            onValueChange = { note = it },
+            label = "Note (Optional)"
+          )
+        }
+      }
 
     }
 

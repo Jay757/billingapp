@@ -47,6 +47,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material.icons.outlined.ShoppingCart
 
 @Composable
@@ -836,6 +838,66 @@ fun AsliLoader(modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.primary,
                     strokeWidth = 4.dp
                 )
+            }
+        }
+    }
+}
+@Composable
+fun AsliDialog(
+    onDismissRequest: () -> Unit,
+    title: String,
+    confirmButton: @Composable () -> Unit,
+    dismissButton: @Composable (() -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .wrapContentHeight()
+                .shadow(
+                    elevation = 24.dp,
+                    shape = RoundedCornerShape(28.dp),
+                    spotColor = AsliColors.PrimaryBlue.copy(alpha = 0.5f)
+                )
+                .border(
+                    width = 1.dp,
+                    color = Color.White.copy(alpha = 0.05f),
+                    shape = RoundedCornerShape(28.dp)
+                ),
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(28.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+
+                content()
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (dismissButton != null) {
+                        dismissButton()
+                        Spacer(Modifier.width(16.dp))
+                    }
+                    confirmButton()
+                }
             }
         }
     }

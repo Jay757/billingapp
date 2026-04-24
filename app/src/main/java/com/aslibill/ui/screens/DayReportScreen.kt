@@ -63,11 +63,18 @@ fun DayReportScreen(
           .padding(AppSpacing.md),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
       ) {
-        Text(
-          "Day Report", 
-          color = AsliColors.TextPrimary, 
-          style = AppTypography.h1
-        )
+        Column {
+          Text(
+            "Day Report", 
+            color = MaterialTheme.colorScheme.onBackground, 
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
+          )
+          Text(
+            "Track daily sales totals and bill counts", 
+            color = MaterialTheme.colorScheme.onSurfaceVariant, 
+            style = MaterialTheme.typography.bodyMedium
+          )
+        }
 
         UnifiedDateRangeSelector(
           fromText = fromText,

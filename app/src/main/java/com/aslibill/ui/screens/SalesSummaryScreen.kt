@@ -69,12 +69,18 @@ fun SalesSummaryScreen(
           .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
       ) {
-        Text(
-          "Sales Summary",
-          color = AsliColors.TextPrimary,
-          style = AppTypography.h2,
-          modifier = Modifier.padding(top = AppSpacing.md)
-        )
+        Column(modifier = Modifier.padding(top = AppSpacing.md)) {
+          Text(
+            "Sales Summary",
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
+          )
+          Text(
+            "High-level overview of revenue and top products",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium
+          )
+        }
 
         UnifiedDateRangeSelector(
           fromText = fromText,

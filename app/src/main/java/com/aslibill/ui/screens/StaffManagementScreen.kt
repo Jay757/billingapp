@@ -77,11 +77,18 @@ fun StaffManagementScreen(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
       ) {
-        Text(
-          "Staff Management",
-          color = MaterialTheme.colorScheme.onBackground,
-          style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
-        )
+        Column {
+          Text(
+            "Staff Management",
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
+          )
+          Text(
+            "Manage your team and permissions",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium
+          )
+        }
 
         OrangeButton(
           text = "Add Staff",
@@ -230,31 +237,45 @@ private fun StaffDialog(
   var name by remember { mutableStateOf(initial.name) }
   var role by remember { mutableStateOf(initial.role) }
   var mobile by remember { mutableStateOf(initial.mobile) }
+  val isValid = name.isNotBlank()
 
-
-  AlertDialog(
+  com.aslibill.ui.components.AsliDialog(
     onDismissRequest = onDismiss,
-    title = { Text(title, style = MaterialTheme.typography.titleLarge) },
-    containerColor = MaterialTheme.colorScheme.surface,
-    titleContentColor = MaterialTheme.colorScheme.onSurface,
-    textContentColor = MaterialTheme.colorScheme.onSurface,
-    text = {
-      Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        AsliTextField(value = name, onValueChange = { name = it }, label = "Name")
-        AsliTextField(value = role, onValueChange = { role = it }, label = "Role (e.g. Manager)")
-        AsliTextField(value = mobile, onValueChange = { mobile = it }, label = "Mobile")
-      }
-    },
+    title = title,
     confirmButton = {
-      TextButton(onClick = {
-        if (name.isNotBlank()) onConfirm(name, role, mobile)
-      }) { Text("SAVE", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold) }
+      androidx.compose.material3.Button(
+        onClick = { if (isValid) onConfirm(name, role, mobile) },
+        enabled = isValid,
+        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+          containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+          disabledContainerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+        ),
+        shape = RoundedCornerShape(14.dp),
+        contentPadding = PaddingValues(horizontal = 28.dp, vertical = 14.dp)
+      ) {
+        Text(
+          "SAVE",
+          color = if (isValid) AsliColors.PrimaryBlue else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+          fontWeight = FontWeight.Black,
+          style = MaterialTheme.typography.labelLarge
+        )
+      }
     },
     dismissButton = {
       TextButton(onClick = onDismiss) {
-        Text("CANCEL", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+          "CANCEL",
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+        )
       }
     }
-  )
+  ) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+      AsliTextField(value = name, onValueChange = { name = it }, label = "Name")
+      AsliTextField(value = role, onValueChange = { role = it }, label = "Role (e.g. Manager)")
+      AsliTextField(value = mobile, onValueChange = { mobile = it }, label = "Mobile")
+    }
+  }
 }
 

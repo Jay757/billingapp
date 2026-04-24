@@ -99,7 +99,7 @@ fun QuickBillScreen(
           )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          GrayButton("Item Wise", onClick = onGoItemWise)
+          OrangeButton("Item Wise", onClick = onGoItemWise)
         }
       }
 

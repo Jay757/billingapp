@@ -62,12 +62,18 @@ fun ItemWiseSalesReportScreen(
           .padding(horizontal = AppSpacing.md),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
       ) {
-        Text(
-          "Item Sales Report",
-          color = AsliColors.TextPrimary,
-          style = AppTypography.h2,
-          modifier = Modifier.padding(top = AppSpacing.md)
-        )
+        Column(modifier = Modifier.padding(top = AppSpacing.md)) {
+          Text(
+            "Item Sales Report",
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
+          )
+          Text(
+            "Analysis of sales performance by product",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium
+          )
+        }
 
         UnifiedDateRangeSelector(
           fromText = fromText,

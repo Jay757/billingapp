@@ -101,11 +101,18 @@ fun BluetoothPrinterScreen(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
       ) {
-        Text(
-          "Printer Setup",
-          color = MaterialTheme.colorScheme.onBackground,
-          style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
-        )
+        Column {
+          Text(
+            "Printer Setup",
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black)
+          )
+          Text(
+            "Configure your bluetooth thermal printer",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium
+          )
+        }
 
         AsliIconButton(
           icon = Icons.Default.Refresh,
