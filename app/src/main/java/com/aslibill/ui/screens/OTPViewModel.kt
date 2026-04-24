@@ -47,7 +47,6 @@ class OTPViewModel(private val authRepository: AuthRepository) : ViewModel() {
             val success = authRepository.verifyOtp(phone, otpCode)
             isLoading = false
             if (success) {
-                Log.i(tag, "OTP Verified successfully for $phone")
                 onSuccess()
             } else {
                 error = authRepository.lastError.value ?: "Verification failed"
@@ -57,7 +56,6 @@ class OTPViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     fun onResend(phone: String) {
         if (!canResend) return
-        Log.i(tag, "Resending OTP to $phone...")
         viewModelScope.launch {
             val code = authRepository.resendOtp(phone)
             if (code != null) {

@@ -66,7 +66,6 @@ class AuthRepository(
             _lastError.value = null
             true
         } catch (t: Throwable) {
-            Log.e(tag, "Login failed. baseUrl=${BuildConfig.API_BASE_URL}, phone=$phone", t)
             
             val errorMsg = extractErrorMessage(t.message)
             if (errorMsg.contains("403") || errorMsg.contains("not verified")) {
@@ -89,7 +88,6 @@ class AuthRepository(
             _lastError.value = null
             resp.optString("code").takeIf { !resp.isNull("code") }
         } catch (t: Throwable) {
-            Log.e(tag, "Signup failed. phone=$phone", t)
             _lastError.value = extractErrorMessage(t.message)
             null
         }
@@ -111,7 +109,6 @@ class AuthRepository(
             _lastError.value = null
             true
         } catch (t: Throwable) {
-            Log.e(tag, "OTP verification failed. phone=$phone", t)
             _lastError.value = extractErrorMessage(t.message)
             false
         }
@@ -124,7 +121,6 @@ class AuthRepository(
             _lastError.value = null
             resp.optString("code").takeIf { !resp.isNull("code") }
         } catch (t: Throwable) {
-            Log.e(tag, "Resend OTP failed. phone=$phone", t)
             _lastError.value = extractErrorMessage(t.message)
             null
         }
@@ -166,16 +162,13 @@ class AuthRepository(
             val name = userObj.getString("name")
             val phone = userObj.getString("phone")
             saveSession(id = userId, name = name, phone = phone, token = newToken)
-            Log.d(tag, "Token refreshed silently on app start")
         } catch (t: Throwable) {
             val msg = t.message ?: ""
             // 401 means token is expired/invalid — clear session so user is sent to login
             if (msg.contains("401") || msg.contains("Unauthorized") || msg.contains("Invalid token")) {
-                Log.w(tag, "Stored token rejected by server (expired). Clearing session.")
                 logout()
             } else {
                 // Network error (offline) — keep the local session alive
-                Log.w(tag, "Token refresh skipped (network unavailable): ${t.message}")
             }
         }
     }

@@ -153,8 +153,8 @@ class ApiHttpClient(
     val url = URL(buildUrl("/health"))
     val conn = (url.openConnection() as HttpURLConnection).apply {
       requestMethod = "GET"
-      connectTimeout = 2000 // Fast timeout for health check
-      readTimeout = 2000
+      connectTimeout = 15000 // Increased for slower backends like Render
+      readTimeout = 15000
     }
 
     return@withContext try {

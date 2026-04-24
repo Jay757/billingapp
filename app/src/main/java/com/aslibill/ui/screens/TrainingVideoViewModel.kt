@@ -35,6 +35,5 @@ class TrainingVideoViewModel : ViewModel() {
 
     fun playVideo(video: TrainingVideo) {
         // In a real app, this would open a video player or YouTube intent
-        println("Playing video: ${video.title}")
     }
 }

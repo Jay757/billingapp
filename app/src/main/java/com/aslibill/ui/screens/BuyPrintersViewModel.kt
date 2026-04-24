@@ -45,7 +45,5 @@ class BuyPrintersViewModel : ViewModel() {
     val printers: StateFlow<List<PrinterProduct>> = _printers.asStateFlow()
 
     fun buyPrinter(printer: PrinterProduct) {
-        // In a real app, this would redirect to an e-commerce site or contact support
-        println("User wants to buy: ${printer.name}")
     }
 }

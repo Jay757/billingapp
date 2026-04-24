@@ -20,13 +20,11 @@ class BackendHealthMonitor(
         if (monitorJob != null) return
         
         monitorJob = scope.launch(Dispatchers.IO) {
-            Log.d("BackendHealthMonitor", "Starting health monitor with interval ${intervalMs}ms")
             while (isActive) {
                 val isOnline = client.checkHealth()
                 val currentStatus = repository.isOnline.value
                 
                 if (isOnline != currentStatus) {
-                    Log.w("BackendHealthMonitor", "Connection status changed: isOnline=$isOnline")
                     repository.updateStatus(isOnline, if (isOnline) null else "Backend unreachable")
                 }
                 
