@@ -7,7 +7,7 @@ import java.util.Date
 import java.util.Locale
 
 data class StoreConfig(
-  val storeName: String = "NOVABILL",
+  val storeName: String = "BILLSUPER",
   val address: String = "Address line 1",
   val gstNumber: String? = null,
   val phone: String? = null,

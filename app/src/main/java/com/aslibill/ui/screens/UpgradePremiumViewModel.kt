@@ -48,8 +48,8 @@ class UpgradePremiumViewModel : ViewModel() {
             PremiumFeature("GST/VAT Support", "Add GST numbers and tax breakdowns to your professional receipts."),
             PremiumFeature("Cloud Backup", "Your data is safe in the cloud. Access it even if you lose your device."),
             PremiumFeature("Advanced Analytics", "Deep dive into your sales patterns with interactive charts and reports."),
-            PremiumFeature("Multi-device Sync", "Collaborate with your team. Use NovaBill on multiple phones simultaneously."),
-            PremiumFeature("Custom Branding", "Remove NovaBill branding and add your own logo to your receipts.")
+            PremiumFeature("Multi-device Sync", "Collaborate with your team. Use BillSuper on multiple phones simultaneously."),
+            PremiumFeature("Custom Branding", "Remove BillSuper branding and add your own logo to your receipts.")
         )
     )
     val features: StateFlow<List<PremiumFeature>> = _features.asStateFlow()

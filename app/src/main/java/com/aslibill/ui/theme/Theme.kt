@@ -39,7 +39,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun NovaBillTheme(
+fun BillSuperTheme(
     mode: ThemeMode = ThemeMode.SYSTEM,
     content: @Composable () -> Unit
 ) {

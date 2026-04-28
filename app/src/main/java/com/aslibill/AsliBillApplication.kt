@@ -3,7 +3,7 @@ package com.aslibill
 import android.app.Application
 import com.aslibill.data.AppContainer
 
-class NovaBillApplication : Application() {
+class BillSuperApplication : Application() {
   lateinit var container: AppContainer
     private set
 

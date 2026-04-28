@@ -2,12 +2,12 @@ package com.aslibill.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.aslibill.NovaBillApplication
+import com.aslibill.BillSuperApplication
 import com.aslibill.data.SettingsRepository
 import com.aslibill.bluetooth.BluetoothPrinterManager
 
 class BluetoothPrinterViewModelFactory(
-    private val app: NovaBillApplication
+    private val app: BillSuperApplication
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(BluetoothPrinterViewModel::class.java)) {

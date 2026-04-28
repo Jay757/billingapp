@@ -17,7 +17,7 @@ class TrainingVideoViewModel : ViewModel() {
 
     private val _videos = MutableStateFlow(
         listOf(
-            TrainingVideo("Getting Started with NovaBill", "2:30"),
+            TrainingVideo("Getting Started with BillSuper", "2:30"),
             TrainingVideo("How to Make a Quick Bill", "1:45"),
             TrainingVideo("Managing Your Inventory", "3:10"),
             TrainingVideo("Understanding Sales Reports", "4:20"),

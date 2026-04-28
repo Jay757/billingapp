@@ -27,7 +27,7 @@ import com.aslibill.ui.screens.PrintSettingsViewModel
 import com.aslibill.ui.screens.PrintSettingsViewModelFactory
 import com.aslibill.ui.screens.QuickBillScreen
 import com.aslibill.ui.screens.ReportsScreen
-import com.aslibill.NovaBillApplication
+import com.aslibill.BillSuperApplication
 import com.aslibill.ui.screens.InventoryViewModelFactory
 import com.aslibill.ui.screens.ItemWiseBillViewModelFactory
 import com.aslibill.ui.screens.ReportsViewModelFactory
@@ -91,10 +91,10 @@ import androidx.compose.runtime.remember
 import kotlinx.coroutines.launch
 
 @Composable
-fun NovaBillApp() {
+fun BillSuperApp() {
   val navController = rememberNavController()
   val context = LocalContext.current
-  val app = context.applicationContext as NovaBillApplication
+  val app = context.applicationContext as BillSuperApplication
   val userSession = app.container.authRepository.userSession.collectAsState(initial = app.container.authRepository.userSession.value).value
   val scope = rememberCoroutineScope()
 
