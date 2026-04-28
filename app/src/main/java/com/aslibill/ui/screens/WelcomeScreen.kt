@@ -210,45 +210,43 @@ fun PremiumLogo(isDark: Boolean) {
                 )
             }
 
-            // Draw a stylized 'N' or Logo shape based on image reference
-            // Image shows three horizontal bars with circles at start
-            val spacing = h / 4
-            
-            // Top bar
-            drawRoundRect(
+            // Draw a stylized 'B' for BillSuper
+            val path = androidx.compose.ui.graphics.Path().apply {
+                val startX = w * 0.25f
+                val endX = w * 0.75f
+                val midY = h * 0.5f
+                val topY = h * 0.15f
+                val bottomY = h * 0.85f
+
+                // Vertical line (back of the B)
+                moveTo(startX, topY)
+                lineTo(startX, bottomY)
+
+                // Top loop
+                moveTo(startX, topY)
+                cubicTo(
+                    x1 = endX, y1 = topY,
+                    x2 = endX, y2 = midY,
+                    x3 = startX, y3 = midY
+                )
+
+                // Bottom loop
+                moveTo(startX, midY)
+                cubicTo(
+                    x1 = endX + w * 0.1f, y1 = midY,
+                    x2 = endX + w * 0.1f, y2 = bottomY,
+                    x3 = startX, y3 = bottomY
+                )
+            }
+
+            drawPath(
+                path = path,
                 brush = silverGradient,
-                topLeft = Offset(w * 0.2f, spacing * 0.5f),
-                size = Size(w * 0.7f, strokeWidth),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(strokeWidth/2, strokeWidth/2)
-            )
-            
-            // Middle bar (with circle)
-            drawCircle(
-                brush = silverGradient,
-                radius = strokeWidth * 1.2f,
-                center = Offset(w * 0.15f, spacing * 2f)
-            )
-            drawRoundRect(
-                brush = silverGradient,
-                topLeft = Offset(w * 0.3f, spacing * 2f - strokeWidth/2),
-                size = Size(w * 0.6f, strokeWidth),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(strokeWidth/2, strokeWidth/2)
-            )
-            
-            // Bottom bar
-            drawRoundRect(
-                brush = silverGradient,
-                topLeft = Offset(w * 0.2f, spacing * 3.5f - strokeWidth),
-                size = Size(w * 0.7f, strokeWidth),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(strokeWidth/2, strokeWidth/2)
-            )
-            
-            // Connecting vertical line at start
-            drawRoundRect(
-                brush = silverGradient,
-                topLeft = Offset(w * 0.2f, spacing * 0.5f),
-                size = Size(strokeWidth, spacing * 3f),
-                cornerRadius = androidx.compose.ui.geometry.CornerRadius(strokeWidth/2, strokeWidth/2)
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = strokeWidth,
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                    join = androidx.compose.ui.graphics.StrokeJoin.Round
+                )
             )
         }
     }
