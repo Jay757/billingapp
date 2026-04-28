@@ -14,5 +14,5 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "asli-bill"
+rootProject.name = "bill-super"
 include(":app")

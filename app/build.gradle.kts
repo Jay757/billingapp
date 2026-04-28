@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-  namespace = "com.aslibill"
+  namespace = "com.billsuper"
   compileSdk = 35
 
   defaultConfig {
