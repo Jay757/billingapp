@@ -5,6 +5,7 @@ import com.aslibill.BuildConfig
 import com.aslibill.bluetooth.BluetoothPrinterManager
 import com.aslibill.network.ApiHttpClient
 import com.aslibill.network.BackendHealthMonitor
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,26 +35,46 @@ class AppContainer(context: Context) {
   private val healthMonitor = BackendHealthMonitor(apiClient, networkStatusRepository, appScope)
 
   init {
-    healthMonitor.start(intervalMs = 30_000)
+    // Check every 60s when online, every 5s when offline for fast reconnection
+    healthMonitor.start(onlineIntervalMs = 60_000, offlineIntervalMs = 5_000)
 
     appScope.launch {
+      // Monitor both session AND network status for seamless data loading
       authRepository.userSession.collect { session ->
         if (session != null) {
-          appScope.launch(Dispatchers.IO) {
-            runCatching {
-              // Trigger initial fetch from API for all modules
-              inventoryRepository.refresh()
-              staffRepository.refresh()
-              customerRepository.refresh()
-              billingRepository.refresh()
-              cashRepository.refresh()
-              settingsRepository.syncFromRemote()
-
-              val btConfig = bluetoothPrinterConfigRepository.loadRemoteConfig()
-              bluetoothPrinterConfigRepository.saveLocalConfig(btConfig)
-            }
+          // Trigger initial fetch if we're online
+          if (networkStatusRepository.isOnline.value) {
+            refreshData()
           }
         }
+      }
+    }
+
+    appScope.launch {
+      // When transitioning from Offline to Online, trigger a refresh
+      networkStatusRepository.isOnline.collect { online ->
+        if (online && authRepository.userSession.value != null) {
+          refreshData()
+        }
+      }
+    }
+  }
+
+  private fun refreshData() {
+    appScope.launch(Dispatchers.IO) {
+      runCatching {
+        Log.d("AppContainer", "Refreshing data due to online status or session start")
+        inventoryRepository.refresh()
+        staffRepository.refresh()
+        customerRepository.refresh()
+        billingRepository.refresh()
+        cashRepository.refresh()
+        settingsRepository.syncFromRemote()
+
+        val btConfig = bluetoothPrinterConfigRepository.loadRemoteConfig()
+        bluetoothPrinterConfigRepository.saveLocalConfig(btConfig)
+      }.onFailure {
+        Log.e("AppContainer", "Failed to refresh data", it)
       }
     }
   }
@@ -61,6 +82,10 @@ class AppContainer(context: Context) {
   suspend fun performLogout() {
     authRepository.logout()
     bluetoothPrinterManager.disconnect()
+  }
+
+  fun checkConnection() {
+    healthMonitor.checkNow()
   }
 }
 

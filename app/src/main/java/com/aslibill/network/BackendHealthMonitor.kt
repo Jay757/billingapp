@@ -15,20 +15,30 @@ class BackendHealthMonitor(
     private val scope: CoroutineScope
 ) {
     private var monitorJob: Job? = null
+    private val tag = "BackendHealthMonitor"
 
-    fun start(intervalMs: Long = 86_400_000) {
+    fun start(onlineIntervalMs: Long = 60_000, offlineIntervalMs: Long = 5_000) {
         if (monitorJob != null) return
         
         monitorJob = scope.launch(Dispatchers.IO) {
             while (isActive) {
-                val isOnline = client.checkHealth()
-                val currentStatus = repository.isOnline.value
-                
-                if (isOnline != currentStatus) {
-                    repository.updateStatus(isOnline, if (isOnline) null else "Backend unreachable")
+                try {
+                    val isOnline = client.checkHealth()
+                    val currentStatus = repository.isOnline.value
+                    
+                    if (isOnline != currentStatus) {
+                        Log.d(tag, "Backend status changed: Online=$isOnline")
+                        repository.updateStatus(isOnline, if (isOnline) null else "Backend unreachable")
+                    }
+                    
+                    // Use a shorter delay if we're offline to reconnect faster
+                    val nextDelay = if (isOnline) onlineIntervalMs else offlineIntervalMs
+                    delay(nextDelay)
+                } catch (e: Exception) {
+                    Log.e(tag, "Health check failed", e)
+                    repository.updateStatus(false, e.message)
+                    delay(offlineIntervalMs)
                 }
-                
-                delay(intervalMs)
             }
         }
     }
@@ -36,5 +46,15 @@ class BackendHealthMonitor(
     fun stop() {
         monitorJob?.cancel()
         monitorJob = null
+    }
+
+    /**
+     * Force an immediate health check.
+     */
+    fun checkNow() {
+        scope.launch(Dispatchers.IO) {
+            val isOnline = client.checkHealth()
+            repository.updateStatus(isOnline, if (isOnline) null else "Backend unreachable")
+        }
     }
 }

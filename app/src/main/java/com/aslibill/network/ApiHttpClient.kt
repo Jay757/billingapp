@@ -50,7 +50,6 @@ class ApiHttpClient(
       if (body.isBlank()) return@withContext JSONObject()
       return@withContext JSONObject(body)
     } catch (e: Exception) {
-      statusRepo?.updateStatus(false, e.message)
       throw e
     } finally {
       conn.disconnect()
@@ -84,7 +83,6 @@ class ApiHttpClient(
       if (respBody.isBlank()) return@withContext JSONObject()
       return@withContext JSONObject(respBody)
     } catch (e: Exception) {
-      statusRepo?.updateStatus(false, e.message)
       throw e
     } finally {
       conn.disconnect()
@@ -118,7 +116,6 @@ class ApiHttpClient(
       if (respBody.isBlank()) return@withContext JSONObject()
       return@withContext JSONObject(respBody)
     } catch (e: Exception) {
-      statusRepo?.updateStatus(false, e.message)
       throw e
     } finally {
       conn.disconnect()
@@ -142,7 +139,6 @@ class ApiHttpClient(
       if (body.isBlank()) return@withContext JSONObject()
       return@withContext JSONObject(body)
     } catch (e: Exception) {
-      statusRepo?.updateStatus(false, e.message)
       throw e
     } finally {
       conn.disconnect()
@@ -184,7 +180,6 @@ class ApiHttpClient(
       if (body.isBlank()) return@withContext org.json.JSONArray()
       return@withContext org.json.JSONArray(body)
     } catch (e: Exception) {
-      statusRepo?.updateStatus(false, e.message)
       throw e
     } finally {
       conn.disconnect()
@@ -239,7 +234,6 @@ class ApiHttpClient(
       if (respBody.isBlank()) return@withContext JSONObject()
       return@withContext JSONObject(respBody)
     } catch (e: Exception) {
-      statusRepo?.updateStatus(false, e.message)
       throw e
     } finally {
       conn.disconnect()
