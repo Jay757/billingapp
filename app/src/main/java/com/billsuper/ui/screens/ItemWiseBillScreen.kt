@@ -190,29 +190,34 @@ fun ItemWiseBillScreen(
       }
 
       LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 160.dp),
+        columns = GridCells.Fixed(1),
         modifier = Modifier
           .fillMaxWidth()
           .weight(0.7f),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
-        verticalArrangement = Arrangement.spacedBy(AppSpacing.md)
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
       ) {
         items(products, key = { it.id }) { p ->
           DarkCard(modifier = Modifier.fillMaxWidth().clickable { vm.addProduct(p) }, alpha = 0.8f) {
-            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(
+              modifier = Modifier.padding(16.dp), 
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically
+            ) {
               Text(
                 p.name, 
                 color = MaterialTheme.colorScheme.onSurface, 
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold, fontSize = 18.sp),
+                modifier = Modifier.weight(1f),
                 maxLines = 1,
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
               )
               Box(
                 modifier = Modifier
                   .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f), RoundedCornerShape(6.dp))
-                  .padding(horizontal = 8.dp, vertical = 4.dp)
+                  .padding(horizontal = 10.dp, vertical = 6.dp)
               ) {
-                Text("₹${p.price.toInt()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                Text("₹${p.price.toInt()}", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black))
               }
             }
           }
