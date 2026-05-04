@@ -35,6 +35,13 @@ class AppContainer(context: Context) {
   private val healthMonitor = BackendHealthMonitor(apiClient, networkStatusRepository, appScope)
 
   init {
+    // Global 401 handler: if any API call returns Unauthorized, log out the user automatically
+    apiClient.onUnauthorized = {
+      appScope.launch {
+        authRepository.logout()
+      }
+    }
+
     // Check every 60s when online, every 5s when offline for fast reconnection
     healthMonitor.start(onlineIntervalMs = 60_000, offlineIntervalMs = 5_000)
 
@@ -88,5 +95,3 @@ class AppContainer(context: Context) {
     healthMonitor.checkNow()
   }
 }
-
-

@@ -16,6 +16,7 @@ class ApiHttpClient(
   connectTimeoutMs: Int = 15_000,
   readTimeoutMs: Int = 20_000
 ) {
+  var onUnauthorized: (() -> Unit)? = null
   private val client = OkHttpClient.Builder()
     .connectTimeout(connectTimeoutMs.toLong(), TimeUnit.MILLISECONDS)
     .readTimeout(readTimeoutMs.toLong(), TimeUnit.MILLISECONDS)
@@ -34,6 +35,9 @@ class ApiHttpClient(
   private fun handleResponse(response: okhttp3.Response): String {
     val body = response.body?.string() ?: ""
     if (!response.isSuccessful) {
+      if (response.code == 401) {
+        onUnauthorized?.invoke()
+      }
       throw IllegalStateException("HTTP ${response.code}: $body")
     }
     statusRepo?.updateStatus(true)
