@@ -39,9 +39,11 @@ class AuthRepository(
         val name = prefs.getString("user_name", null)
         val phone = prefs.getString("user_phone", null)
         val token = prefs.getString("token", null)
+        
         if (id != -1 && name != null && phone != null && token != null) {
             _userSession.value = UserSession(id, name, phone)
             _token.value = token
+            
             // Proactively refresh the token on app start so it never silently expires
             // during a session. Runs on a background scope tied to the process lifetime.
             CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
@@ -161,14 +163,17 @@ class AuthRepository(
             val userId = userObj.getInt("id")
             val name = userObj.getString("name")
             val phone = userObj.getString("phone")
+            
             saveSession(id = userId, name = name, phone = phone, token = newToken)
         } catch (t: Throwable) {
             val msg = t.message ?: ""
+            
             // 401 means token is expired/invalid — clear session so user is sent to login
+            // We are cautious here: only logout if it's definitely an auth error
             if (msg.contains("401") || msg.contains("Unauthorized") || msg.contains("Invalid token")) {
                 logout()
             } else {
-                // Network error (offline) — keep the local session alive
+                // Network error (offline) or server 500 — keep the local session alive
             }
         }
     }
@@ -179,7 +184,7 @@ class AuthRepository(
             putString("user_name", name)
             putString("user_phone", phone)
             putString("token", token)
-        }.commit()
+        }.apply() // Use apply() for asynchronous but reliable disk write
         
         _userSession.value = UserSession(id, name, phone)
         _token.value = token
@@ -188,7 +193,7 @@ class AuthRepository(
     suspend fun logout() {
         // Clear all relevant user preferences
         listOf("auth_prefs", "print_settings", "bluetooth_printer").forEach { name ->
-            context.getSharedPreferences(name, Context.MODE_PRIVATE).edit().clear().commit()
+            context.getSharedPreferences(name, Context.MODE_PRIVATE).edit().clear().apply()
         }
         
         _userSession.value = null
